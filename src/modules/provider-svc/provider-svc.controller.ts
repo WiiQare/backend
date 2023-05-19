@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   UploadedFile,
@@ -15,7 +16,10 @@ import { UserRole } from '../../common/constants/enums';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/user-role.decorator';
 import {
+  AddServiceToPackageDto,
   AuthorizeVoucherTransferDto,
+  CreatePackageDto,
+  CreateServiceDto,
   ProviderValidateEmailDto,
   RedeemVoucherDto,
   RegisterProviderDto,
@@ -54,6 +58,7 @@ export class ProviderController {
   ): Promise<void> {
     return this.providerService.providerVerifyEmail(providerValidateEmailDto);
   }
+
   @Get('provider-voucher-details')
   @Roles(UserRole.PROVIDER)
   @HttpCode(HttpStatus.OK)
@@ -123,5 +128,34 @@ export class ProviderController {
   ): Promise<Record<string, any>> {
     const { providerId } = payload;
     return this.providerService.getTransactionStatistic(providerId);
+  }
+
+  @Post('service')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'API endpoint for Provider to create service' })
+  createService(@Body() serviceDto: CreateServiceDto): Promise<void> {
+    return this.providerService.addServiceToProvider(serviceDto);
+  }
+
+  @Post('package')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'API endpoint for Provider to create package' })
+  createPackage(@Body() packageDto: CreatePackageDto): Promise<void> {
+    return this.providerService.addPackageToProvider(packageDto);
+  }
+
+  @Post('package/:providerId/add-service')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'API endpoint for Provider to add service to package',
+  })
+  addServiceToPackage(
+    @Param('providerId') providerId: string,
+    @Body() addServiceToPackageDto: AddServiceToPackageDto,
+  ): Promise<void> {
+    return this.providerService.addServiceToPackage(
+      providerId,
+      addServiceToPackageDto,
+    );
   }
 }

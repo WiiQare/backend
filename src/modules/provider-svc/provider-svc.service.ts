@@ -24,11 +24,16 @@ import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
 import { SmsService } from '../sms/sms.service';
 import {
+  AddServiceToPackageDto,
   ContactPersonDto,
+  CreatePackageDto,
+  CreateServiceDto,
   ProviderValidateEmailDto,
   RegisterProviderDto,
 } from './dto/provider.dto';
+import { Package } from './entities/package.entity';
 import { Provider } from './entities/provider.entity';
+import { Service } from './entities/service.entity';
 
 @Injectable()
 export class ProviderService {
@@ -41,6 +46,10 @@ export class ProviderService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Package)
+    private packageRepository: Repository<Package>,
+    @InjectRepository(Service)
+    private servicesRepository: Repository<Service>,
     private objectStorageService: ObjectStorageService,
     private cachingService: CachingService,
     private mailService: MailService,
@@ -341,5 +350,59 @@ export class ProviderService {
 
     //TODO: update the voucher details on chain.
     return this.transactionRepository.save(updatedTransactionList);
+  }
+
+  // Add service to provider
+  async addServiceToProvider(payload: CreateServiceDto): Promise<void> {
+    const { provider } = payload;
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    // Create new service
+    let service = new Service();
+    service.name = payload.name;
+    service.description = payload.description;
+    service.price = payload.price;
+    service.provider = provider;
+
+    // Save service
+    service = await this.servicesRepository.save(service);
+
+    // Add service to provider
+    provider.services.push(service);
+
+    // Save provider
+    await this.providerRepository.save(provider);
+  }
+
+  // Add package to provider
+  async addPackageToProvider(payload: CreatePackageDto): Promise<void> {
+    const provider = payload.provider;
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    // Create new package
+    let newPackage = new Package();
+    newPackage.name = payload.name;
+    newPackage.description = payload.description;
+    newPackage.price = payload.price;
+    newPackage.provider = provider;
+
+    // Save package
+    newPackage = await this.packageRepository.save(newPackage);
+
+    // Add package to provider
+    provider.packages.push(newPackage);
+
+    // Save provider
+    await this.providerRepository.save(provider);
+  }
+
+  // Group services into package
+  async addServiceToPackage(
+    providerId: string,
+    payload: AddServiceToPackageDto,
+  ): Promise<void> {
+    // TODO
   }
 }

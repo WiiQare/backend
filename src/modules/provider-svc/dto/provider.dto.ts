@@ -10,6 +10,9 @@ import {
   IsUUID,
 } from 'class-validator';
 import { BusinessType } from '../../../common/constants/enums';
+import { Package } from '../entities/package.entity';
+import { Provider } from '../entities/provider.entity';
+import { Service } from '../entities/service.entity';
 
 export class ContactPersonDto {
   @IsNotEmpty()
@@ -143,4 +146,50 @@ export class RedeemVoucherDto {
   @IsNotEmpty()
   @IsArray()
   transactionHashes: string[];
+}
+
+export class CreateServiceDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  provider: Provider;
+}
+
+export class CreatePackageDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  provider: Provider;
+
+  @IsNotEmpty()
+  @IsArray()
+  services: CreateServiceDto[];
+}
+
+export class AddServiceToPackageDto {
+  @IsNotEmpty()
+  package: Package;
+
+  @IsNotEmpty()
+  @IsArray()
+  services: Service[];
 }
