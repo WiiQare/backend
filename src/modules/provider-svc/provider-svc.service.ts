@@ -354,7 +354,9 @@ export class ProviderService {
 
   // Add service to provider
   async addServiceToProvider(payload: CreateServiceDto): Promise<void> {
-    const { provider } = payload;
+    const provider = await this.providerRepository.findOne({
+      where: { id: payload.providerId },
+    });
 
     if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
 
@@ -377,7 +379,9 @@ export class ProviderService {
 
   // Add package to provider
   async addPackageToProvider(payload: CreatePackageDto): Promise<void> {
-    const provider = payload.provider;
+    const provider = await this.providerRepository.findOne({
+      where: { id: payload.providerId },
+    });
 
     if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
 
@@ -399,10 +403,7 @@ export class ProviderService {
   }
 
   // Group services into package
-  async addServiceToPackage(
-    providerId: string,
-    payload: AddServiceToPackageDto,
-  ): Promise<void> {
+  async addServiceToPackage(payload: AddServiceToPackageDto): Promise<void> {
     // TODO
   }
 }

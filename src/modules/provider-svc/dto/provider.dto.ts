@@ -11,7 +11,6 @@ import {
 } from 'class-validator';
 import { BusinessType } from '../../../common/constants/enums';
 import { Package } from '../entities/package.entity';
-import { Provider } from '../entities/provider.entity';
 import { Service } from '../entities/service.entity';
 
 export class ContactPersonDto {
@@ -162,7 +161,8 @@ export class CreateServiceDto {
   price: number;
 
   @IsNotEmpty()
-  provider: Provider;
+  @IsString()
+  providerId: string;
 }
 
 export class CreatePackageDto {
@@ -178,7 +178,8 @@ export class CreatePackageDto {
   price: number;
 
   @IsNotEmpty()
-  provider: Provider;
+  @IsString()
+  providerId: string;
 
   @IsNotEmpty()
   @IsArray()
@@ -192,4 +193,8 @@ export class AddServiceToPackageDto {
   @IsNotEmpty()
   @IsArray()
   services: Service[];
+
+  @IsNotEmpty()
+  @IsString()
+  providerId: string;
 }

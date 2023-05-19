@@ -131,20 +131,29 @@ export class ProviderController {
   }
 
   @Post('service')
+  @Post(':providerId/service')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'API endpoint for Provider to create service' })
-  createService(@Body() serviceDto: CreateServiceDto): Promise<void> {
+  createService(
+    @Param('providerId') providerId: string,
+    @Body() serviceDto: CreateServiceDto,
+  ): Promise<void> {
+    serviceDto.providerId = providerId;
     return this.providerService.addServiceToProvider(serviceDto);
   }
 
-  @Post('package')
+  @Post(':providerId/package')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'API endpoint for Provider to create package' })
-  createPackage(@Body() packageDto: CreatePackageDto): Promise<void> {
+  createPackage(
+    @Param('providerId') providerId: string,
+    @Body() packageDto: CreatePackageDto,
+  ): Promise<void> {
+    packageDto.providerId = providerId;
     return this.providerService.addPackageToProvider(packageDto);
   }
 
-  @Post('package/:providerId/add-service')
+  @Post(':providerId/package/add-service')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'API endpoint for Provider to add service to package',
@@ -153,9 +162,7 @@ export class ProviderController {
     @Param('providerId') providerId: string,
     @Body() addServiceToPackageDto: AddServiceToPackageDto,
   ): Promise<void> {
-    return this.providerService.addServiceToPackage(
-      providerId,
-      addServiceToPackageDto,
-    );
+    addServiceToPackageDto.providerId = providerId;
+    return this.providerService.addServiceToPackage(addServiceToPackageDto);
   }
 }
