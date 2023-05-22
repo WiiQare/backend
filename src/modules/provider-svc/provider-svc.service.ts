@@ -369,12 +369,6 @@ export class ProviderService {
 
     // Save service
     service = await this.servicesRepository.save(service);
-
-    // Add service to provider
-    provider.services.push(service);
-
-    // Save provider
-    await this.providerRepository.save(provider);
   }
 
   // Add package to provider
@@ -394,16 +388,40 @@ export class ProviderService {
 
     // Save package
     newPackage = await this.packageRepository.save(newPackage);
-
-    // Add package to provider
-    provider.packages.push(newPackage);
-
-    // Save provider
-    await this.providerRepository.save(provider);
   }
 
   // Group services into package
   async addServiceToPackage(payload: AddServiceToPackageDto): Promise<void> {
-    // TODO
+    const provider = await this.providerRepository.findOne({
+      where: { id: payload.providerId },
+    });
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    // Find package
+    const pkg = await this.packageRepository.findOne({
+      where: { id: payload.package.id },
+    });
+
+    if (!pkg) throw new ForbiddenException(_404.PACKAGE_NOT_FOUND);
+
+    // Create and save new services
+    const services = await Promise.all(
+      payload.services.map(async (serviceDto) => {
+        let service = new Service();
+        service.name = serviceDto.name;
+        service.description = serviceDto.description;
+        service.price = serviceDto.price;
+        service.provider = provider;
+
+        return await this.servicesRepository.save(service);
+      }),
+    );
+
+    // Add services to package
+    pkg.services.push(...services);
+
+    // Save package
+    await this.packageRepository.save(pkg);
   }
 }
