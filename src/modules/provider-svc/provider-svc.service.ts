@@ -297,9 +297,25 @@ export class ProviderService {
       .where('transaction.ownerId = :providerId', { providerId })
       .getMany();
 
+    let totalRedeemedAmount = 0,
+      totalPendingAmount = 0,
+      totalUnclaimedAmount = 0;
+
+    transactions.forEach((transaction) => {
+      if (transaction.status === VoucherStatus.PENDING)
+        totalPendingAmount += transaction.amount;
+      if (transaction.status === VoucherStatus.CLAIMED)
+        totalRedeemedAmount += transaction.amount;
+      if (transaction.status === VoucherStatus.UNCLAIMED)
+        totalUnclaimedAmount += transaction.amount;
+    });
+
     return {
       totalAmount: _.sumBy(transactions, 'amount'),
       totalUniquePatients: _.uniqBy(transactions, 'voucher.patientId').length,
+      totalRedeemedAmount,
+      totalPendingAmount,
+      totalUnclaimedAmount,
     };
   }
 
