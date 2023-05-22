@@ -89,7 +89,7 @@ export class ProviderController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'API endpoint is used to retrieve all transaction for a given provider',
+      'API endpoint is used to retrieve all transaction for a given provider.',
   })
   getAllTransactionByProviderId(
     @Query() payload: SearchTransactionDto,
