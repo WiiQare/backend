@@ -1,8 +1,7 @@
 import { BaseEntity } from 'src/db/base-entity';
-import { AfterLoad, Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { Provider } from './provider.entity';
-import { PackageService } from './packageservice.entity';
-
+import { Service } from './service.entity';
 @Entity()
 export class Package extends BaseEntity {
   @Column()
@@ -17,13 +16,7 @@ export class Package extends BaseEntity {
   @ManyToOne(() => Provider, (provider) => provider.packages)
   provider: Provider;
 
-  @OneToMany(() => PackageService, (PackageService) => PackageService.package)
-  packageServices: PackageService[];
-
-  @AfterLoad() // TypeORM lifecycle hook
-  get services() {
-    return this.packageServices?.map(
-      (packageService) => packageService.service,
-    );
-  }
+  @ManyToMany(() => Service, (service) => service.packages)
+  @JoinTable()
+  services: Service[];
 }

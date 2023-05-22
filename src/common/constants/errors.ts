@@ -98,6 +98,10 @@ export const _404 = {
     code: 'PROVIDER_NOT_FOUND',
     description: 'Fournisseur introuvable!',
   },
+  PACKAGE_NOT_FOUND: {
+    code: 'PACKAGE_NOT_FOUND',
+    description: 'Package introuvable!',
+  },
   INVALID_TRANSACTION_HASH: {
     code: 'INVALID_TRANSACTION_HASH',
     description: 'Le code de transaction fourni est invalide!',
