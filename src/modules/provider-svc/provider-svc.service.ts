@@ -7,7 +7,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import { APP_NAME, DAY, HOUR } from 'src/common/constants/constants';
-import { UserRole, UserStatus, UserType } from 'src/common/constants/enums';
+import {
+  UserRole,
+  UserStatus,
+  UserType,
+  VoucherStatus,
+} from 'src/common/constants/enums';
 import { _403, _404 } from 'src/common/constants/errors';
 import { generateToken, randomSixDigit } from 'src/helpers/common.helper';
 import { Repository } from 'typeorm';
@@ -270,7 +275,23 @@ export class ProviderService {
    * @param providerId
    *
    */
-  async getAllTransactions(providerId: string): Promise<Record<string, any>> {
+  async getAllTransactions(providerId: string): Promise<Record<string, any>[]> {
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .where('transaction.ownerId = :providerId', { providerId })
+      .getMany();
+    //TODO: paginate this!.
+    return transactions;
+  }
+
+  /**
+   * This method is used to statistic about transactions
+   * @param providerId
+   *
+   */
+  async getTransactionStatistic(
+    providerId: string,
+  ): Promise<Record<string, any>> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
       .where('transaction.ownerId = :providerId', { providerId })
@@ -279,7 +300,30 @@ export class ProviderService {
     return {
       totalAmount: _.sumBy(transactions, 'amount'),
       totalUniquePatients: _.uniqBy(transactions, 'voucher.patientId').length,
-      transactions,
     };
+  }
+
+  /**
+   * This method is used to redeem voucher
+   *
+   */
+  async redeemVoucher(hashes: string[]): Promise<Record<string, any>[]> {
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .where(`transaction.transactionHash In (:...hashes)`, { hashes })
+      .andWhere(`transaction.status = :status`, {
+        status: VoucherStatus.UNCLAIMED,
+      })
+      .getMany();
+
+    // update transactions status to pending!.
+
+    const updatedTransactionList = transactions.map((transaction) => ({
+      ...transaction,
+      status: VoucherStatus.PENDING,
+    }));
+
+    //TODO: update the voucher details on chain.
+    return this.transactionRepository.save(updatedTransactionList);
   }
 }

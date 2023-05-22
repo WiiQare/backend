@@ -1,6 +1,6 @@
 import { BaseEntity } from 'src/db/base-entity';
 import { Column, Entity } from 'typeorm';
-import { UserType } from '../../../common/constants/enums';
+import { UserType, VoucherStatus } from '../../../common/constants/enums';
 
 @Entity()
 export class Transaction extends BaseEntity {
@@ -47,8 +47,12 @@ export class Transaction extends BaseEntity {
   })
   ownerType: UserType;
 
-  @Column()
-  status: string;
+  @Column({
+    type: 'enum',
+    enum: VoucherStatus,
+    default: VoucherStatus.UNCLAIMED,
+  })
+  status: VoucherStatus;
 
   @Column()
   transactionHash: string;

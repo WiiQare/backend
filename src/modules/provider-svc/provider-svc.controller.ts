@@ -17,6 +17,7 @@ import { Roles } from '../../common/decorators/user-role.decorator';
 import {
   AuthorizeVoucherTransferDto,
   ProviderValidateEmailDto,
+  RedeemVoucherDto,
   RegisterProviderDto,
   SearchTransactionDto,
 } from './dto/provider.dto';
@@ -84,6 +85,19 @@ export class ProviderController {
     );
   }
 
+  @Post('redeem-voucher')
+  @Roles(UserRole.PROVIDER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'API endpoint is used to redeem vouchers by provider',
+  })
+  redeemVoucherByProvider(
+    @Body() payload: RedeemVoucherDto,
+  ): Promise<Record<string, any>[]> {
+    const { transactionHashes } = payload;
+    return this.providerService.redeemVoucher(transactionHashes);
+  }
+
   @Get('transactions')
   @Roles(UserRole.PROVIDER)
   @HttpCode(HttpStatus.OK)
@@ -93,9 +107,21 @@ export class ProviderController {
   })
   getAllTransactionByProviderId(
     @Query() payload: SearchTransactionDto,
+  ): Promise<Record<string, any>[]> {
+    const { providerId } = payload;
+    return this.providerService.getAllTransactions(providerId);
+  }
+
+  @Get('statistics')
+  @Roles(UserRole.PROVIDER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'API endpoint is used to retrieve transaction statistics',
+  })
+  getTransactionStatistics(
+    @Query() payload: SearchTransactionDto,
   ): Promise<Record<string, any>> {
     const { providerId } = payload;
-    //TODO: make sure we the owner only can retrieve he's own transactions!
-    return this.providerService.getAllTransactions(providerId);
+    return this.providerService.getTransactionStatistic(providerId);
   }
 }

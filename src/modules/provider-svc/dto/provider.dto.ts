@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsEmail,
   IsEnum,
   IsISO31661Alpha2,
@@ -136,4 +137,10 @@ export class SearchTransactionDto {
   @IsNotEmpty()
   @IsUUID()
   providerId: string;
+}
+
+export class RedeemVoucherDto {
+  @IsNotEmpty()
+  @IsArray()
+  transactionHashes: string[];
 }
