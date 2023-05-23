@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { IsCurrency } from 'class-validator';
 import { MessageBird, initClient } from 'messagebird';
 import { AppConfigService } from 'src/config/app-config.service';
 
@@ -49,12 +50,13 @@ export class SmsService {
     phoneNumber: string,
     senderName: string,
     amount: number,
+    currency: string,
   ): Promise<void> {
     const params = {
       originator: 'WiiQare',
       recipients: [phoneNumber],
       body: `
-      Vous avez reçu le pass de santé de ${senderName} d'une valeur de ${amount} de pass santé WiiQare.
+      Vous avez reçu le pass de santé de ${senderName} d'une valeur de ${amount} ${currency} de pass santé WiiQare.
       \n Votre code pass santé et ${shortenHash}. \n\n pour plus d'info contactez : +243 979 544 127
       `,
     };

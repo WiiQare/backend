@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class AppConfigService {
-  constructor(private configService: ConfigService<EnvironmentVariables>) { }
+  constructor(private configService: ConfigService<EnvironmentVariables>) {}
 
   get appName(): string {
     return APP_NAME;
