@@ -54,7 +54,7 @@ export class ProviderService {
     private cachingService: CachingService,
     private mailService: MailService,
     private smsService: SmsService,
-  ) { }
+  ) {}
 
   /**
    * This function retrieve provider account related by the provider id
