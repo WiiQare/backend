@@ -69,6 +69,13 @@ export class ProviderService {
     });
   }
 
+  /**
+   * This method retrieves all providers and returns them as a list
+   */
+  async getAllProviders(): Promise<Provider[]> {
+    return this.providerRepository.find();
+  }
+
   async providerVerifyEmail(payload: ProviderValidateEmailDto): Promise<void> {
     const { email, password } = payload;
     // generate random reset password token

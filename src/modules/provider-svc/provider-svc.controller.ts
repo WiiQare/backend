@@ -26,11 +26,20 @@ import {
   SearchTransactionDto,
 } from './dto/provider.dto';
 import { ProviderService } from './provider-svc.service';
+import { Provider } from './entities/provider.entity';
 
 @ApiTags('Provider')
 @Controller('provider')
 export class ProviderController {
   constructor(private providerService: ProviderService) { }
+
+  @Get()
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'API endpoint for retrieving all providers' })
+  getAllProviders(): Promise<Provider[]> {
+    return this.providerService.getAllProviders();
+  }
 
   @Post()
   @Public()
