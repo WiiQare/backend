@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { IsCurrency } from 'class-validator';
 import { MessageBird, initClient } from 'messagebird';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from '../../config/app-config.service';
 
 @Injectable()
 export class SmsService {
@@ -80,7 +79,6 @@ export class SmsService {
   async sendTransactionVerificationTokenBySmsToAPatient(
     token: string,
     phoneNumber: string,
-    amount: number,
   ): Promise<void> {
     const params = {
       originator: 'WiiQare',
