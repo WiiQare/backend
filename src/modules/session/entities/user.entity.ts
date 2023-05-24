@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
-import { UserRole, UserStatus } from 'src/common/constants/enums';
-import { BaseEntity } from 'src/db/base-entity';
+import { UserRole, UserStatus } from '../../../common/constants/enums';
+import { BaseEntity } from '../../../db/base-entity';
 import { Column, Entity } from 'typeorm';
 
 @Entity()
@@ -23,5 +23,4 @@ export class User extends BaseEntity {
   @Exclude()
   @Column({ nullable: true })
   password: string;
-
 }
