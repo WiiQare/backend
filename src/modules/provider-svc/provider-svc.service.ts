@@ -371,6 +371,21 @@ export class ProviderService {
     service = await this.servicesRepository.save(service);
   }
 
+  // Get services of provider
+  async getServicesByProviderId(providerId: string): Promise<Service[]> {
+    const provider = await this.providerRepository.findOne({
+      where: { id: providerId },
+    });
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    const services = await this.servicesRepository.find({
+      where: { provider },
+    });
+
+    return services;
+  }
+
   // Add package to provider
   async addPackageToProvider(payload: CreatePackageDto): Promise<void> {
     const provider = await this.providerRepository.findOne({
