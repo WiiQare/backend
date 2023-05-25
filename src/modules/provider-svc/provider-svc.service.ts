@@ -6,15 +6,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
-import { APP_NAME, DAY, HOUR } from 'src/common/constants/constants';
+import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import {
   UserRole,
   UserStatus,
   UserType,
   VoucherStatus,
-} from 'src/common/constants/enums';
-import { _403, _404 } from 'src/common/constants/errors';
-import { generateToken, randomSixDigit } from 'src/helpers/common.helper';
+} from '../../common/constants/enums';
+import { _403, _404 } from '../../common/constants/errors';
+import { generateToken, randomSixDigit } from '../../helpers/common.helper';
 import { Repository } from 'typeorm';
 import { CachingService } from '../caching/caching.service';
 import { MailService } from '../mail/mail.service';
