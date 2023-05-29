@@ -1,5 +1,5 @@
-import { BusinessType } from 'src/common/constants/enums';
-import { BaseEntity } from 'src/db/base-entity';
+import { BusinessType } from '../../../common/constants/enums';
+import { BaseEntity } from '../../../db/base-entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { User } from '../../session/entities/user.entity';
 import { ContactPersonDto } from '../dto/provider.dto';

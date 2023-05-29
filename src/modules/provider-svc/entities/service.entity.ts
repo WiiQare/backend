@@ -1,4 +1,4 @@
-import { BaseEntity } from 'src/db/base-entity';
+import { BaseEntity } from '../../../db/base-entity';
 import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
 import { Package } from './package.entity';
 import { Provider } from './provider.entity';
