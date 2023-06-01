@@ -1,7 +1,5 @@
 import { BaseEntity } from 'src/db/base-entity';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
-import { Provider } from './provider.entity';
-import { Service } from './service.entity';
+import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class Package extends BaseEntity {
@@ -13,11 +11,4 @@ export class Package extends BaseEntity {
 
   @Column('decimal')
   price: number;
-
-  @ManyToOne(() => Provider, (provider) => provider.packages)
-  provider: Provider;
-
-  @ManyToMany(() => Service, (service) => service.packages)
-  @JoinTable()
-  services: Service[];
 }

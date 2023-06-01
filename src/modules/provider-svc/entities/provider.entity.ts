@@ -1,7 +1,6 @@
 import { BusinessType } from 'src/common/constants/enums';
 import { BaseEntity } from 'src/db/base-entity';
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
-import { User } from '../../session/entities/user.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { ContactPersonDto } from '../dto/provider.dto';
 import { Package } from './package.entity';
 import { Service } from './service.entity';
@@ -29,11 +28,7 @@ export class Provider extends BaseEntity {
   @Column()
   nationalId: string;
 
-  @OneToOne(() => User, { cascade: ['insert', 'update'], nullable: true })
-  @JoinColumn()
-  user?: User;
-
-  @Column({ comment: 'registered company number' })
+  @Column({ comment: 'Registered company number' })
   businessRegistrationNo: number;
 
   @Column({ type: 'enum', enum: BusinessType })
@@ -45,6 +40,7 @@ export class Provider extends BaseEntity {
   @Column({ type: 'json', nullable: true })
   contactPerson?: ContactPersonDto;
 
+  //TODO: refactor these relationships!
   @OneToMany(() => Package, (pkg) => pkg.provider)
   packages?: Package[];
 

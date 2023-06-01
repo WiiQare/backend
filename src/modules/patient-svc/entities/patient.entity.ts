@@ -1,6 +1,5 @@
 import { BaseEntity } from 'src/db/base-entity';
-import { User } from 'src/modules/session/entities/user.entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class Patient extends BaseEntity {
@@ -12,10 +11,6 @@ export class Patient extends BaseEntity {
 
   @Column()
   lastName: string;
-
-  @OneToOne(() => User, { cascade: ['insert', 'update'] })
-  @JoinColumn()
-  user: User;
 
   @Column({ nullable: true })
   email?: string;

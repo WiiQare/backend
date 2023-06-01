@@ -1,6 +1,5 @@
 import { BaseEntity } from 'src/db/base-entity';
-import { User } from 'src/modules/session/entities/user.entity';
-import { Column, Entity, OneToOne, JoinColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class Payer extends BaseEntity {
@@ -9,10 +8,6 @@ export class Payer extends BaseEntity {
 
   @Column()
   lastName: string;
-
-  @OneToOne(() => User, { cascade: ['insert', 'update'] })
-  @JoinColumn()
-  user: User;
 
   @Column()
   country: string;
@@ -25,7 +20,4 @@ export class Payer extends BaseEntity {
 
   @Column({ nullable: true })
   city?: string;
-
-  @Column({ unique: true, nullable: true }) // TODO: remove this nullable later!
-  referralCode: string;
 }

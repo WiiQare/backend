@@ -1,12 +1,15 @@
 import { BaseEntity } from 'src/db/base-entity';
 import { Column, Entity } from 'typeorm';
-import { UserType, VoucherStatus } from '../../../common/constants/enums';
+import {
+  ReceiverType,
+  TransactionStatus,
+} from '../../../common/constants/enums';
 
 @Entity()
 export class Transaction extends BaseEntity {
   @Column({
     type: 'double precision',
-    comment: 'sent amount before conversion',
+    comment: 'Sent amount before conversion',
   })
   senderAmount: number;
 
@@ -28,7 +31,7 @@ export class Transaction extends BaseEntity {
   @Column({ comment: 'local currency' })
   currency: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'uuid' })
   senderId: string;
 
   @Column({
@@ -41,29 +44,18 @@ export class Transaction extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: UserType,
+    enum: ReceiverType,
     nullable: true,
-    default: UserType.PATIENT,
   })
-  ownerType: UserType;
+  ownerType: ReceiverType;
 
   @Column({
     type: 'enum',
-    enum: VoucherStatus,
-    default: VoucherStatus.UNCLAIMED,
+    enum: TransactionStatus,
+    default: TransactionStatus.PENDING,
   })
-  status: VoucherStatus;
-
-  @Column()
-  transactionHash: string;
-
-  //TODO: @remove nullable later!
-  @Column({ nullable: true })
-  shortenHash: string;
+  status: TransactionStatus;
 
   @Column()
   stripePaymentId: string;
-
-  @Column({ type: 'jsonb' })
-  voucher: Record<string, any>;
 }

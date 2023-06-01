@@ -1,9 +1,10 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   CreateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class BaseEntity {
   @ApiProperty()
@@ -17,4 +18,8 @@ export class BaseEntity {
   @ApiProperty()
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  @ApiProperty()
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
 }
