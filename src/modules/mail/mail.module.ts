@@ -1,7 +1,7 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module } from '@nestjs/common';
-import { join } from 'path';
+import path from 'path';
 import { AppConfigService } from 'src/config/app-config.service';
 import { MailService } from './mail.service';
 
@@ -21,7 +21,7 @@ import { MailService } from './mail.service';
           from: '"No Reply" <wiiqare@google.com>',
         },
         template: {
-          dir: join(__dirname, 'templates'),
+          dir: path.resolve(__dirname, '../../../templates'),
           adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
           options: {
             strict: true,
