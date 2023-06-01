@@ -1,6 +1,6 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
-import { AUTO_FORGOT_TTL } from 'src/common/constants/constants';
+import { AUTO_FORGOT_TTL } from '../../common/constants/constants';
 
 /**
  * This class here, plays the role of part of brain LOL.

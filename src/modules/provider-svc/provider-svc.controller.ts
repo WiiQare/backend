@@ -26,6 +26,7 @@ import {
   SearchTransactionDto,
 } from './dto/provider.dto';
 import { ProviderService } from './provider-svc.service';
+import { Service } from './entities/service.entity';
 
 @ApiTags('Provider')
 @Controller('provider')
@@ -140,6 +141,15 @@ export class ProviderController {
   ): Promise<void> {
     serviceDto.providerId = providerId;
     return this.providerService.addServiceToProvider(serviceDto);
+  }
+
+  @Get(':providerId/service')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'API endpoint to retrieve services of Provider' })
+  getServicesByProviderId(
+    @Param('providerId') providerId: string,
+  ): Promise<Service[]> {
+    return this.providerService.getServicesByProviderId(providerId);
   }
 
   @Post(':providerId/package')
