@@ -7,11 +7,14 @@ import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
 import { Patient } from '../patient-svc/entities/patient.entity';
 import {
+  InviteType,
   UserRole,
   UserStatus,
   UserType,
   VoucherStatus,
 } from '../../common/constants/enums';
+import { SendInviteDto } from './dto/payer.dto';
+import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 
 describe('PayerService', () => {
   let service: PayerService;
@@ -22,7 +25,9 @@ describe('PayerService', () => {
 
   // Mock services
   const mockMailService = {};
-  const mockSmsService = {};
+  const mockSmsService = {
+    sendSmsTOFriend: jest.fn(),
+  } as unknown as SmsService;
 
   // Mock entities
   const mockUser: User = {
@@ -150,5 +155,33 @@ describe('PayerService', () => {
     expect(payerRepository.create).toBeCalledTimes(1);
     expect(payerRepository.save).toBeCalledTimes(1);
     expect(payerRepository.save).toBeCalledWith(mockPayer);
+  });
+
+  it('should send an invite sms to a friend', async () => {
+    const sendInviteDTO: SendInviteDto = {
+      phoneNumbers: ['phoneNumber'],
+      inviteType: InviteType.SMS,
+    };
+
+    const authUser: JwtClaimsDataDto = {
+      sub: mockPayer.id,
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
+
+    const sendSMSInviteToFriendSpy = jest.spyOn(
+      service,
+      'sendSMSInviteToFriend',
+    );
+
+    await service.sendInviteToFriend(sendInviteDTO, authUser);
+
+    expect(payerRepository.createQueryBuilder).toBeCalledTimes(1);
+    expect(
+      payerRepository.createQueryBuilder().leftJoinAndSelect,
+    ).toBeCalledTimes(1);
+    expect(sendSMSInviteToFriendSpy).toBeCalledTimes(1);
   });
 });
