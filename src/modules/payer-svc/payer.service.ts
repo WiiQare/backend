@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { customAlphabet } from 'nanoid';
-import { _400, _403, _404 } from 'src/common/constants/errors';
+import { _400, _403, _404 } from '../../common/constants/errors';
 import { Repository } from 'typeorm';
 import { SALT_ROUNDS } from '../../common/constants/constants';
 import { InviteType, UserRole, UserStatus } from '../../common/constants/enums';

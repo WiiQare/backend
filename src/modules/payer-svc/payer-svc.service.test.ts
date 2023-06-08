@@ -45,7 +45,7 @@ describe('PayerService', () => {
     lastName: 'lastName',
     user: mockUser,
     country: 'country',
-    referralCode: 'referralCode',
+    referralCode: 'REF-f01a2f',
   };
 
   const mockPatient: Patient = {
@@ -115,5 +115,40 @@ describe('PayerService', () => {
       mockMailService as MailService,
       mockSmsService as SmsService,
     );
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('should return the mock payer by id', async () => {
+    const result = await service.findPayerById(mockPayer.id);
+
+    expect(result).toEqual(mockPayer);
+    expect(payerRepository.findOne).toBeCalledTimes(1);
+  });
+
+  it('should return the mock payer by user id', async () => {
+    const result = await service.findPayerByUserId(mockUser.id);
+
+    expect(result).toEqual(mockPayer);
+    expect(payerRepository.findOne).toBeCalledTimes(1);
+  });
+
+  it('should return a new payer equal to the mock payer', async () => {
+    const result = await service.registerNewPayerAccount({
+      phoneNumber: 'phoneNumber',
+      email: 'email',
+      emailVerificationToken: 'emailVerificationToken',
+      firstName: 'firstName',
+      lastName: 'lastName',
+      password: 'password',
+      country: 'country',
+    });
+
+    expect(result).toEqual(mockPayer);
+    expect(payerRepository.create).toBeCalledTimes(1);
+    expect(payerRepository.save).toBeCalledTimes(1);
+    expect(payerRepository.save).toBeCalledWith(mockPayer);
   });
 });
