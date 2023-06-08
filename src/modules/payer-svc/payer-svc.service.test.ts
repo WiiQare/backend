@@ -24,9 +24,12 @@ describe('PayerService', () => {
   let userRepository: Repository<User>;
 
   // Mock services
-  const mockMailService = {};
+  const mockMailService = {
+    sendInviteEmail: jest.fn(),
+  } as unknown as MailService;
   const mockSmsService = {
     sendSmsTOFriend: jest.fn(),
+    sendVoucherAsAnSMS: jest.fn(),
   } as unknown as SmsService;
 
   // Mock entities
@@ -183,5 +186,48 @@ describe('PayerService', () => {
       payerRepository.createQueryBuilder().leftJoinAndSelect,
     ).toBeCalledTimes(1);
     expect(sendSMSInviteToFriendSpy).toBeCalledTimes(1);
+  });
+
+  it('should send an email invite to a friend', async () => {
+    const sendInviteDTO: SendInviteDto = {
+      phoneNumbers: ['phoneNumber'],
+      emails: ['email'],
+      inviteType: InviteType.EMAIL,
+    };
+
+    const authUser: JwtClaimsDataDto = {
+      sub: mockPayer.id,
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
+
+    await service.sendInviteToFriend(sendInviteDTO, authUser);
+
+    expect(payerRepository.createQueryBuilder).toBeCalledTimes(1);
+    expect(
+      payerRepository.createQueryBuilder().leftJoinAndSelect,
+    ).toBeCalledTimes(1);
+    expect(mockMailService.sendInviteEmail).toBeCalledTimes(1);
+  });
+
+  it('should send a SMS voucher', async () => {
+    const authUser: JwtClaimsDataDto = {
+      sub: mockPayer.id,
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
+
+    await service.sendSmsVoucher('shortenHash', authUser);
+
+    expect(payerRepository.createQueryBuilder).toBeCalledTimes(1);
+    expect(transactionRepository.findOne).toBeCalledTimes(1);
+    expect(transactionRepository.findOne).toBeCalledWith({
+      where: { shortenHash: 'shortenHash' },
+    });
+    expect(mockSmsService.sendVoucherAsAnSMS).toBeCalledTimes(1);
   });
 });
