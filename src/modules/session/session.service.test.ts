@@ -255,4 +255,24 @@ describe('SessionService', () => {
       );
     });
   });
+
+  describe('findOne', () => {
+    it('should throw an error when a user is not found', async () => {
+      mockUserRepository.findOne = jest.fn().mockResolvedValue(undefined);
+
+      await expect(
+        sessionService.findOne({
+          where: { id: 'id' },
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return the mock user', async () => {
+      const user = await sessionService.findOne({
+        where: { id: 'id' },
+      });
+
+      expect(user).toEqual(mockUser);
+    });
+  });
 });
