@@ -8,7 +8,11 @@ import { MailService } from '../mail/mail.service';
 import { CachingService } from '../caching/caching.service';
 import { SessionService } from './session.service';
 import { CreateSessionDto } from './dto/create-session.dto';
-import { UserRole, UserStatus } from '../../common/constants/enums';
+import {
+  UserRole,
+  UserStatus,
+  BusinessType,
+} from '../../common/constants/enums';
 import {
   UnauthorizedException,
   BadRequestException,
@@ -18,19 +22,57 @@ import {
 import * as bcrypt from 'bcrypt';
 import { _400, _401, _403, _404 } from '../../common/constants/errors';
 import { DAY } from '../../common/constants/constants';
+import { Provider } from '../provider-svc/entities/provider.entity';
+import { Payer } from '../payer-svc/entities/payer.entity';
 
 jest.mock('bcrypt');
 
 describe('SessionService', () => {
   // Mock user entity
-  const mockUser = {
+  const mockUser: User = {
     id: 'id',
+    updatedAt: new Date(),
+    createdAt: new Date(),
     email: 'email',
     phoneNumber: 'phoneNumber',
     username: 'username',
-    role: UserRole.PATIENT,
+    role: UserRole.PAYER,
     status: UserStatus.ACTIVE,
     password: 'password',
+  };
+
+  // Mock payer entity
+  const mockPayer: Payer = {
+    id: 'id',
+    updatedAt: new Date(),
+    createdAt: new Date(),
+    firstName: 'firstName',
+    lastName: 'lastName',
+    user: mockUser,
+    country: 'country',
+    homeAddress: 'homeAddress',
+    referralCode: 'referralCode',
+  };
+
+  // Mock provider entity
+  const mockProvider: Provider = {
+    id: 'id',
+    updatedAt: new Date(),
+    createdAt: new Date(),
+    name: 'name',
+    email: 'email',
+    address: 'address',
+    phone: 'phone',
+    city: 'city',
+    postalCode: 'postalCode',
+    nationalId: 'nationalId',
+    businessRegistrationNo: 123,
+    businessType: BusinessType.HOSPITAL,
+    user: {
+      ...mockUser,
+      role: UserRole.PROVIDER,
+    },
+    logoLink: 'logoLink',
   };
 
   // Mock services
@@ -213,7 +255,7 @@ describe('SessionService', () => {
       );
     });
 
-    it('should return a session response dto on successful authentication', async () => {
+    it('should return a session response dto on successful admin authentication', async () => {
       const payload: CreateSessionDto = {
         password: 'password',
         phoneNumber: 'phoneNumber',
@@ -222,10 +264,6 @@ describe('SessionService', () => {
       mockUserRepository.findOne = jest.fn().mockResolvedValue({
         ...mockUser,
         role: UserRole.WIIQARE_ADMIN,
-      });
-
-      mockPayerService.findPayerByUserId = jest.fn().mockResolvedValue({
-        id: 'id',
       });
 
       jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -238,6 +276,88 @@ describe('SessionService', () => {
           userId: mockUser.id,
           phoneNumber: mockUser.phoneNumber,
           names: 'ADMIN',
+          email: mockUser.email,
+          access_token: 'jwtToken',
+        }),
+      );
+    });
+
+    it('should return a session response dto on successful manager authentication', async () => {
+      const payload: CreateSessionDto = {
+        password: 'password',
+        phoneNumber: 'phoneNumber',
+      };
+
+      mockUserRepository.findOne = jest.fn().mockResolvedValue({
+        ...mockUser,
+        role: UserRole.WIIQARE_MANAGER,
+      });
+
+      const sessionResponse = await sessionService.authenticateUser(payload);
+
+      expect(sessionResponse).toEqual(
+        expect.objectContaining({
+          userId: mockUser.id,
+          type: UserRole.WIIQARE_MANAGER,
+          phoneNumber: mockUser.phoneNumber,
+          names: 'MANAGER',
+          email: mockUser.email,
+          access_token: 'jwtToken',
+        }),
+      );
+    });
+
+    it('should return a session response dto on successful provider authentication', async () => {
+      const payload: CreateSessionDto = {
+        password: 'password',
+        phoneNumber: 'phoneNumber',
+      };
+
+      mockUserRepository.findOne = jest.fn().mockResolvedValue({
+        ...mockUser,
+        role: UserRole.PROVIDER,
+      });
+
+      mockProviderService.findProviderByUserId = jest
+        .fn()
+        .mockResolvedValue(mockProvider);
+
+      const sessionResponse = await sessionService.authenticateUser(payload);
+
+      expect(sessionResponse).toEqual(
+        expect.objectContaining({
+          userId: mockUser.id,
+          providerId: mockUser.id,
+          type: UserRole.PROVIDER,
+          phoneNumber: mockUser.phoneNumber,
+          names: mockProvider.name,
+          email: mockUser.email,
+          access_token: 'jwtToken',
+        }),
+      );
+    });
+
+    it('should return a session response dto on successful payer authentication', async () => {
+      const payload: CreateSessionDto = {
+        password: 'password',
+        phoneNumber: 'phoneNumber',
+      };
+
+      mockUserRepository.findOne = jest.fn().mockResolvedValue(mockUser);
+
+      mockPayerService.findPayerByUserId = jest
+        .fn()
+        .mockResolvedValue(mockPayer);
+
+      const sessionResponse = await sessionService.authenticateUser(payload);
+
+      expect(sessionResponse).toEqual(
+        expect.objectContaining({
+          userId: mockUser.id,
+          payerId: mockUser.id,
+          type: UserRole.PAYER,
+          phoneNumber: mockUser.phoneNumber,
+          names: mockPayer.firstName + ' ' + mockPayer.lastName,
           email: mockUser.email,
           access_token: 'jwtToken',
         }),
