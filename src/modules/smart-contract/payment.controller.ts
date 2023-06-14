@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import _ from 'lodash';
 import { InjectStripe } from 'nestjs-stripe';
-import { UserRole } from 'src/common/constants/enums';
+import { UserRole, VoucherStatus } from 'src/common/constants/enums';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Roles } from 'src/common/decorators/user-role.decorator';
@@ -38,7 +38,7 @@ export class PaymentController {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly transactionService: TransactionService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({
@@ -157,7 +157,7 @@ export class PaymentController {
             transactionHash,
             shortenHash,
             voucher: voucherToSave,
-            status: 'success', //TODO: adds status to transaction
+            status: VoucherStatus.UNCLAIMED,
           });
           await this.transactionRepository.save(transactionToSave);
 

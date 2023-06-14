@@ -1,7 +1,8 @@
 export const _400 = {
   MALFORMED_INPUTS_PROVIDED: {
     code: 'MALFORMED_INPUTS_PROVIDED',
-    description: 'Certaines des données fournies sont manquantes ou non autorisées',
+    description:
+      'Certaines des données fournies sont manquantes ou non autorisées',
   },
   PASSWORD_MISMATCH: {
     code: 'PASSWORD_MISMATCH',
@@ -9,7 +10,7 @@ export const _400 = {
   },
   EMAIL_REQUIRED: {
     code: 'EMAIL_REQUIRED',
-    description: 'L\'e-mail est requis!',
+    description: "L'e-mail est requis!",
   },
   PHONE_NUMBER_REQUIRED: {
     code: 'PHONE_NUMBER_REQUIRED',
@@ -39,7 +40,7 @@ export const _401 = {
 export const _403 = {
   EMAIL_VERIFICATION_REQUIRED: {
     code: 'EMAIL_VERIFICATION_REQUIRED',
-    description: 'L\'e-mail n\'est pas vérifié ou la vérification a expiré!',
+    description: "L'e-mail n'est pas vérifié ou la vérification a expiré!",
   },
   OTP_VERIFICATION_FAILED: {
     code: 'OTP_VERIFICATION_FAILED',
@@ -64,7 +65,7 @@ export const _403 = {
   },
   INVALID_EMAIL_VERIFICATION_TOKEN: {
     code: 'INVALID_EMAIL_VERIFICATION_TOKEN',
-    description: 'Le lien de vérification d\'e-mail fourni non valide!',
+    description: "Le lien de vérification d'e-mail fourni non valide!",
   },
   ACCESS_NOT_ALLOWED: {
     code: 'ACCESS_NOT_ALLOWED',
@@ -81,7 +82,10 @@ export const _403 = {
 };
 
 export const _404 = {
-  USER_NOT_FOUND: { code: 'USER_NOT_FOUND', description: 'Utilisateur non trouvé!' },
+  USER_NOT_FOUND: {
+    code: 'USER_NOT_FOUND',
+    description: 'Utilisateur non trouvé!',
+  },
   PAYER_NOT_FOUND: {
     code: 'PAYER_NOT_FOUND',
     description: 'Expart introuvable!',
@@ -92,7 +96,11 @@ export const _404 = {
   },
   PROVIDER_NOT_FOUND: {
     code: 'PROVIDER_NOT_FOUND',
-    description: 'Provider not found!',
+    description: 'Fournisseur introuvable!',
+  },
+  PACKAGE_NOT_FOUND: {
+    code: 'PACKAGE_NOT_FOUND',
+    description: 'Package introuvable!',
   },
   INVALID_TRANSACTION_HASH: {
     code: 'INVALID_TRANSACTION_HASH',
@@ -110,6 +118,6 @@ export const _409 = {
 export const _500 = {
   INTERNAL_SERVER_ERROR: {
     code: 'INTERNAL_SERVER_ERROR',
-    description: 'Quelque chose s\'est passé de manière inattendue!',
+    description: "Quelque chose s'est passé de manière inattendue!",
   },
 };

@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsEmail,
   IsEnum,
   IsISO31661Alpha2,
@@ -9,6 +10,8 @@ import {
   IsUUID,
 } from 'class-validator';
 import { BusinessType } from '../../../common/constants/enums';
+import { Package } from '../entities/package.entity';
+import { Service } from '../entities/service.entity';
 
 export class ContactPersonDto {
   @IsNotEmpty()
@@ -135,5 +138,63 @@ export class AuthorizeVoucherTransferDto {
 export class SearchTransactionDto {
   @IsNotEmpty()
   @IsUUID()
+  providerId: string;
+}
+
+export class RedeemVoucherDto {
+  @IsNotEmpty()
+  @IsArray()
+  transactionHashes: string[];
+}
+
+export class CreateServiceDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  @IsString()
+  providerId: string;
+}
+
+export class CreatePackageDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  @IsString()
+  providerId: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  services: CreateServiceDto[];
+}
+
+export class AddServiceToPackageDto {
+  @IsNotEmpty()
+  package: Package;
+
+  @IsNotEmpty()
+  @IsArray()
+  services: CreateServiceDto[];
+
+  @IsNotEmpty()
+  @IsString()
   providerId: string;
 }

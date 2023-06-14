@@ -21,6 +21,7 @@ export enum VoucherStatus {
   CLAIMED = 'CLAIMED',
   UNCLAIMED = 'UNCLAIMED',
   BURNED = 'BURNED',
+  PENDING = 'PENDING',
 }
 
 export enum InviteType {

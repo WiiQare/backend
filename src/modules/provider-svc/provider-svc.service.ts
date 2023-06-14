@@ -6,10 +6,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
-import { APP_NAME, DAY, HOUR } from 'src/common/constants/constants';
-import { UserRole, UserStatus, UserType } from 'src/common/constants/enums';
-import { _403, _404 } from 'src/common/constants/errors';
-import { generateToken, randomSixDigit } from 'src/helpers/common.helper';
+import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
+import {
+  UserRole,
+  UserStatus,
+  UserType,
+  VoucherStatus,
+} from '../../common/constants/enums';
+import { _403, _404 } from '../../common/constants/errors';
+import { generateToken, randomSixDigit } from '../../helpers/common.helper';
 import { Repository } from 'typeorm';
 import { CachingService } from '../caching/caching.service';
 import { MailService } from '../mail/mail.service';
@@ -19,11 +24,16 @@ import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
 import { SmsService } from '../sms/sms.service';
 import {
+  AddServiceToPackageDto,
   ContactPersonDto,
+  CreatePackageDto,
+  CreateServiceDto,
   ProviderValidateEmailDto,
   RegisterProviderDto,
 } from './dto/provider.dto';
+import { Package } from './entities/package.entity';
 import { Provider } from './entities/provider.entity';
+import { Service } from './entities/service.entity';
 
 @Injectable()
 export class ProviderService {
@@ -36,11 +46,15 @@ export class ProviderService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Package)
+    private packageRepository: Repository<Package>,
+    @InjectRepository(Service)
+    private servicesRepository: Repository<Service>,
     private objectStorageService: ObjectStorageService,
     private cachingService: CachingService,
     private mailService: MailService,
     private smsService: SmsService,
-  ) { }
+  ) {}
 
   /**
    * This function retrieve provider account related by the provider id
@@ -270,16 +284,159 @@ export class ProviderService {
    * @param providerId
    *
    */
-  async getAllTransactions(providerId: string): Promise<Record<string, any>> {
+  async getAllTransactions(providerId: string): Promise<Record<string, any>[]> {
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .where('transaction.ownerId = :providerId', { providerId })
+      .getMany();
+    //TODO: paginate this!.
+    return transactions;
+  }
+
+  /**
+   * This method is used to statistic about transactions
+   * @param providerId
+   *
+   */
+  async getTransactionStatistic(
+    providerId: string,
+  ): Promise<Record<string, any>> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
       .where('transaction.ownerId = :providerId', { providerId })
       .getMany();
 
+    let totalRedeemedAmount = 0,
+      totalPendingAmount = 0,
+      totalUnclaimedAmount = 0;
+
+    transactions.forEach((transaction) => {
+      if (transaction.status === VoucherStatus.PENDING)
+        totalPendingAmount += transaction.amount;
+      if (transaction.status === VoucherStatus.CLAIMED)
+        totalRedeemedAmount += transaction.amount;
+      if (transaction.status === VoucherStatus.UNCLAIMED)
+        totalUnclaimedAmount += transaction.amount;
+    });
+
     return {
       totalAmount: _.sumBy(transactions, 'amount'),
       totalUniquePatients: _.uniqBy(transactions, 'voucher.patientId').length,
-      transactions,
+      totalRedeemedAmount,
+      totalPendingAmount,
+      totalUnclaimedAmount,
     };
+  }
+
+  /**
+   * This method is used to redeem voucher
+   *
+   */
+  async redeemVoucher(hashes: string[]): Promise<Record<string, any>[]> {
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .where(`transaction.transactionHash In (:...hashes)`, { hashes })
+      .andWhere(`transaction.status = :status`, {
+        status: VoucherStatus.UNCLAIMED,
+      })
+      .getMany();
+
+    // update transactions status to pending!.
+
+    const updatedTransactionList = transactions.map((transaction) => ({
+      ...transaction,
+      status: VoucherStatus.PENDING,
+    }));
+
+    //TODO: update the voucher details on chain.
+    return this.transactionRepository.save(updatedTransactionList);
+  }
+
+  // Add service to provider
+  async addServiceToProvider(payload: CreateServiceDto): Promise<void> {
+    const provider = await this.providerRepository.findOne({
+      where: { id: payload.providerId },
+    });
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    // Create new service
+    let service = new Service();
+    service.name = payload.name;
+    service.description = payload.description;
+    service.price = payload.price;
+    service.provider = provider;
+
+    // Save service
+    service = await this.servicesRepository.save(service);
+  }
+
+  // Get services of provider
+  async getServicesByProviderId(providerId: string): Promise<Service[]> {
+    const provider = await this.providerRepository.findOne({
+      where: { id: providerId },
+    });
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    const services = await this.servicesRepository.find({
+      where: { provider },
+    });
+
+    return services;
+  }
+
+  // Add package to provider
+  async addPackageToProvider(payload: CreatePackageDto): Promise<void> {
+    const provider = await this.providerRepository.findOne({
+      where: { id: payload.providerId },
+    });
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    // Create new package
+    let newPackage = new Package();
+    newPackage.name = payload.name;
+    newPackage.description = payload.description;
+    newPackage.price = payload.price;
+    newPackage.provider = provider;
+
+    // Save package
+    newPackage = await this.packageRepository.save(newPackage);
+  }
+
+  // Group services into package
+  async addServiceToPackage(payload: AddServiceToPackageDto): Promise<void> {
+    const provider = await this.providerRepository.findOne({
+      where: { id: payload.providerId },
+    });
+
+    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
+
+    // Find package
+    const pkg = await this.packageRepository.findOne({
+      where: { id: payload.package.id },
+    });
+
+    if (!pkg) throw new ForbiddenException(_404.PACKAGE_NOT_FOUND);
+
+    // Create and save new services
+    const services = await Promise.all(
+      payload.services.map(async (serviceDto) => {
+        let service = new Service();
+        service.name = serviceDto.name;
+        service.description = serviceDto.description;
+        service.price = serviceDto.price;
+        service.provider = provider;
+
+        return await this.servicesRepository.save(service);
+      }),
+    );
+
+    // Add services to package
+    pkg.services.push(...services);
+
+    // Save package
+    await this.packageRepository.save(pkg);
   }
 }

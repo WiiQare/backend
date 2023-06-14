@@ -1,8 +1,10 @@
-import { BusinessType } from 'src/common/constants/enums';
-import { BaseEntity } from 'src/db/base-entity';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
-import { ContactPersonDto } from '../dto/provider.dto';
+import { BusinessType } from '../../../common/constants/enums';
+import { BaseEntity } from '../../../db/base-entity';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { User } from '../../session/entities/user.entity';
+import { ContactPersonDto } from '../dto/provider.dto';
+import { Package } from './package.entity';
+import { Service } from './service.entity';
 
 @Entity()
 export class Provider extends BaseEntity {
@@ -42,4 +44,10 @@ export class Provider extends BaseEntity {
 
   @Column({ type: 'json', nullable: true })
   contactPerson?: ContactPersonDto;
+
+  @OneToMany(() => Package, (pkg) => pkg.provider)
+  packages?: Package[];
+
+  @OneToMany(() => Service, (service) => service.provider)
+  services?: Service[];
 }

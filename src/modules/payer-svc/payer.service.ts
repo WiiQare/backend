@@ -186,6 +186,7 @@ export class PayerService {
       patient.phoneNumber,
       authUser.names,
       transaction.amount,
+      transaction.currency,
     );
   }
 }
