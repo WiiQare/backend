@@ -41,7 +41,7 @@ export class SessionService {
     private readonly providerService: ProviderService,
     private mailService: MailService,
     private cachingService: CachingService,
-  ) { }
+  ) {}
 
   async authenticateUser(
     payload: CreateSessionDto,
