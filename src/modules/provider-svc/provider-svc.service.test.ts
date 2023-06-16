@@ -17,7 +17,7 @@ import {
   UserRole,
   UserStatus,
 } from '../../common/constants/enums';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { _403, _404 } from '../../common/constants/errors';
 import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import { RegisterProviderDto } from './dto/provider.dto';
@@ -329,6 +329,51 @@ describe('ProviderService', () => {
         mockPatient.phoneNumber,
         mockTransaction.amount,
       );
+    });
+  });
+
+  describe('getTransactionByShortenHash', () => {
+    const shortenHash = 'shortenHash';
+
+    it('should return the details of the mock transaction', async () => {
+      jest.spyOn(service, 'sendTxVerificationOTP').mockResolvedValue(null);
+
+      const result = await service.getTransactionByShortenHash(shortenHash);
+      expect(transactionRepository.findOne).toHaveBeenCalledWith({
+        where: { shortenHash, ownerType: UserType.PATIENT },
+      });
+      expect(patientRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockTransaction.ownerId },
+      });
+      expect(service.sendTxVerificationOTP).toHaveBeenCalledWith(
+        shortenHash,
+        mockPatient,
+        mockTransaction,
+      );
+      expect(result).toEqual({
+        hash: mockTransaction.transactionHash,
+        shortenHash: mockTransaction.shortenHash,
+        amount: mockTransaction.amount,
+        currency: mockTransaction.currency,
+        patientNames: `${mockPatient.firstName} ${mockPatient.lastName}`,
+        patientPhoneNumber: mockPatient.phoneNumber,
+      });
+    });
+
+    it('should throw an error if the transaction does not exist', async () => {
+      transactionRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        service.getTransactionByShortenHash('someShortenHash'),
+      ).rejects.toThrow(new NotFoundException(_404.INVALID_TRANSACTION_HASH));
+    });
+
+    it('should throw an error if the transaction is not owned by a patient', async () => {
+      patientRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        service.getTransactionByShortenHash(shortenHash),
+      ).rejects.toThrow(new NotFoundException(_404.PATIENT_NOT_FOUND));
     });
   });
 
