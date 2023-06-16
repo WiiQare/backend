@@ -19,7 +19,7 @@ import {
 } from '../../common/constants/enums';
 import { ForbiddenException } from '@nestjs/common';
 import { _403, _404 } from '../../common/constants/errors';
-import { APP_NAME, DAY } from '../../common/constants/constants';
+import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import { RegisterProviderDto } from './dto/provider.dto';
 
 describe('ProviderService', () => {
@@ -45,7 +45,9 @@ describe('ProviderService', () => {
   const mockMailService = {
     sendProviderVerificationEmail: jest.fn(),
   } as unknown as MailService;
-  const mockSmsService = {};
+  const mockSmsService = {
+    sendTransactionVerificationTokenBySmsToAPatient: jest.fn(),
+  } as unknown as SmsService;
 
   // Mock entities
   const mockProvider: Provider = {
@@ -304,6 +306,28 @@ describe('ProviderService', () => {
 
       await expect(service.registerNewProvider(logo, payload)).rejects.toThrow(
         new ForbiddenException(_403.INVALID_EMAIL_VERIFICATION_TOKEN),
+      );
+    });
+  });
+
+  describe('sendTxVerificationOTP', () => {
+    it('should send a verification OTP to a patient', async () => {
+      await service.sendTxVerificationOTP(
+        'shortenHash',
+        mockPatient,
+        mockTransaction,
+      );
+      expect(mockCachingService.save).toHaveBeenCalledWith(
+        `${APP_NAME}:transaction:shortenHash`,
+        expect.any(String),
+        HOUR,
+      );
+      expect(
+        mockSmsService.sendTransactionVerificationTokenBySmsToAPatient,
+      ).toHaveBeenCalledWith(
+        expect.any(String),
+        mockPatient.phoneNumber,
+        mockTransaction.amount,
       );
     });
   });
