@@ -19,6 +19,7 @@ import {
 } from '../../common/constants/enums';
 import { ForbiddenException } from '@nestjs/common';
 import { _404 } from '../../common/constants/errors';
+import { DAY } from '../../common/constants/constants';
 
 describe('ProviderService', () => {
   let service: ProviderService;
@@ -31,8 +32,12 @@ describe('ProviderService', () => {
 
   // Mock services
   const mockObjectStorageService = {};
-  const mockCachingService = {};
-  const mockMailService = {};
+  const mockCachingService = {
+    save: jest.fn(),
+  } as unknown as CachingService;
+  const mockMailService = {
+    sendProviderVerificationEmail: jest.fn(),
+  } as unknown as MailService;
   const mockSmsService = {};
 
   // Mock entities
@@ -182,6 +187,36 @@ describe('ProviderService', () => {
       const result = await service.findProviderByUserId('id');
 
       expect(result).toEqual(mockProvider);
+    });
+
+    it('should return null if the provider does not exist', async () => {
+      providerRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      const result = await service.findProviderByUserId('id');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('providerVerifyEmail', () => {
+    const payload = {
+      email: 'email',
+      password: 'password',
+    };
+
+    it('should verify the email of a provider', async () => {
+      await service.providerVerifyEmail(payload);
+      expect(mockCachingService.save).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          email: payload.email,
+          password: payload.password,
+        },
+        DAY,
+      );
+      expect(
+        mockMailService.sendProviderVerificationEmail,
+      ).toHaveBeenCalledWith(payload.email, expect.any(String));
     });
   });
 
