@@ -514,6 +514,43 @@ describe('ProviderService', () => {
     });
   });
 
+  describe('redeemVoucher', () => {
+    const hashes = ['hash1', 'hash2'];
+    const mockTx1 = {
+      ...mockTransaction,
+      transactionHash: 'hash1',
+    };
+    const mockTx2 = {
+      ...mockTransaction,
+      transactionHash: 'hash2',
+    };
+
+    const newTxList = [
+      {
+        ...mockTx1,
+        status: VoucherStatus.PENDING,
+      },
+      {
+        ...mockTx2,
+        status: VoucherStatus.PENDING,
+      },
+    ];
+
+    it('should redeem vouchers', async () => {
+      transactionRepository.createQueryBuilder = jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockTx1, mockTx2]),
+      });
+
+      transactionRepository.save = jest.fn().mockResolvedValue(newTxList);
+
+      const result = await service.redeemVoucher(hashes);
+      expect(transactionRepository.save).toHaveBeenCalledWith(newTxList);
+      expect(result).toEqual(newTxList);
+    });
+  });
+
   describe('addServiceToProvider', () => {
     const payload = {
       providerId: 'id',
