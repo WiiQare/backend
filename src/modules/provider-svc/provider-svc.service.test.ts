@@ -444,6 +444,23 @@ describe('ProviderService', () => {
     });
   });
 
+  describe('getAllTransactions', () => {
+    const providerId = 'id';
+
+    it('should return all transactions', async () => {
+      const result = await service.getAllTransactions(providerId);
+      expect(transactionRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'transaction',
+      );
+      expect(
+        transactionRepository.createQueryBuilder().where,
+      ).toHaveBeenCalledWith('transaction.ownerType = :ownerType', {
+        providerId,
+      });
+      expect(result).toEqual([mockTransaction]);
+    });
+  });
+
   describe('addServiceToProvider', () => {
     const payload = {
       providerId: 'id',
