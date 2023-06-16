@@ -377,6 +377,73 @@ describe('ProviderService', () => {
     });
   });
 
+  describe('authorizeVoucherTransfer', () => {
+    const shortenHash = 'shortenHash';
+    const providerId = 'id';
+    const securityCode = 'securityCode';
+    const cachedToken = `${APP_NAME}:transaction:${shortenHash}`;
+
+    it('should authorize a voucher transfer', async () => {
+      mockCachingService.get = jest.fn().mockResolvedValue(securityCode);
+
+      const result = await service.authorizeVoucherTransfer(
+        shortenHash,
+        providerId,
+        securityCode,
+      );
+      expect(transactionRepository.findOne).toHaveBeenCalledWith({
+        where: { shortenHash, ownerType: UserType.PATIENT },
+      });
+      expect(providerRepository.findOne).toHaveBeenCalledWith({
+        where: { id: providerId },
+      });
+      expect(mockCachingService.get).toHaveBeenCalledWith(cachedToken);
+      expect(transactionRepository.save).toHaveBeenCalledWith({
+        ...mockTransaction,
+        ownerType: UserType.PROVIDER,
+        ownerId: providerId,
+      });
+      expect(result).toEqual({
+        code: 200,
+        message: 'Voucher transfer authorized successfully',
+      });
+    });
+
+    it('should throw an error if the transaction does not exist', async () => {
+      transactionRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        service.authorizeVoucherTransfer(
+          'someShortenHash',
+          providerId,
+          securityCode,
+        ),
+      ).rejects.toThrow(new NotFoundException(_404.INVALID_TRANSACTION_HASH));
+    });
+
+    it('should throw an error if the providerId is invalid', async () => {
+      providerRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        service.authorizeVoucherTransfer(
+          shortenHash,
+          'someProviderId',
+          securityCode,
+        ),
+      ).rejects.toThrow(new NotFoundException(_404.PROVIDER_NOT_FOUND));
+    });
+
+    it('should throw an error if the security code is invalid', async () => {
+      mockCachingService.get = jest.fn().mockResolvedValue('savedSecurityCode');
+
+      await expect(
+        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode),
+      ).rejects.toThrow(
+        new ForbiddenException(_403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE),
+      );
+    });
+  });
+
   describe('addServiceToProvider', () => {
     const payload = {
       providerId: 'id',
