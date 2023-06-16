@@ -18,8 +18,9 @@ import {
   UserStatus,
 } from '../../common/constants/enums';
 import { ForbiddenException } from '@nestjs/common';
-import { _404 } from '../../common/constants/errors';
-import { DAY } from '../../common/constants/constants';
+import { _403, _404 } from '../../common/constants/errors';
+import { APP_NAME, DAY } from '../../common/constants/constants';
+import { RegisterProviderDto } from './dto/provider.dto';
 
 describe('ProviderService', () => {
   let service: ProviderService;
@@ -31,9 +32,15 @@ describe('ProviderService', () => {
   let serviceRepository: Repository<Service>;
 
   // Mock services
-  const mockObjectStorageService = {};
+  const mockObjectStorageService = {
+    saveObject: jest.fn(),
+  } as unknown as ObjectStorageService;
   const mockCachingService = {
     save: jest.fn(),
+    get: jest.fn().mockReturnValue({
+      email: 'email',
+      password: 'password',
+    }),
   } as unknown as CachingService;
   const mockMailService = {
     sendProviderVerificationEmail: jest.fn(),
@@ -217,6 +224,87 @@ describe('ProviderService', () => {
       expect(
         mockMailService.sendProviderVerificationEmail,
       ).toHaveBeenCalledWith(payload.email, expect.any(String));
+    });
+  });
+
+  describe('registerNewProvider', () => {
+    const payload: RegisterProviderDto = {
+      name: 'name',
+      emailVerificationToken: 'emailVerificationToken',
+      address: 'address',
+      phone: 'phone',
+      city: 'city',
+      postalCode: 'postalCode',
+      nationalId: 'nationalId',
+      businessRegistrationNo: 1,
+      businessType: BusinessType.HOSPITAL,
+      contactPersonFirstName: 'contactPersonFirstName',
+      contactPersonLastName: 'contactPersonLastName',
+      contactPersonPhone: 'contactPersonPhone',
+      contactPersonEmail: 'contactPersonEmail',
+      contactPersonOccupation: 'contactPersonOccupation',
+      contactPersonCountry: 'contactPersonCountry',
+      contactPersonHomeAddress: 'contactPersonHomeAddress',
+    };
+
+    const logo: Express.Multer.File = {} as Express.Multer.File;
+
+    const cacheToken = `${APP_NAME}:email:${payload.emailVerificationToken}`;
+
+    it('should register a new provider', async () => {
+      const contactPerson = {
+        email: payload.contactPersonEmail,
+        country: payload.contactPersonCountry,
+        firstName: payload.contactPersonFirstName,
+        lastName: payload.contactPersonLastName,
+        homeAddress: payload.contactPersonHomeAddress,
+        phone: payload.contactPersonPhone,
+        occupation: payload.contactPersonOccupation,
+      };
+
+      const result = await service.registerNewProvider(logo, payload);
+      expect(providerRepository.save).toHaveBeenCalled();
+      expect(mockObjectStorageService.saveObject).toHaveBeenCalledWith(logo);
+      expect(mockCachingService.get).toHaveBeenCalledWith(cacheToken);
+      expect(providerRepository.save).toHaveBeenCalledWith({
+        email: 'email',
+        logoLink: 'https://google.com/logo',
+        name: payload.name,
+        address: payload.address,
+        businessRegistrationNo: payload.businessRegistrationNo,
+        nationalId: payload.nationalId,
+        businessType: payload.businessType,
+        phone: payload.phone,
+        city: payload.city,
+        postalCode: payload.postalCode,
+        emailVerificationToken: payload.emailVerificationToken,
+        contactPerson: contactPerson,
+        user: {
+          email: 'email',
+          password: expect.any(String),
+          phoneNumber: payload.phone,
+          role: UserRole.PROVIDER,
+          status: UserStatus.INACTIVE,
+        },
+      });
+
+      expect(result).toEqual({
+        id: mockProvider.id,
+        providerName: mockProvider.name,
+        address: mockProvider.address,
+        businessType: mockProvider.businessType,
+        businessRegistrationNo: mockProvider.businessRegistrationNo,
+        city: mockProvider.city,
+        email: mockProvider.email,
+      });
+    });
+
+    it('should throw an error if the email verification token is invalid', async () => {
+      mockCachingService.get = jest.fn().mockResolvedValue(null);
+
+      await expect(service.registerNewProvider(logo, payload)).rejects.toThrow(
+        new ForbiddenException(_403.INVALID_EMAIL_VERIFICATION_TOKEN),
+      );
     });
   });
 
