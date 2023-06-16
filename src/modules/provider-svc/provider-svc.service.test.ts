@@ -454,10 +454,63 @@ describe('ProviderService', () => {
       );
       expect(
         transactionRepository.createQueryBuilder().where,
-      ).toHaveBeenCalledWith('transaction.ownerType = :ownerType', {
+      ).toHaveBeenCalledWith('transaction.ownerId = :providerId', {
         providerId,
       });
       expect(result).toEqual([mockTransaction]);
+    });
+  });
+
+  describe('getTransactionStatistic', () => {
+    const providerId = 'id';
+    // mockTransaction has voucher status of unclaimed
+    const mockClaimedTx = {
+      ...mockTransaction,
+      status: VoucherStatus.CLAIMED,
+    };
+    const mockPendingTx = {
+      ...mockTransaction,
+      status: VoucherStatus.PENDING,
+    };
+    const mockBurnedTx = {
+      ...mockTransaction,
+      status: VoucherStatus.BURNED,
+    };
+
+    it('should return the transaction statistics', async () => {
+      transactionRepository.createQueryBuilder = jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest
+          .fn()
+          .mockResolvedValue([
+            mockTransaction,
+            mockClaimedTx,
+            mockPendingTx,
+            mockBurnedTx,
+            mockBurnedTx,
+            mockClaimedTx,
+            mockTransaction,
+            mockClaimedTx,
+          ]),
+      });
+
+      const result = await service.getTransactionStatistic(providerId);
+      expect(transactionRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'transaction',
+      );
+      expect(
+        transactionRepository.createQueryBuilder().where,
+      ).toHaveBeenCalledWith('transaction.ownerId = :providerId', {
+        providerId,
+      });
+      expect(result).toEqual({
+        totalAmount: 8,
+        totalUniquePatients: 1,
+        totalRedeemedAmount: 3,
+        totalPendingAmount: 1,
+        totalUnclaimedAmount: 2,
+      });
     });
   });
 

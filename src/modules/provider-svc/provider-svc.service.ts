@@ -306,6 +306,7 @@ export class ProviderService {
       .where('transaction.ownerId = :providerId', { providerId })
       .getMany();
 
+    console.log(transactions);
     let totalRedeemedAmount = 0,
       totalPendingAmount = 0,
       totalUnclaimedAmount = 0;
