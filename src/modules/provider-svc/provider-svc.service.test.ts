@@ -175,6 +175,7 @@ describe('ProviderService', () => {
     } as unknown as Repository<Package>;
     serviceRepository = {
       save: jest.fn().mockResolvedValue(mockService),
+      find: jest.fn().mockResolvedValue([mockService]),
     } as unknown as Repository<Service>;
 
     service = new ProviderService(
@@ -571,6 +572,24 @@ describe('ProviderService', () => {
       providerRepository.findOne = jest.fn().mockResolvedValue(null);
 
       await expect(service.addServiceToProvider(payload)).rejects.toThrow(
+        new ForbiddenException(_404.PROVIDER_NOT_FOUND),
+      );
+    });
+  });
+
+  describe('getServicesByProviderId', () => {
+    it('should return all services of a provider', async () => {
+      const result = await service.getServicesByProviderId('id');
+      expect(serviceRepository.find).toHaveBeenCalledWith({
+        where: { provider: mockProvider },
+      });
+      expect(result).toEqual([mockService]);
+    });
+
+    it('should throw an error if the provider does not exist', async () => {
+      providerRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(service.getServicesByProviderId('someId')).rejects.toThrow(
         new ForbiddenException(_404.PROVIDER_NOT_FOUND),
       );
     });
