@@ -17,6 +17,8 @@ import {
   UserRole,
   UserStatus,
 } from '../../common/constants/enums';
+import { ForbiddenException } from '@nestjs/common';
+import { _404 } from '../../common/constants/errors';
 
 describe('ProviderService', () => {
   let service: ProviderService;
@@ -175,13 +177,15 @@ describe('ProviderService', () => {
     );
   });
 
-  it('should return the mock provder', async () => {
-    const result = await service.findProviderByUserId('id');
+  describe('findProviderByUserId', () => {
+    it('should return the mock provder', async () => {
+      const result = await service.findProviderByUserId('id');
 
-    expect(result).toEqual(mockProvider);
+      expect(result).toEqual(mockProvider);
+    });
   });
 
-  it('should add a service to a provider', async () => {
+  describe('addServiceToProvider', () => {
     const payload = {
       providerId: 'id',
       name: 'name',
@@ -189,14 +193,24 @@ describe('ProviderService', () => {
       price: 1,
     };
 
-    await service.addServiceToProvider(payload);
-    expect(providerRepository.findOne).toHaveBeenCalledWith({
-      where: { id: payload.providerId },
+    it('should add a service to a provider', async () => {
+      await service.addServiceToProvider(payload);
+      expect(providerRepository.findOne).toHaveBeenCalledWith({
+        where: { id: payload.providerId },
+      });
+      expect(serviceRepository.save).toHaveBeenCalled();
     });
-    expect(serviceRepository.save).toHaveBeenCalled();
+
+    it('should throw an error if the provider does not exist', async () => {
+      providerRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(service.addServiceToProvider(payload)).rejects.toThrow(
+        new ForbiddenException(_404.PROVIDER_NOT_FOUND),
+      );
+    });
   });
 
-  it('should add a package to a provider', async () => {
+  describe('addPackageToProvider', () => {
     const payload = {
       providerId: 'id',
       name: 'name',
@@ -218,14 +232,24 @@ describe('ProviderService', () => {
       ],
     };
 
-    await service.addPackageToProvider(payload);
-    expect(providerRepository.findOne).toHaveBeenCalledWith({
-      where: { id: payload.providerId },
+    it('should add a package to a provider', async () => {
+      await service.addPackageToProvider(payload);
+      expect(providerRepository.findOne).toHaveBeenCalledWith({
+        where: { id: payload.providerId },
+      });
+      expect(packageRepository.save).toHaveBeenCalled();
     });
-    expect(packageRepository.save).toHaveBeenCalled();
+
+    it('should throw an error if the provider does not exist', async () => {
+      providerRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(service.addPackageToProvider(payload)).rejects.toThrow(
+        new ForbiddenException(_404.PROVIDER_NOT_FOUND),
+      );
+    });
   });
 
-  it('should add a service to a package', async () => {
+  describe('addServiceToPackage', () => {
     const payload = {
       providerId: 'id',
       package: mockPackage,
@@ -245,16 +269,34 @@ describe('ProviderService', () => {
       ],
     };
 
-    await service.addServiceToPackage(payload);
-    expect(providerRepository.findOne).toHaveBeenCalledWith({
-      where: { id: payload.providerId },
+    it('should add a service to a package', async () => {
+      await service.addServiceToPackage(payload);
+      expect(providerRepository.findOne).toHaveBeenCalledWith({
+        where: { id: payload.providerId },
+      });
+      expect(packageRepository.findOne).toHaveBeenCalledWith({
+        where: { id: payload.package.id },
+      });
+      expect(serviceRepository.save).toHaveBeenCalledTimes(
+        payload.services.length,
+      );
+      expect(packageRepository.save).toHaveBeenCalled();
     });
-    expect(packageRepository.findOne).toHaveBeenCalledWith({
-      where: { id: payload.package.id },
+
+    it('should throw an error if the provider does not exist', async () => {
+      providerRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(service.addServiceToPackage(payload)).rejects.toThrow(
+        new ForbiddenException(_404.PROVIDER_NOT_FOUND),
+      );
     });
-    expect(serviceRepository.save).toHaveBeenCalledTimes(
-      payload.services.length,
-    );
-    expect(packageRepository.save).toHaveBeenCalled();
+
+    it('should throw an error if the package does not exist', async () => {
+      packageRepository.findOne = jest.fn().mockResolvedValue(null);
+
+      await expect(service.addServiceToPackage(payload)).rejects.toThrow(
+        new ForbiddenException(_404.PACKAGE_NOT_FOUND),
+      );
+    });
   });
 });
