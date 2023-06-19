@@ -15,6 +15,7 @@ describe('SmartContractService', () => {
   const mockWeb3 = {
     eth: {
       getGasPrice: jest.fn(),
+      getAccounts: jest.fn().mockResolvedValue(['0xabcdef']),
       Contract: jest.fn().mockReturnValue({
         methods: {
           mintVoucher: jest.fn().mockReturnValue({
@@ -22,7 +23,46 @@ describe('SmartContractService', () => {
               transactionHash: '0x123',
             }),
           }),
-          vouchers: jest.fn().mockReturnValue({
+          vouchers: jest.fn().mockImplementation(() => {
+            return Promise.resolve({
+              owner: '0x123',
+              patient: '0x456',
+              amount: 1,
+              currency: 'USD',
+              status: 1,
+              createdAt: 1234567890,
+              updatedAt: 1234567890,
+            });
+          }),
+        },
+      }),
+      accounts: {
+        privateKeyToAccount: jest.fn().mockReturnValue({
+          address: '0x1234567890abcdef1234567890abcdef12345678',
+        }),
+        wallet: {
+          add: jest.fn().mockReturnValue({
+            address: '0x1234567890abcdef1234567890abcdef12345678',
+          }),
+        },
+      },
+    },
+  } as unknown as Web3;
+
+  let smartContractService: SmartContractService;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+
+    mockWeb3.eth.Contract = jest.fn().mockImplementation(() => ({
+      methods: {
+        mintVoucher: jest.fn().mockReturnValue({
+          send: jest.fn().mockResolvedValue({
+            transactionHash: '0x123',
+          }),
+        }),
+        vouchers: jest.fn().mockImplementation(() => {
+          return {
             call: jest.fn().mockResolvedValue({
               owner: '0x123',
               patient: '0x456',
@@ -32,35 +72,11 @@ describe('SmartContractService', () => {
               createdAt: 1234567890,
               updatedAt: 1234567890,
             }),
-          }),
-        },
-      }),
-      accounts: {
-        privateKeyToAccount: jest.fn().mockReturnValue({
-          address: '0x1234567890abcdef1234567890abcdef12345678',
-        }),
-        wallet: {
-          add: jest.fn(),
-        },
-      },
-    },
-    Contract: jest.fn().mockReturnValue({
-      methods: {
-        mintVoucher: jest.fn().mockReturnValue({
-          send: jest.fn().mockResolvedValue({
-            transactionHash: '0x123',
-          }),
+          };
         }),
       },
-    }),
-  } as unknown as Web3;
+    }));
 
-  let smartContractService: SmartContractService;
-
-  beforeEach(async () => {
-    jest.clearAllMocks();
-
-    // Initialize smartContractService
     smartContractService = new SmartContractService(
       mockAppConfigService,
       mockWeb3,
@@ -134,11 +150,18 @@ describe('SmartContractService', () => {
     const voucherId = 'someVoucherId';
 
     it('should return voucher information', async () => {
-      // The implementation of this method is still in progress, so this
-      // test is just a placeholder for now.
-      await smartContractService.getVoucherById(voucherId);
+      const response = await smartContractService.getVoucherById(voucherId);
 
       expect(mockWeb3.eth.Contract).toBeCalledTimes(1);
+      expect(response).toEqual({
+        owner: '0x123',
+        patient: '0x456',
+        amount: 1,
+        currency: 'USD',
+        status: 1,
+        createdAt: 1234567890,
+        updatedAt: 1234567890,
+      });
     });
 
     it('should throw an error if the contract method throws an error', async () => {
