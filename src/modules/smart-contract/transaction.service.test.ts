@@ -64,9 +64,7 @@ describe('TransactionService', () => {
         select: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getMany: jest
-          .fn()
-          .mockResolvedValue([mockTransaction1, mockTransaction2]),
+        getMany: jest.fn().mockResolvedValue([mockTransaction1]),
       }),
     } as unknown as Repository<Transaction>;
 
@@ -83,6 +81,45 @@ describe('TransactionService', () => {
 
       expect(mockTransactionRepository.find).toHaveBeenCalled();
       expect(result).toEqual([mockTransaction1, mockTransaction2]);
+    });
+
+    it('should return null if no transaction history found', async () => {
+      jest.spyOn(mockTransactionRepository, 'find').mockResolvedValueOnce(null);
+
+      const result = await service.getAllTransactionHistory();
+
+      expect(mockTransactionRepository.find).toHaveBeenCalled();
+      expect(result).toEqual(null);
+    });
+  });
+
+  describe('getTransactionHistoryBySenderId', () => {
+    it('should return transaction history by sender id', async () => {
+      const result = await service.getTransactionHistoryBySenderId(
+        '216fefae-c968-4f2a-b5a3-40eb621e2e71',
+      );
+
+      expect(mockTransactionRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(result).toEqual([mockTransaction1]);
+    });
+
+    it('should return null if no transaction history found', async () => {
+      jest
+        .spyOn(mockTransactionRepository, 'createQueryBuilder')
+        .mockReturnValueOnce({
+          leftJoinAndMapOne: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          getMany: jest.fn().mockResolvedValue(null),
+        } as any);
+
+      const result = await service.getTransactionHistoryBySenderId(
+        'someSenderId',
+      );
+
+      expect(mockTransactionRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(result).toEqual(null);
     });
   });
 });
