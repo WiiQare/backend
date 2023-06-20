@@ -88,4 +88,32 @@ describe('PatientSvcService', () => {
       transactionRepository,
     );
   });
+
+  describe('registerPatient', () => {
+    const patientDto: CreatePatientDto = {
+      phoneNumber: '123456789',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'email',
+      homeAddress: 'homeAddress',
+      country: 'country',
+      city: 'city',
+    };
+
+    it('should register a patient', async () => {
+      jest.spyOn(patientRepository, 'findOne').mockResolvedValueOnce(null);
+
+      const patient = await patientSvcService.registerPatient(patientDto);
+
+      expect(patient).toEqual(mockPatient);
+      expect(patientRepository.create).toHaveBeenCalledWith(patientDto);
+      expect(patientRepository.save).toHaveBeenCalledWith(mockPatient);
+    });
+
+    it('should throw an error if patient already exists', async () => {
+      await expect(
+        patientSvcService.registerPatient(patientDto),
+      ).rejects.toThrow(new ForbiddenException(_403.PATIENT_ALREADY_EXISTS));
+    });
+  });
 });
