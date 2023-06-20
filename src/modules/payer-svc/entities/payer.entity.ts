@@ -1,5 +1,5 @@
-import { BaseEntity } from 'src/db/base-entity';
-import { User } from 'src/modules/session/entities/user.entity';
+import { BaseEntity } from '../../../db/base-entity';
+import { User } from '../../../modules/session/entities/user.entity';
 import { Column, Entity, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity()
