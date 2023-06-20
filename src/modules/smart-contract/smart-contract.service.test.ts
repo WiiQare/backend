@@ -74,6 +74,30 @@ describe('SmartContractService', () => {
             }),
           };
         }),
+        getAllVouchers: jest.fn().mockImplementation(() => {
+          return {
+            call: jest.fn().mockResolvedValue([
+              {
+                owner: '0x123',
+                patient: '0x456',
+                amount: 1,
+                currency: 'USD',
+                status: 1,
+                createdAt: 1234567890,
+                updatedAt: 1234567890,
+              },
+              {
+                owner: '0x123',
+                patient: '0x456',
+                amount: 1,
+                currency: 'USD',
+                status: 1,
+                createdAt: 1234567890,
+                updatedAt: 1234567890,
+              },
+            ]),
+          };
+        }),
       },
     }));
 
