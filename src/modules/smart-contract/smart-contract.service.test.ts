@@ -91,6 +91,13 @@ describe('SmartContractService', () => {
             }),
           };
         }),
+        alterVoucher: jest.fn().mockImplementation(() => {
+          return {
+            call: jest.fn().mockResolvedValue({
+              transactionHash: '0x123',
+            }),
+          };
+        }),
       },
     }));
 
@@ -298,6 +305,46 @@ describe('SmartContractService', () => {
       const logErrorSpy = jest.spyOn(helpers, 'logError');
 
       await smartContractService.transferVoucher('0x123', '0x456');
+
+      expect(logErrorSpy).toHaveBeenCalledWith(
+        'Error in getVoucher: Error: Contract Error',
+      );
+
+      logErrorSpy.mockRestore();
+    });
+  });
+
+  describe('alterVoucher', () => {
+    it('should alter a voucher', async () => {
+      const result = await smartContractService.alterVoucher('0x123', '0x456');
+
+      expect(mockWeb3.eth.accounts.wallet.add).toBeCalledTimes(1);
+      expect(mockWeb3.eth.Contract).toBeCalledTimes(1);
+
+      expect(result).toEqual({
+        transactionHash: '0x123',
+      });
+    });
+
+    it('should throw an error if the contract method throws an error', async () => {
+      mockWeb3.eth.Contract = jest.fn().mockImplementation(() => {
+        return {
+          methods: {
+            alterVoucher: jest.fn().mockReturnValue({
+              call: jest.fn().mockRejectedValue(new Error('Contract Error')),
+            }),
+          },
+        };
+      });
+
+      smartContractService = new SmartContractService(
+        mockAppConfigService,
+        mockWeb3,
+      );
+
+      const logErrorSpy = jest.spyOn(helpers, 'logError');
+
+      await smartContractService.alterVoucher('0x123', '0x456');
 
       expect(logErrorSpy).toHaveBeenCalledWith(
         'Error in getVoucher: Error: Contract Error',
