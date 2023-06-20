@@ -65,6 +65,10 @@ describe('PatientSvcService', () => {
     findOne: jest.fn().mockResolvedValue(mockPatient),
     create: jest.fn().mockReturnValue(mockPatient),
     save: jest.fn().mockResolvedValue(mockPatient),
+    createQueryBuilder: jest.fn().mockReturnValue({
+      whereInIds: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([mockPatient, mockPatient]),
+    }),
   } as unknown as Repository<Patient>;
 
   const transactionRepository = {
@@ -143,6 +147,37 @@ describe('PatientSvcService', () => {
       await expect(
         patientSvcService.findPatientByPhoneNumber(mockPatient.phoneNumber),
       ).rejects.toThrow(new NotFoundException(_404.PATIENT_NOT_FOUND));
+    });
+  });
+
+  describe('findAllPatientByPayerId', () => {
+    const patientResponseDto: PatientResponseDto = {
+      id: 'id',
+      phoneNumber: '123456789',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'email',
+    };
+
+    it('should find all patients by payer id', async () => {
+      // Mock response to return ownerId
+      jest.spyOn(transactionRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([{ ownerId: mockPatient.id }]),
+      } as any);
+
+      const patientResponse = await patientSvcService.findAllPatientByPayerId(
+        mockUser.id,
+      );
+
+      expect(patientResponse).toEqual(
+        expect.arrayContaining([expect.objectContaining(patientResponseDto)]),
+      );
+      expect(transactionRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(patientRepository.createQueryBuilder).toHaveBeenCalled();
     });
   });
 });
