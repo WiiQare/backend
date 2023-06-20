@@ -36,6 +36,9 @@ describe('SmartContractService', () => {
 
   let smartContractService: SmartContractService;
 
+  // Constants
+  const gasFees = { gasPrice: 1, safeLow: 1, standard: 1, fast: 1 };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -105,11 +108,14 @@ describe('SmartContractService', () => {
       mockAppConfigService,
       mockWeb3,
     );
+
+    // This is to silence the console.error output from the logError helper
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    jest.spyOn(helpers, 'logError').mockImplementation(() => {});
   });
 
   describe('getGasFees', () => {
     it('should return gas fees', async () => {
-      const gasFees = { gasPrice: 1, safeLow: 1, standard: 1, fast: 1 };
       jest.spyOn(global, 'fetch').mockImplementation(
         () =>
           Promise.resolve({
@@ -130,7 +136,10 @@ describe('SmartContractService', () => {
     };
 
     it('should mint a voucher', async () => {
-      const gasFees = { gasPrice: 1, safeLow: 1, standard: 1, fast: 1 };
+      // Silence the console output from the logInfo helper
+      const logInfoSpy = jest.spyOn(helpers, 'logInfo');
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      logInfoSpy.mockImplementation(() => {});
 
       smartContractService.getGasFees = jest.fn().mockResolvedValue(gasFees);
 
@@ -140,6 +149,8 @@ describe('SmartContractService', () => {
       expect(response).toEqual({
         transactionHash: '0x123',
       });
+
+      logInfoSpy.mockRestore();
     });
 
     it('should throw an error if the contract method throws an error', async () => {
