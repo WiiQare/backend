@@ -10,6 +10,8 @@ import {
   UserType,
   VoucherStatus,
 } from '../../common/constants/enums';
+import { ForbiddenException } from '@nestjs/common';
+import { _403 } from '../../common/constants/errors';
 
 describe('PatientSvcService', () => {
   // Mock entities
