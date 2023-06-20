@@ -10,8 +10,8 @@ import {
   UserType,
   VoucherStatus,
 } from '../../common/constants/enums';
-import { ForbiddenException } from '@nestjs/common';
-import { _403 } from '../../common/constants/errors';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { _403, _404 } from '../../common/constants/errors';
 
 describe('PatientSvcService', () => {
   // Mock entities
@@ -114,6 +114,35 @@ describe('PatientSvcService', () => {
       await expect(
         patientSvcService.registerPatient(patientDto),
       ).rejects.toThrow(new ForbiddenException(_403.PATIENT_ALREADY_EXISTS));
+    });
+  });
+
+  describe('findPatientByPhoneNumber', () => {
+    const patientResponseDto: PatientResponseDto = {
+      id: 'id',
+      phoneNumber: '123456789',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'email',
+    };
+
+    it('should find a patient by phone number', async () => {
+      const patientResponse = await patientSvcService.findPatientByPhoneNumber(
+        mockPatient.phoneNumber,
+      );
+
+      expect(patientResponse).toEqual([patientResponseDto]);
+      expect(patientRepository.findOne).toHaveBeenCalledWith({
+        where: { phoneNumber: '123456789' },
+      });
+    });
+
+    it('should throw an error if patient does not exist', async () => {
+      jest.spyOn(patientRepository, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(
+        patientSvcService.findPatientByPhoneNumber(mockPatient.phoneNumber),
+      ).rejects.toThrow(new NotFoundException(_404.PATIENT_NOT_FOUND));
     });
   });
 });
