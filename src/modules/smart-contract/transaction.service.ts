@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from '../../config/app-config.service';
 import { Repository } from 'typeorm';
 import { Patient } from '../patient-svc/entities/patient.entity';
 import { Payer } from '../payer-svc/entities/payer.entity';

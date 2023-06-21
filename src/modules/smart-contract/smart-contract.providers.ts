@@ -1,5 +1,5 @@
 import { Provider } from '@nestjs/common';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from '../../config/app-config.service';
 import Web3 from 'web3';
 
 export const nodeProvider: Provider = {

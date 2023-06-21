@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { _403, _404 } from 'src/common/constants/errors';
+import { _403, _404 } from '../../common/constants/errors';
 import { Repository } from 'typeorm';
 import { UserType } from '../../common/constants/enums';
 import { Transaction } from '../smart-contract/entities/transaction.entity';

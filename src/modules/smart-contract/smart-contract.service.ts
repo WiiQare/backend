@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AppConfigService } from 'src/config/app-config.service';
-import { logError, logInfo } from 'src/helpers/common.helper';
+import { AppConfigService } from '../../config/app-config.service';
+import { logError, logInfo } from '../../helpers/common.helper';
 import Web3 from 'web3';
 import { Account, AddedAccount } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
