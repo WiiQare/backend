@@ -71,6 +71,8 @@ export class PaymentController {
       // Verify the webhook event with Stripe to ensure it is authentic
       const webhookSecret = this.appConfigService.stripeWebHookSecret;
 
+      console.log(webhookSecret)
+
       const verifiedEvent = this.stripe.webhooks.constructEvent(
         req.rawBody,
         signature,
@@ -170,7 +172,7 @@ export class PaymentController {
       }
     } catch (err) {
       logError(`Error processing webhook event: ${err}`);
-      return { error: 'Failed to process webhook event' };
+      return { error: 'Failed to process webhook event : ' + err };
     }
   }
 
@@ -204,6 +206,6 @@ export class PaymentController {
         'patient.phoneNumber',
       ])
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
-      .getOne();
+      .getOne() ?? {code: "NULL_RESULT"};
   }
 }
