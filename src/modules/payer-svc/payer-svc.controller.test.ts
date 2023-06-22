@@ -6,14 +6,18 @@ import { PayerService } from './payer.service';
 import { CachingService } from '../caching/caching.service';
 import { SessionService } from '../session/session.service';
 import { PatientSvcService } from '../patient-svc/patient-svc.service';
-import { SearchPatientDto } from './dto/payer.dto';
+import { CreatePayerAccountDto, SearchPatientDto } from './dto/payer.dto';
 import { PatientResponseDto } from '../patient-svc/dto/patient.dto';
 import { UserRole, UserStatus } from '../../common/constants/enums';
-import { NotFoundException } from '@nestjs/common';
-import { _404 } from '../../common/constants/errors';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { _403, _404, _409 } from '../../common/constants/errors';
 
 describe('PayerSvcController', () => {
-  let mockUserRepository: Partial<Repository<User>>;
+  let mockUserRepository: Repository<User>;
   let mockPayerService: Partial<PayerService>;
   let mockCachingService: Partial<CachingService>;
   let mockSessionService: Partial<SessionService>;
@@ -60,15 +64,25 @@ describe('PayerSvcController', () => {
     jest.clearAllMocks;
 
     // Mock dependencies
-    mockUserRepository = {};
+    mockUserRepository = {
+      createQueryBuilder: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    } as unknown as Repository<User>;
 
     mockPayerService = {
       findPayerById: jest.fn().mockResolvedValue(mockPayer),
+      registerNewPayerAccount: jest.fn().mockResolvedValue(mockPayer),
     };
 
-    mockCachingService = {};
+    mockCachingService = {
+      get: jest.fn().mockResolvedValue('dataToHash'),
+    };
 
-    mockSessionService = {};
+    mockSessionService = {
+      hashDataToHex: jest.fn().mockReturnValue('emailVerificationToken'),
+    };
 
     mockPatientService = {
       findPatientByPhoneNumber: jest
@@ -155,9 +169,70 @@ describe('PayerSvcController', () => {
     });
   });
 
-  describe('createPayerAccount', () => {});
+  describe('createPayerAccount', () => {
+    const mockCreatePayerAccountDto: CreatePayerAccountDto = {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      country: 'country',
+      password: 'password',
+      email: 'email',
+      phoneNumber: 'phoneNumber',
+      emailVerificationToken: 'emailVerificationToken',
+    };
+
+    it('should create a new payer', async () => {
+      // Call method
+      const response = await payerSvcController.createPayerAccount(
+        mockCreatePayerAccountDto,
+      );
+
+      expect(response).toEqual(mockPayer);
+    });
+
+    it('should throw an error if email is invalid', async () => {
+      // Adjust mock caching service
+      mockCachingService.get = jest.fn().mockResolvedValue(null);
+
+      expect(() =>
+        payerSvcController.createPayerAccount(mockCreatePayerAccountDto),
+      ).rejects.toThrow(
+        new ForbiddenException(_403.EMAIL_VERIFICATION_REQUIRED),
+      );
+    });
+
+    it('should throw an error if the email verification token is incorrect', async () => {
+      mockSessionService.hashDataToHex = jest
+        .fn()
+        .mockReturnValue('someOtherToken');
+
+      expect(() =>
+        payerSvcController.createPayerAccount(mockCreatePayerAccountDto),
+      ).rejects.toThrow(
+        new ForbiddenException(_403.EMAIL_VERIFICATION_REQUIRED),
+      );
+    });
+
+    it('should throw an error if user already exists', () => {
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        orWhere: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(mockUser),
+      };
+
+      // Mock the creation of the QueryBuilder
+      mockUserRepository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
+
+      expect(() =>
+        payerSvcController.createPayerAccount(mockCreatePayerAccountDto),
+      ).rejects.toThrow(new ConflictException(_409.USER_ALREADY_EXISTS));
+    });
+  });
 
   describe('registerNewPatient', () => {});
 
   describe('sendInviteToFriend', () => {});
+
+  describe('sendSmsVoucher', () => {});
 });
