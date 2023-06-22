@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
-import { UserRole, UserStatus } from 'src/common/constants/enums';
+import { UserRole, UserStatus } from '../../../common/constants/enums';
 
 export class JwtClaimsDataDto {
   @IsUUID()
