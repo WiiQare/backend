@@ -6,15 +6,24 @@ import { PayerService } from './payer.service';
 import { CachingService } from '../caching/caching.service';
 import { SessionService } from '../session/session.service';
 import { PatientSvcService } from '../patient-svc/patient-svc.service';
-import { CreatePayerAccountDto, SearchPatientDto } from './dto/payer.dto';
-import { PatientResponseDto } from '../patient-svc/dto/patient.dto';
-import { UserRole, UserStatus } from '../../common/constants/enums';
+import {
+  CreatePayerAccountDto,
+  SearchPatientDto,
+  SendInviteDto,
+  SendSmsVoucherDto,
+} from './dto/payer.dto';
+import {
+  CreatePatientDto,
+  PatientResponseDto,
+} from '../patient-svc/dto/patient.dto';
+import { InviteType, UserRole, UserStatus } from '../../common/constants/enums';
 import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { _403, _404, _409 } from '../../common/constants/errors';
+import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 
 describe('PayerSvcController', () => {
   let mockUserRepository: Repository<User>;
@@ -24,6 +33,7 @@ describe('PayerSvcController', () => {
   let mockPatientService: Partial<PatientSvcService>;
   let payerSvcController: PayerSvcController;
 
+  // Mock DTOs
   const mockPatientResponseDto: PatientResponseDto = {
     id: 'id',
     phoneNumber: 'phoneNumber',
@@ -34,6 +44,15 @@ describe('PayerSvcController', () => {
 
   const mockUUID = '66a3b552-5b0b-428d-bd4e-d9f2d8182ba3';
 
+  const mockJwtClaimsDataDto: JwtClaimsDataDto = {
+    sub: mockUUID,
+    type: UserRole.PAYER,
+    phoneNumber: 'phoneNumber',
+    names: 'firstName lastName',
+    status: UserStatus.ACTIVE,
+  };
+
+  // Mock entities
   const mockUser: User = {
     id: 'id',
     createdAt: new Date(),
@@ -74,6 +93,8 @@ describe('PayerSvcController', () => {
     mockPayerService = {
       findPayerById: jest.fn().mockResolvedValue(mockPayer),
       registerNewPayerAccount: jest.fn().mockResolvedValue(mockPayer),
+      sendInviteToFriend: jest.fn(),
+      sendSmsVoucher: jest.fn(),
     };
 
     mockCachingService = {
@@ -94,6 +115,7 @@ describe('PayerSvcController', () => {
           phoneNumber: '',
         },
       ]),
+      registerPatient: jest.fn().mockResolvedValue(mockPatientResponseDto),
     };
 
     // Create controller
@@ -230,9 +252,62 @@ describe('PayerSvcController', () => {
     });
   });
 
-  describe('registerNewPatient', () => {});
+  describe('registerNewPatient', () => {
+    const mockCreatePatientAccountDto: CreatePatientDto = {
+      firstName: 'firstName',
+      lastName: 'lastName',
+      email: 'email',
+      phoneNumber: 'phoneNumber',
+      homeAddress: 'homeAddress',
+      country: 'country',
+      city: 'city',
+    };
 
-  describe('sendInviteToFriend', () => {});
+    it('should call the registerPatient method of the patient service', async () => {
+      const response = await payerSvcController.registerNewPatient(
+        mockCreatePatientAccountDto,
+      );
 
-  describe('sendSmsVoucher', () => {});
+      expect(mockPatientService.registerPatient).toHaveBeenCalledWith(
+        mockCreatePatientAccountDto,
+      );
+      expect(response).toEqual(mockPatientResponseDto);
+    });
+  });
+
+  describe('sendInviteToFriend', () => {
+    const mockSendInviteDto: SendInviteDto = {
+      inviteType: InviteType.SMS,
+      emails: ['email'],
+      phoneNumbers: ['phoneNumber'],
+    };
+
+    it('should send an invite to a friend', async () => {
+      await payerSvcController.sendInviteToFriend(
+        mockSendInviteDto,
+        mockJwtClaimsDataDto,
+      );
+      expect(mockPayerService.sendInviteToFriend).toHaveBeenCalledWith(
+        mockSendInviteDto,
+        mockJwtClaimsDataDto,
+      );
+    });
+  });
+
+  describe('sendSmsVoucher', () => {
+    const mockSendSmsvoucherDto: SendSmsVoucherDto = {
+      shortenHash: 'shortenHash',
+    };
+
+    it('should send an sms voucher', async () => {
+      await payerSvcController.sendSmsVoucher(
+        mockSendSmsvoucherDto,
+        mockJwtClaimsDataDto,
+      );
+      expect(mockPayerService.sendSmsVoucher).toHaveBeenCalledWith(
+        mockSendSmsvoucherDto.shortenHash,
+        mockJwtClaimsDataDto,
+      );
+    });
+  });
 });
