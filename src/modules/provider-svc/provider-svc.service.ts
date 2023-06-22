@@ -353,7 +353,7 @@ export class ProviderService {
   }
 
   // Add service to provider
-  async addServiceToProvider(payload: CreateServiceDto): Promise<void> {
+  async addServiceToProvider(payload: CreateServiceDto): Promise<Service> {
     const provider = await this.providerRepository.findOne({
       where: { id: payload.providerId },
     });
@@ -369,18 +369,16 @@ export class ProviderService {
 
     // Save service
     service = await this.servicesRepository.save(service);
+    return service
   }
 
   // Get services of provider
   async getServicesByProviderId(providerId: string): Promise<Service[]> {
-    const provider = await this.providerRepository.findOne({
-      where: { id: providerId },
-    });
-
-    if (!provider) throw new ForbiddenException(_404.PROVIDER_NOT_FOUND);
 
     const services = await this.servicesRepository.find({
-      where: { provider },
+      where: {provider: {id: providerId}},
+      relations: ['provider'],
+      select: ['id', 'createdAt', 'description', 'price', 'name']
     });
 
     return services;

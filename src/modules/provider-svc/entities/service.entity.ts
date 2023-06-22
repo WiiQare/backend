@@ -9,7 +9,7 @@ export class Service extends BaseEntity {
   name: string;
 
   @Column()
-  description: string;
+  description?: string;
 
   @Column('decimal')
   price: number;
@@ -18,5 +18,5 @@ export class Service extends BaseEntity {
   provider: Provider;
 
   @ManyToMany(() => Package, (pkg) => pkg.services)
-  packages: Package[];
+  packages?: Package[];
 }
