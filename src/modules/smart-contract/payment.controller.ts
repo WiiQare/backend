@@ -172,7 +172,7 @@ export class PaymentController {
       }
     } catch (err) {
       logError(`Error processing webhook event: ${err}`);
-      return { error: 'Failed to process webhook event : ' + err };
+      return { error: 'Failed to process webhook event' };
     }
   }
 
