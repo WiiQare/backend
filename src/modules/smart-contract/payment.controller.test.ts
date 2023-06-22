@@ -56,7 +56,13 @@ describe('PaymentController', () => {
       } as any,
     };
 
-    mockTransactionRepository = {};
+    mockTransactionRepository = {
+      createQueryBuilder: jest.fn().mockReturnThis(),
+      leftJoinAndMapOne: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(mockTransaction),
+    } as unknown as Partial<Repository<Transaction>>;
 
     mockTransactionService = {
       getTransactionHistoryBySenderId: jest
@@ -72,6 +78,17 @@ describe('PaymentController', () => {
     mockAppConfigService = {
       stripeWebHookSecret: 'stripeWebHookSecret',
     };
+
+    // Silence the logs from helper
+    jest
+      .spyOn(helpers, 'logError')
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .mockImplementation(() => {});
+
+    jest
+      .spyOn(helpers, 'logInfo')
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      .mockImplementation(() => {});
 
     // Instantiate the controller with the mocks
     controller = new PaymentController(
@@ -264,12 +281,6 @@ describe('PaymentController', () => {
         .mockImplementation((data) => data);
       mockTransactionRepository.save = jest.fn();
 
-      // Should just call log info helper and display the event type
-      const logInfoSpy = jest
-        .spyOn(helpers, 'logInfo')
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .mockImplementation(() => {});
-
       // Call the method
       await controller.handlePaymentWebhookEvent(
         mockSignature,
@@ -283,6 +294,8 @@ describe('PaymentController', () => {
         mockAppConfigService.stripeWebHookSecret,
       );
 
+      const logInfoSpy = jest.spyOn(helpers, 'logInfo');
+
       expect(logInfoSpy).toHaveBeenCalledWith(
         `Unhandled Stripe event type: ${mockSomeEvent.type}`,
       );
@@ -295,10 +308,7 @@ describe('PaymentController', () => {
       });
 
       // Should just call log error helper and display the error message
-      const logErrorSpy = jest
-        .spyOn(helpers, 'logError')
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .mockImplementation(() => {});
+      const logErrorSpy = jest.spyOn(helpers, 'logError');
 
       // Call the method
       const response = await controller.handlePaymentWebhookEvent(
@@ -322,5 +332,16 @@ describe('PaymentController', () => {
     });
   });
 
-  describe('retrieveVoucherByPaymentId', () => {});
+  describe('retrieveVoucherByPaymentId', () => {
+    it('should retrieve voucher by payment id', async () => {
+      const mockPaymentId = 'mockPaymentId';
+
+      // Call the method
+      const response = await controller.retrieveVoucherByPaymentId(
+        mockPaymentId,
+      );
+
+      expect(response).toEqual(mockTransaction);
+    });
+  });
 });
