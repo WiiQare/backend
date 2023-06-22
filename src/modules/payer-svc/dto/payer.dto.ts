@@ -10,7 +10,7 @@ import {
   IsUUID,
   Length,
 } from 'class-validator';
-import { InviteType } from 'src/common/constants/enums';
+import { InviteType } from '../../../common/constants/enums';
 
 export class CreatePayerAccountDto {
   @IsNotEmpty()
