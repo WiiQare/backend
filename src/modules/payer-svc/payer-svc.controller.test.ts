@@ -5,6 +5,7 @@ import { PayerService } from './payer.service';
 import { CachingService } from '../caching/caching.service';
 import { SessionService } from '../session/session.service';
 import { PatientSvcService } from '../patient-svc/patient-svc.service';
+import { SearchPatientDto } from './dto/payer.dto';
 import { PatientResponseDto } from '../patient-svc/dto/patient.dto';
 
 describe('PayerSvcController', () => {
@@ -13,6 +14,15 @@ describe('PayerSvcController', () => {
   let mockCachingService: Partial<CachingService>;
   let mockSessionService: Partial<SessionService>;
   let mockPatientService: Partial<PatientSvcService>;
+  let payerSvcController: PayerSvcController;
+
+  const mockPatientResponseDto: PatientResponseDto = {
+    id: 'id',
+    phoneNumber: 'phoneNumber',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'email',
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks;
@@ -26,10 +36,20 @@ describe('PayerSvcController', () => {
 
     mockSessionService = {};
 
-    mockPatientService = {};
+    mockPatientService = {
+      findPatientByPhoneNumber: jest
+        .fn()
+        .mockResolvedValue([mockPatientResponseDto]),
+      findAllPatientByPayerId: jest.fn().mockResolvedValue([
+        {
+          ...mockPatientResponseDto,
+          phoneNumber: '',
+        },
+      ]),
+    };
 
     // Create controller
-    const payerSvcController = new PayerSvcController(
+    payerSvcController = new PayerSvcController(
       mockUserRepository as Repository<User>,
       mockPayerService as PayerService,
       mockCachingService as CachingService,
@@ -38,7 +58,47 @@ describe('PayerSvcController', () => {
     );
   });
 
-  describe('retrievePatientByPhoneNumber', () => {});
+  describe('retrievePatientByPhoneNumber', () => {
+    const mockSearchPatientDto: SearchPatientDto = {
+      phoneNumber: 'phoneNumber',
+      payerId: 'payerId',
+    };
+
+    it('should retrieve a patient by phone number', async () => {
+      // Call method
+      const response = await payerSvcController.retrievePatientByPhoneNumber(
+        mockSearchPatientDto,
+      );
+
+      expect(mockPatientService.findPatientByPhoneNumber).toHaveBeenCalledWith(
+        mockSearchPatientDto.phoneNumber,
+      );
+      expect(response).toEqual([mockPatientResponseDto]);
+    });
+
+    it('should retrieve a patient by payer id', async () => {
+      // Adjust mock
+      const mockNewSearchPatientDto: SearchPatientDto = {
+        ...mockSearchPatientDto,
+        phoneNumber: '',
+      };
+
+      // Call method
+      const response = await payerSvcController.retrievePatientByPhoneNumber(
+        mockNewSearchPatientDto,
+      );
+
+      expect(mockPatientService.findAllPatientByPayerId).toHaveBeenCalledWith(
+        mockNewSearchPatientDto.payerId,
+      );
+      expect(response).toEqual([
+        {
+          ...mockPatientResponseDto,
+          phoneNumber: '',
+        },
+      ]);
+    });
+  });
 
   describe('retrievePayerAccountInfo', () => {});
 
