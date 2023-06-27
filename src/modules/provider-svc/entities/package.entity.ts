@@ -9,7 +9,7 @@ export class Package extends BaseEntity {
   name: string;
 
   @Column()
-  description: string;
+  description?: string;
 
   @Column('decimal')
   price: number;
@@ -18,6 +18,5 @@ export class Package extends BaseEntity {
   provider: Provider;
 
   @ManyToMany(() => Service, (service) => service.packages)
-  @JoinTable()
   services: Service[];
 }

@@ -385,7 +385,7 @@ export class ProviderService {
   }
 
   // Add package to provider
-  async addPackageToProvider(payload: CreatePackageDto): Promise<void> {
+  async addPackageToProvider(payload: CreatePackageDto): Promise<Package> {
     const provider = await this.providerRepository.findOne({
       where: { id: payload.providerId },
     });
@@ -398,9 +398,22 @@ export class ProviderService {
     newPackage.description = payload.description;
     newPackage.price = payload.price;
     newPackage.provider = provider;
+    newPackage.services = payload.services;
 
     // Save package
     newPackage = await this.packageRepository.save(newPackage);
+    return newPackage
+  }
+
+  // Get services of provider
+  async getPackagesByProviderId(providerId: string): Promise<Package[]> {
+
+    const packages = await this.packageRepository.find({
+      where: {provider: {id: providerId}},
+      relations: ['provider', 'services']
+    });
+
+    return packages;
   }
 
   // Group services into package

@@ -183,7 +183,7 @@ export class CreatePackageDto {
 
   @IsNotEmpty()
   @IsArray()
-  services: CreateServiceDto[];
+  services: [];
 }
 
 export class AddServiceToPackageDto {

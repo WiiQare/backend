@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Headers,
+  NotFoundException,
   Post,
   Query,
   RawBodyRequest,
@@ -27,6 +28,7 @@ import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 import { Transaction } from './entities/transaction.entity';
 import { SmartContractService } from './smart-contract.service';
 import { TransactionService } from './transaction.service';
+import { _400 } from 'src/common/constants/errors';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -182,7 +184,7 @@ export class PaymentController {
   async retrieveVoucherByPaymentId(
     @Query('paymentId') paymentId: string,
   ): Promise<any> {
-    return await this.transactionRepository
+    let transaction = await this.transactionRepository
       .createQueryBuilder('transaction')
       .leftJoinAndMapOne(
         'transaction.sender',
@@ -206,6 +208,10 @@ export class PaymentController {
         'patient.phoneNumber',
       ])
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
-      .getOne() ?? {code: "NULL_RESULT"};
+      .getOne();
+
+      if (!transaction) throw new NotFoundException(_400.VOUCHER_PROCESS)
+
+      return transaction
   }
 }
