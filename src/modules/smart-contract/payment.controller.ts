@@ -210,7 +210,7 @@ export class PaymentController {
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
       .getOne();
 
-      if (!transaction) throw new NotFoundException(_400.VOUCHER_PROCESS)
+      if (!transaction) throw new NotFoundException('Resource not found')
 
       return transaction
   }
