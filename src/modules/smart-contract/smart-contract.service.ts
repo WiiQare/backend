@@ -33,11 +33,11 @@ export class SmartContractService {
   /***
    *  This function is used to get gas free from the network
    */
-  async getGasFees(): Promise<any> {
-    // get gas fees from mumbai network
-    //TODO: move it to .env
-    return (await fetch('https://gasstation-mumbai.matic.today/v2')).json();
-  }
+  // async getGasFees(): Promise<any> {
+  //   // get gas fees from mumbai network
+  //   //TODO: move it to .env
+  //   return (await fetch('https://gasstation-mumbai.matic.today/v2')).json();
+  // }
 
   /**
    * This function is used to mint a newer voucher NFT on blockchain.
@@ -45,7 +45,7 @@ export class SmartContractService {
    */
   async mintVoucher(mintVoucherDto: MintVoucherDto) {
     try {
-      const gasParams = await this.getGasFees();
+      // const gasParams = await this.getGasFees();
       //NOTICE: starting we will be using the wiiQare account to mint the vouchers!
 
       const { ownerId, amount, currency, patientId } = mintVoucherDto;
