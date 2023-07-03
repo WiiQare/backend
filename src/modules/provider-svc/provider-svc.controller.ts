@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Provider,
   Query,
   UploadedFile,
   UseInterceptors,
@@ -183,5 +184,13 @@ export class ProviderController {
   ): Promise<void> {
     addServiceToPackageDto.providerId = providerId;
     return this.providerService.addServiceToPackage(addServiceToPackageDto);
+  }
+
+  @Get('/list')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'API endpoint to retrieve Provider' })
+  getListProvider(
+  ): Promise<Provider[]> {
+    return this.providerService.listProvider();
   }
 }

@@ -450,4 +450,8 @@ export class ProviderService {
     // Save package
     await this.packageRepository.save(pkg);
   }
+
+  async listProvider(): Promise<any> {
+    return await this.providerRepository.find({order: {createdAt: 'DESC'}, take: 5, })
+  }
 }

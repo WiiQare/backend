@@ -684,4 +684,15 @@ describe('ProviderService', () => {
       );
     });
   });
+
+  describe('getListProvider', () => {
+
+    it('should return all Provider', async () => {
+      const result = await service.listProvider();
+      expect(serviceRepository.find).toHaveBeenCalledWith({
+        where: { provider: mockProvider },
+      });
+      expect(result).toEqual([mockService]);
+    });
+  });
 });
