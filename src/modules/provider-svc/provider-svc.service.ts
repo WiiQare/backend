@@ -288,6 +288,7 @@ export class ProviderService {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
       .where('transaction.ownerId = :providerId', { providerId })
+      .orderBy('transaction.updatedAt', 'DESC')
       .getMany();
     //TODO: paginate this!.
     return transactions;
