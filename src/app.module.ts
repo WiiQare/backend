@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, RouterModule } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -11,7 +11,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { AppConfigModule } from './config/app-config.module';
 import { AppConfigService } from './config/app-config.service';
 import { TypeOrmConfigService } from './db/typeorm-config.service';
-import { AdministrationSvcModule } from './modules/administration-svc/adminstration-svc.module';
+import { AdministrationSvcModule } from './modules/administration-svc/administration-svc.module';
 import { CachingModule } from './modules/caching/caching.module';
 import { MailModule } from './modules/mail/mail.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
@@ -38,6 +38,12 @@ import { SMSModule } from './modules/sms/sms.module';
     AuthModule,
     SessionModule,
     AdministrationSvcModule,
+    RouterModule.register([
+      {
+        path: 'admin',
+        module: AdministrationSvcModule,
+      },
+    ]),
     PatientSvcModule,
     PayerSvcModule,
     ProviderSvcModule,
@@ -54,4 +60,4 @@ import { SMSModule } from './modules/sms/sms.module';
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule { }
+export class AppModule {}
