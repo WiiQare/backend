@@ -269,7 +269,7 @@ export class ProviderService {
     const updatedTransaction = await this.transactionRepository.save({
       ...transaction,
       ownerType: UserType.PROVIDER,
-      ownerId: providerId,
+      hospitalId: providerId,
     });
 
     return {

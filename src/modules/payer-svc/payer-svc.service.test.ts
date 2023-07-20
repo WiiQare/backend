@@ -86,6 +86,7 @@ describe('PayerService', () => {
     currency: 'USD',
     senderId: mockPayer.id,
     ownerId: mockPayer.id,
+    hospitalId: null,
     ownerType: UserType.PAYER,
     status: VoucherStatus.UNCLAIMED,
     transactionHash: 'transactionHash',

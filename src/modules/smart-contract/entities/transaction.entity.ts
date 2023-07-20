@@ -40,6 +40,14 @@ export class Transaction extends BaseEntity {
   ownerId: string;
 
   @Column({
+    type: 'uuid',
+    nullable: true,
+    comment:
+      'This is the uuid of who current own the voucher for this transaction',
+  })
+  hospitalId: string;
+
+  @Column({
     type: 'enum',
     enum: UserType,
     nullable: true,

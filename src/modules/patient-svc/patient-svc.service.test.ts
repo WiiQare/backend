@@ -47,6 +47,7 @@ describe('PatientSvcService', () => {
     updatedAt: new Date('2023-06-20T10:01:00Z'),
     senderId: '216fefae-c968-4f2a-b5a3-40eb621e2e71',
     ownerId: '7a11095d-ec42-4f9a-9fb1-3261b047c524',
+    hospitalId: '7a11095d-ec42-4f9a-9fb1-3261b047c524',
     senderAmount: 1,
     senderCurrency: 'USD',
     amount: 1,

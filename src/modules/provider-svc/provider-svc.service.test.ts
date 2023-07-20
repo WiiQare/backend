@@ -109,6 +109,7 @@ describe('ProviderService', () => {
     currency: 'currency',
     senderId: 'senderId',
     ownerId: 'ownerId',
+    hospitalId: 'hospitalId',
     ownerType: UserType.PATIENT,
     status: VoucherStatus.UNCLAIMED,
     transactionHash: 'transactionHash',
