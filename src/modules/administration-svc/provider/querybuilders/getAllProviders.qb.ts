@@ -3,10 +3,10 @@ import { Provider } from 'src/modules/provider-svc/entities/provider.entity';
 import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
 import { DataSource, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
-async function getProviderInfoQueryBuilder(
+function getProviderInfoQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Provider>> {
-  return await dataSource
+): SelectQueryBuilder<Provider> {
+  return dataSource
     .createQueryBuilder()
     .from(Provider, 'provider')
     .addSelect('provider.id::text', 'providerId')
@@ -16,10 +16,10 @@ async function getProviderInfoQueryBuilder(
     .addSelect("to_char(provider.createdAt,'dd/mm/yyyy')", 'registrationDate');
 }
 
-async function getLastProviderToBeneficiaryTransactionDateQueryBuilder(
+function getLastProviderToBeneficiaryTransactionDateQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -34,10 +34,10 @@ async function getLastProviderToBeneficiaryTransactionDateQueryBuilder(
     .groupBy(`"providerId"`);
 }
 
-async function getUniqueBeneficiaryCountPerProviderQueryBuilder(
+function getUniqueBeneficiaryCountPerProviderQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -52,10 +52,10 @@ async function getUniqueBeneficiaryCountPerProviderQueryBuilder(
     .groupBy(`"providerId"`);
 }
 
-async function getTotalBeneficiaryProviderTransactionsWithinOneWeekQueryBuilder(
+function getTotalBeneficiaryProviderTransactionsWithinOneWeekQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -72,10 +72,10 @@ async function getTotalBeneficiaryProviderTransactionsWithinOneWeekQueryBuilder(
     })
     .groupBy(`"providerId"`);
 }
-async function getTotalBeneficiaryProviderTransactionsWithinOneMonthQueryBuilder(
+function getTotalBeneficiaryProviderTransactionsWithinOneMonthQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -92,10 +92,10 @@ async function getTotalBeneficiaryProviderTransactionsWithinOneMonthQueryBuilder
     })
     .groupBy(`"providerId"`);
 }
-async function getTotalBeneficiaryProviderTransactionsWithinThreeMonthQueryBuilder(
+function getTotalBeneficiaryProviderTransactionsWithinThreeMonthQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -112,10 +112,10 @@ async function getTotalBeneficiaryProviderTransactionsWithinThreeMonthQueryBuild
     })
     .groupBy(`"providerId"`);
 }
-async function getTotalBeneficiaryProviderTransactionsWithinSixMonthQueryBuilder(
+function getTotalBeneficiaryProviderTransactionsWithinSixMonthQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -132,10 +132,11 @@ async function getTotalBeneficiaryProviderTransactionsWithinSixMonthQueryBuilder
     })
     .groupBy(`"providerId"`);
 }
-async function getTotalBeneficiaryTransactionPerProviderQueryBuilder(
+
+function getTotalBeneficiaryTransactionPerProviderQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -150,10 +151,10 @@ async function getTotalBeneficiaryTransactionPerProviderQueryBuilder(
     .groupBy(`"providerId"`);
 }
 
-async function getTotalValueAndCountOfReceivedVouchersPerProviderQueryBuilder(
+function getTotalValueAndCountOfReceivedVouchersPerProviderQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -168,10 +169,10 @@ async function getTotalValueAndCountOfReceivedVouchersPerProviderQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
-async function getUnclaimedVouchersPerProviderQueryBuilder(
+function getUnclaimedVouchersPerProviderQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -189,10 +190,11 @@ async function getUnclaimedVouchersPerProviderQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
-async function getClaimedVouchersPerProviderQueryBuilder(
+
+function getClaimedVouchersPerProviderQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -207,10 +209,10 @@ async function getClaimedVouchersPerProviderQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
-async function getRedeemedVouchersPerProviderQueryBuilder(
+function getRedeemedVouchersPerProviderQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -226,67 +228,67 @@ async function getRedeemedVouchersPerProviderQueryBuilder(
     .groupBy(`"providerId"`);
 }
 
-export async function getAllProvidersQueryBuilder(
+export function getAllProvidersQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<ObjectLiteral>> {
-  return await dataSource
+): SelectQueryBuilder<ObjectLiteral> {
+  return dataSource
     .createQueryBuilder()
     .addCommonTableExpression(
-      await getProviderInfoQueryBuilder(dataSource),
+      getProviderInfoQueryBuilder(dataSource),
       'ProviderTable',
     )
     .addCommonTableExpression(
-      await getLastProviderToBeneficiaryTransactionDateQueryBuilder(dataSource),
+      getLastProviderToBeneficiaryTransactionDateQueryBuilder(dataSource),
       'providerBeneficiaryLastTransactionTable',
     )
     .addCommonTableExpression(
-      await getUniqueBeneficiaryCountPerProviderQueryBuilder(dataSource),
+      getUniqueBeneficiaryCountPerProviderQueryBuilder(dataSource),
       'uniqueBeneficiaryCountPerProviderTable',
     )
     .addCommonTableExpression(
-      await getTotalBeneficiaryProviderTransactionsWithinOneWeekQueryBuilder(
+      getTotalBeneficiaryProviderTransactionsWithinOneWeekQueryBuilder(
         dataSource,
       ),
       'totalBeneficiaryProviderTransactionWithinOneWeekTable',
     )
     .addCommonTableExpression(
-      await getTotalBeneficiaryProviderTransactionsWithinOneMonthQueryBuilder(
+      getTotalBeneficiaryProviderTransactionsWithinOneMonthQueryBuilder(
         dataSource,
       ),
       'totalBeneficiaryProviderTransactionWithinOneMonthTable',
     )
     .addCommonTableExpression(
-      await getTotalBeneficiaryProviderTransactionsWithinThreeMonthQueryBuilder(
+      getTotalBeneficiaryProviderTransactionsWithinThreeMonthQueryBuilder(
         dataSource,
       ),
       'totalBeneficiaryProviderTransactionWithinThreeMonthTable',
     )
     .addCommonTableExpression(
-      await getTotalBeneficiaryProviderTransactionsWithinSixMonthQueryBuilder(
+      getTotalBeneficiaryProviderTransactionsWithinSixMonthQueryBuilder(
         dataSource,
       ),
       'totalBeneficiaryProviderTransactionWithinSixMonthTable',
     )
     .addCommonTableExpression(
-      await getTotalBeneficiaryTransactionPerProviderQueryBuilder(dataSource),
+      getTotalBeneficiaryTransactionPerProviderQueryBuilder(dataSource),
       'totalBeneficiaryTransactionPerProviderTable',
     )
     .addCommonTableExpression(
-      await getTotalValueAndCountOfReceivedVouchersPerProviderQueryBuilder(
+      getTotalValueAndCountOfReceivedVouchersPerProviderQueryBuilder(
         dataSource,
       ),
       'totalReceivedVouchersInfoTable',
     )
     .addCommonTableExpression(
-      await getUnclaimedVouchersPerProviderQueryBuilder(dataSource),
+      getUnclaimedVouchersPerProviderQueryBuilder(dataSource),
       'unclaimedVouchersPerProviderTable',
     )
     .addCommonTableExpression(
-      await getClaimedVouchersPerProviderQueryBuilder(dataSource),
+      getClaimedVouchersPerProviderQueryBuilder(dataSource),
       'claimedVouchersPerProviderTable',
     )
     .addCommonTableExpression(
-      await getRedeemedVouchersPerProviderQueryBuilder(dataSource),
+      getRedeemedVouchersPerProviderQueryBuilder(dataSource),
       'redeemedVouchersPerProviderTable',
     )
     .from('ProviderTable', 'p')

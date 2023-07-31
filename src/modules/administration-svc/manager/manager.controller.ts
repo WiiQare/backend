@@ -1,10 +1,7 @@
 import { Body, ConflictException, Controller, Get, Post } from '@nestjs/common';
-import { AdminService } from './admin.service';
+import { ManagerService } from './manager.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  createAdminAccountDTO,
-  createAdminAccountReponseDTO,
-} from './dto/admin.dto';
+import { createManagerDTO, createManagerReponseDTO } from './dto/manager.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../session/entities/user.entity';
@@ -13,36 +10,36 @@ import { Roles } from 'src/common/decorators/user-role.decorator';
 import { UserRole } from 'src/common/constants/enums';
 import { _409 } from 'src/common/constants/errors';
 
-@ApiTags('Admin')
-@Controller()
-export class AdminController {
+@ApiTags('admin/managers')
+@Controller('managers')
+export class ManagerController {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly adminService: AdminService,
+    private readonly managerService: ManagerService,
   ) {}
 
   @Post()
   @Public()
-  async createAdminAccount(
-    @Body() createAdminAccount: createAdminAccountDTO,
-  ): Promise<createAdminAccountReponseDTO> {
+  async createManagerAccount(
+    @Body() createManagerDTO: createManagerDTO,
+  ): Promise<createManagerReponseDTO> {
     // check if user doesn't exists!
     const userExists = await this.userRepository
       .createQueryBuilder('user')
-      .where(`user.email = :email`, { email: createAdminAccount.email })
+      .where(`user.email = :email`, { email: createManagerDTO.email })
       .getOne();
 
     if (userExists) throw new ConflictException(_409.USER_ALREADY_EXISTS);
 
     const { id, email, status, role } =
-      await this.adminService.registerNewAdminAccount(createAdminAccount);
+      await this.managerService.registerNewManagerAccount(createManagerDTO);
 
     return {
       userId: id,
       email,
       status,
       userRole: role,
-    } as createAdminAccountReponseDTO;
+    } as createManagerReponseDTO;
   }
 }

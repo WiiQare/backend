@@ -3,19 +3,19 @@ import { Provider } from 'src/modules/provider-svc/entities/provider.entity';
 import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 
-export async function getNumberOfRegisteredProvidersQueryBuilder(
+export function getNumberOfRegisteredProvidersQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Provider>> {
-  return await dataSource
+): SelectQueryBuilder<Provider> {
+  return dataSource
     .createQueryBuilder()
     .from(Provider, 'provider')
     .addSelect('COUNT(provider.id)::integer', 'numberOfRegisteredProviders');
 }
 
-export async function getTotalBeneficiaryTransactionMadeWithinOneWeekQueryBuilder(
+export function getTotalBeneficiaryTransactionMadeWithinOneWeekQueryBuilder(
   dataSource: DataSource,
 ) {
-  return await dataSource
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -34,10 +34,10 @@ export async function getTotalBeneficiaryTransactionMadeWithinOneWeekQueryBuilde
       datePrior: subWeeks(Date.now(), 1),
     });
 }
-export async function getTotalBeneficiaryTransactionMadeWithinOneMonthQueryBuilder(
+export function getTotalBeneficiaryTransactionMadeWithinOneMonthQueryBuilder(
   dataSource: DataSource,
 ) {
-  return await dataSource
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -56,10 +56,10 @@ export async function getTotalBeneficiaryTransactionMadeWithinOneMonthQueryBuild
       datePrior: subMonths(Date.now(), 1),
     });
 }
-export async function getTotalBeneficiaryTransactionMadeWithinThreeMonthsQueryBuilder(
+export function getTotalBeneficiaryTransactionMadeWithinThreeMonthsQueryBuilder(
   dataSource: DataSource,
 ) {
-  return await dataSource
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -78,10 +78,10 @@ export async function getTotalBeneficiaryTransactionMadeWithinThreeMonthsQueryBu
       datePrior: subMonths(Date.now(), 3),
     });
 }
-export async function getTotalBeneficiaryTransactionMadeWithinSixMonthsQueryBuilder(
+export function getTotalBeneficiaryTransactionMadeWithinSixMonthsQueryBuilder(
   dataSource: DataSource,
 ) {
-  return await dataSource
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -101,10 +101,10 @@ export async function getTotalBeneficiaryTransactionMadeWithinSixMonthsQueryBuil
     });
 }
 
-export async function getTotalBeneficiaryToProviderTransactionQueryBuilder(
+export function getTotalBeneficiaryToProviderTransactionQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -117,10 +117,10 @@ export async function getTotalBeneficiaryToProviderTransactionQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
 
-export async function getTotalNumberOfUniqueBeneficiaryQueryBuilder(
+export function getTotalNumberOfUniqueBeneficiaryQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -133,10 +133,10 @@ export async function getTotalNumberOfUniqueBeneficiaryQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
 
-export async function getAllUnclaimedVouchersQueryBuilder(
+export function getAllUnclaimedVouchersQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -152,10 +152,10 @@ export async function getAllUnclaimedVouchersQueryBuilder(
     .andWhere("transaction.status ='UNCLAIMED'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
-export async function getAllClaimedVouchersQueryBuilder(
+export function getAllClaimedVouchersQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')
@@ -168,10 +168,10 @@ export async function getAllClaimedVouchersQueryBuilder(
     .andWhere("transaction.status = 'CLAIMED'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
-export async function getAllRedeemedVouchersQueryBuilder(
+export function getAllRedeemedVouchersQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .leftJoin(Provider, 'provider', 'transaction.ownerId=provider.id')

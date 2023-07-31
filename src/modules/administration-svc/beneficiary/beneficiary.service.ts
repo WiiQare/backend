@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getCountryNameFromCode } from '../_common_';
+import { getCountryNameFromCode } from '../_helpers_';
 import { DataSource } from 'typeorm';
 import { BeneficiaryDTO, BeneficiarySummaryDTO } from './dto/beneficiary.dto';
 import { getAllBeneficiariesQueryBuilder } from './querybuilders/getAllbeneficiary.qb';
@@ -25,8 +25,8 @@ export class BeneficiaryService {
     take = 10,
     skip = 0,
   ): Promise<Array<BeneficiaryDTO>> {
-    const beneficiariesRawData = await (
-      await getAllBeneficiariesQueryBuilder(this.dataSource)
+    const beneficiariesRawData = await getAllBeneficiariesQueryBuilder(
+      this.dataSource,
     )
       .orderBy('"name"')
       .limit(take)
@@ -94,24 +94,26 @@ export class BeneficiaryService {
    * @returns
    */
   async getSummary(): Promise<BeneficiarySummaryDTO> {
-    const { numberOfRegisteredBeneficiaries } = await (
-      await getNumberOfRegisteredBeneficiariesQueryBuilder(this.dataSource)
-    ).getRawOne();
-
-    const { numberOfPendingVouchers, totalAmountOfPendingVouchers } = await (
-      await getPendingVouchersForAllBeneficiariesQueryBuilder(this.dataSource)
-    ).getRawOne();
-
-    const { numberOfRedeemedVouchers, totalAmountOfRedeemedVouchers } = await (
-      await getRedeemedVouchersForAllBeneficiariesQueryBuilder(this.dataSource)
-    ).getRawOne();
-    const { numberOfProviderTransactions, totalAmountOfProviderTransactions } =
-      await (
-        await getBeneficiaryToProviderTransactionsQueryBuilder(this.dataSource)
+    const { numberOfRegisteredBeneficiaries } =
+      await getNumberOfRegisteredBeneficiariesQueryBuilder(
+        this.dataSource,
       ).getRawOne();
-    const { numberOfActiveBeneficiaries } = await (
-      await getActiveBeneficiariesQueryBuilder(this.dataSource)
-    ).getRawOne();
+
+    const { numberOfPendingVouchers, totalAmountOfPendingVouchers } =
+      await getPendingVouchersForAllBeneficiariesQueryBuilder(
+        this.dataSource,
+      ).getRawOne();
+
+    const { numberOfRedeemedVouchers, totalAmountOfRedeemedVouchers } =
+      await getRedeemedVouchersForAllBeneficiariesQueryBuilder(
+        this.dataSource,
+      ).getRawOne();
+    const { numberOfProviderTransactions, totalAmountOfProviderTransactions } =
+      await getBeneficiaryToProviderTransactionsQueryBuilder(
+        this.dataSource,
+      ).getRawOne();
+    const { numberOfActiveBeneficiaries } =
+      await getActiveBeneficiariesQueryBuilder(this.dataSource).getRawOne();
 
     return {
       numberOfRegisteredBeneficiaries: numberOfRegisteredBeneficiaries || 0,

@@ -7,8 +7,8 @@ import { User } from '../session/entities/user.entity';
 
 import { PayerService } from './payer/payer.service';
 import { PayerController } from './payer/payer.controller';
-import { AdminController } from './admin/admin.controller';
-import { AdminService } from './admin/admin.service';
+import { ManagerController } from './manager/manager.controller';
+import { ManagerService } from './manager/manager.service';
 import { PaymentService } from './payment/payment.service';
 import { PaymentController } from './payment/payment.controller';
 import { BeneficiaryService } from './beneficiary/beneficiary.service';
@@ -22,27 +22,32 @@ import { ProviderService } from './provider/provider.service';
 import { ChartsService } from './charts/charts.service';
 import { ChartsController } from './charts/charts.controller';
 
+import { ExporterController } from './exporter/exporter.controller';
+import { ExporterService } from './exporter/exporter.service';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payer, Transaction, User, Patient, Provider]),
   ],
   providers: [
     PayerService,
-    AdminService,
+    ManagerService,
     BeneficiaryService,
     PaymentService,
     VoucherService,
     ProviderService,
     ChartsService,
+    ExporterService,
   ],
   controllers: [
     PayerController,
-    AdminController,
+    ManagerController,
     BeneficiaryController,
     PaymentController,
     ProviderController,
     VoucherController,
     ChartsController,
+    ExporterController,
   ],
 })
 export class AdministrationSvcModule {}

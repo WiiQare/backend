@@ -3,19 +3,19 @@ import { Patient } from 'src/modules/patient-svc/entities/patient.entity';
 import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 
-export async function getNumberOfRegisteredBeneficiariesQueryBuilder(
+export function getNumberOfRegisteredBeneficiariesQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Patient>> {
-  return await dataSource
+): SelectQueryBuilder<Patient> {
+  return dataSource
     .createQueryBuilder()
     .from(Patient, 'patient')
     .addSelect('COUNT(patient.id)::integer', 'numberOfRegisteredBeneficiaries');
 }
 
-export async function getPendingVouchersForAllBeneficiariesQueryBuilder(
+export function getPendingVouchersForAllBeneficiariesQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .addSelect('COUNT(transaction.voucher)::integer', 'numberOfPendingVouchers')
@@ -25,10 +25,10 @@ export async function getPendingVouchersForAllBeneficiariesQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
 
-export async function getRedeemedVouchersForAllBeneficiariesQueryBuilder(
+export function getRedeemedVouchersForAllBeneficiariesQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .addSelect(
@@ -41,10 +41,10 @@ export async function getRedeemedVouchersForAllBeneficiariesQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
 
-export async function getBeneficiaryToProviderTransactionsQueryBuilder(
+export function getBeneficiaryToProviderTransactionsQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Transaction>> {
-  return await dataSource
+): SelectQueryBuilder<Transaction> {
+  return dataSource
     .createQueryBuilder()
     .from(Transaction, 'transaction')
     .addSelect('COUNT(transaction.id)::integer', 'numberOfProviderTransactions')
@@ -57,10 +57,10 @@ export async function getBeneficiaryToProviderTransactionsQueryBuilder(
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
 
-export async function getActiveBeneficiariesQueryBuilder(
+export function getActiveBeneficiariesQueryBuilder(
   dataSource: DataSource,
-): Promise<SelectQueryBuilder<Patient>> {
-  return await dataSource
+): SelectQueryBuilder<Patient> {
+  return dataSource
     .createQueryBuilder()
     .from(Patient, 'patient')
     .leftJoin(

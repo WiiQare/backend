@@ -11,7 +11,7 @@ export class VoucherController {
   constructor(private readonly voucherService: VoucherService) {}
 
   @Get('summary')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'API endpoint to get summary list of all Vouchers informations',
   })
@@ -20,7 +20,7 @@ export class VoucherController {
   }
 
   @Get()
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'This API is used retrieve list of all vouchers.',
   })

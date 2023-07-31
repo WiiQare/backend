@@ -15,7 +15,7 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Get('summary')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'API endpoint to get summary list of all Payments informations',
   })
@@ -24,7 +24,7 @@ export class PaymentController {
   }
 
   @Get('payers')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'This API is used retrieve list of payments received from payer.',
   })
@@ -36,7 +36,7 @@ export class PaymentController {
   }
 
   @Get('providers')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   // @Public()
   @ApiOperation({
     summary: 'This API is used retrieve list of payments due to provider.',

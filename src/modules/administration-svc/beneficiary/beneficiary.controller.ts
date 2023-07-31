@@ -1,9 +1,17 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  ParseIntPipe,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BeneficiaryService } from './beneficiary.service';
 import { BeneficiaryDTO, BeneficiarySummaryDTO } from './dto/beneficiary.dto';
 import { UserRole } from 'src/common/constants/enums';
 import { Roles } from 'src/common/decorators/user-role.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('admin/beneficiaries')
 @Controller('beneficiaries')
@@ -23,7 +31,7 @@ export class BeneficiaryController {
   }
 
   @Get('summary')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'API endpoint to get summary  of all Beneficiaries informations',
   })

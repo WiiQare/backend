@@ -12,7 +12,7 @@ export class PayerController {
   constructor(private readonly payerService: PayerService) {}
 
   @Get('summary')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   //@Public()
   @ApiOperation({
     summary: 'API endpoint to get summary list of all Payers informations',
@@ -22,7 +22,7 @@ export class PayerController {
   }
 
   @Get()
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   // @Public()
   @ApiOperation({
     summary: 'This API is used retrieve Migrant Payers List.',

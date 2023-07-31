@@ -11,7 +11,7 @@ export class ChartsController {
   constructor(private chartService: ChartsService) {}
 
   @Get('payers')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary:
       'API endpoint to get informations used for  payer chart on the homepage of dashboard',
@@ -25,7 +25,7 @@ export class ChartsController {
   }
 
   @Get('beneficiaries')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary:
       'API endpoint to get informations used for beneficiary chart on the homepage of dashboard',

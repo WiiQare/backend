@@ -5,10 +5,8 @@ import { DataSource, SelectQueryBuilder } from 'typeorm';
 /**
  * QueryBuilder used to get payers Id,full Name, country code and registration date
  */
-async function getPayerInfoQueryBuilder(
-  dataSource: DataSource,
-): Promise<SelectQueryBuilder<Payer>> {
-  return await dataSource
+function getPayerInfoQueryBuilder(dataSource: DataSource) {
+  return dataSource
     .createQueryBuilder()
     .from(Payer, 'payer')
     .addSelect('payer.id::text', 'payerId')
@@ -17,9 +15,7 @@ async function getPayerInfoQueryBuilder(
     .addSelect("to_char(payer.created_at,'dd/mm/yyyy')", 'registrationDate');
 }
 
-async function getUniqueBeneficiaryCountPerPayerQueryBuilder(
-  dataSource: DataSource,
-) {
+function getUniqueBeneficiaryCountPerPayerQueryBuilder(dataSource: DataSource) {
   return dataSource
     .createQueryBuilder()
     .from(Payer, 'payer')
@@ -33,10 +29,8 @@ async function getUniqueBeneficiaryCountPerPayerQueryBuilder(
     .groupBy('"payerId"');
 }
 
-async function getPurchasedVouchersPerPayerQueryBuilder(
-  dataSource: DataSource,
-) {
-  return await dataSource
+function getPurchasedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
+  return dataSource
     .createQueryBuilder()
     .from(Payer, 'payer')
     .leftJoin(Transaction, 'transaction', 'transaction.senderId=payer.id')
@@ -50,8 +44,8 @@ async function getPurchasedVouchersPerPayerQueryBuilder(
     .groupBy('"payerId"');
 }
 
-async function getPendingVouchersPerPayerQueryBuilder(dataSource: DataSource) {
-  return await dataSource
+function getPendingVouchersPerPayerQueryBuilder(dataSource: DataSource) {
+  return dataSource
     .createQueryBuilder()
     .from(Payer, 'payer')
     .leftJoin(Transaction, 'transaction', 'transaction.senderId=payer.id')
@@ -63,10 +57,8 @@ async function getPendingVouchersPerPayerQueryBuilder(dataSource: DataSource) {
     .andWhere("transaction.status='PENDING'")
     .groupBy('"payerId"');
 }
-async function getUnclaimedVouchersPerPayerQueryBuilder(
-  dataSource: DataSource,
-) {
-  return await dataSource
+function getUnclaimedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
+  return dataSource
     .createQueryBuilder()
     .from(Payer, 'payer')
     .leftJoin(Transaction, 'transaction', 'transaction.senderId=payer.id')
@@ -81,8 +73,8 @@ async function getUnclaimedVouchersPerPayerQueryBuilder(
     .andWhere("transaction.status='UNCLAIMED'")
     .groupBy('"payerId"');
 }
-async function getRedeemedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
-  return await dataSource
+function getRedeemedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
+  return dataSource
     .createQueryBuilder()
     .from(Payer, 'payer')
     .leftJoin(Transaction, 'transaction', 'transaction.senderId=payer.id')
@@ -95,31 +87,31 @@ async function getRedeemedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
     .groupBy('"payerId"');
 }
 
-export async function getAllPayersQueryBuilder(dataSource: DataSource) {
+export function getAllPayersQueryBuilder(dataSource: DataSource) {
   return dataSource
     .createQueryBuilder()
     .addCommonTableExpression(
-      await getPayerInfoQueryBuilder(dataSource),
+      getPayerInfoQueryBuilder(dataSource),
       'PayerTable',
     )
     .addCommonTableExpression(
-      await getUniqueBeneficiaryCountPerPayerQueryBuilder(dataSource),
+      getUniqueBeneficiaryCountPerPayerQueryBuilder(dataSource),
       'uniqueBeneficiaryCountPerPayerTable',
     )
     .addCommonTableExpression(
-      await getPurchasedVouchersPerPayerQueryBuilder(dataSource),
+      getPurchasedVouchersPerPayerQueryBuilder(dataSource),
       'purchasedVouchersPerPayerTable',
     )
     .addCommonTableExpression(
-      await getPendingVouchersPerPayerQueryBuilder(dataSource),
+      getPendingVouchersPerPayerQueryBuilder(dataSource),
       'pendingVouchersPerPayerTable',
     )
     .addCommonTableExpression(
-      await getUnclaimedVouchersPerPayerQueryBuilder(dataSource),
+      getUnclaimedVouchersPerPayerQueryBuilder(dataSource),
       'unclaimedVouchersPerPayerTable',
     )
     .addCommonTableExpression(
-      await getRedeemedVouchersPerPayerQueryBuilder(dataSource),
+      getRedeemedVouchersPerPayerQueryBuilder(dataSource),
       'redeemedVouchersPerPayerTable',
     )
     .from('PayerTable', 'p')

@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { createAdminAccountDTO } from './dto/admin.dto';
+import { createManagerDTO } from './dto/manager.dto';
 import { User } from '../../session/entities/user.entity';
 import { UserRole, UserStatus } from 'src/common/constants/enums';
 import { SALT_ROUNDS } from 'src/common/constants/constants';
 
 @Injectable()
-export class AdminService {
+export class ManagerService {
   constructor(
     @InjectRepository(User)
     private UserRepository: Repository<User>,
@@ -19,18 +19,18 @@ export class AdminService {
    * @param payload
    * @returns User
    */
-  async registerNewAdminAccount(payload: createAdminAccountDTO): Promise<User> {
+  async registerNewManagerAccount(payload: createManagerDTO): Promise<User> {
     const { email, password } = payload;
 
     const hashedPassword = bcrypt.hashSync(password, SALT_ROUNDS);
 
-    const adminUserTobeCreated = {
+    const managerTobeCreated = {
       email,
       password: hashedPassword,
-      role: UserRole.WIIQARE_ADMIN,
+      role: UserRole.WIIQARE_MANAGER,
       status: UserStatus.ACTIVE,
     };
 
-    return this.UserRepository.save(adminUserTobeCreated);
+    return this.UserRepository.save(managerTobeCreated);
   }
 }

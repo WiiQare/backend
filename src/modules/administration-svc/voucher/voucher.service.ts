@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { VoucherDTO, VoucherSummaryDTO } from './dto/voucher.dto';
 import { subMonths, subWeeks } from 'date-fns';
+import { getAllVouchersQueryBuilder } from './querybuilders/getAllVouchers.qb';
 
 @Injectable()
 export class VoucherService {
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
+    private dataSource: DataSource,
   ) {}
 
   /**
@@ -156,21 +158,7 @@ export class VoucherService {
    * @returns
    */
   async getAllVouchers(take = 10, skip = 0): Promise<VoucherDTO[]> {
-    const vouchers = await this.transactionRepository
-      .createQueryBuilder('transaction')
-      .select([
-        'transaction.amount',
-        'transaction.senderAmount',
-        'transaction.senderId',
-        'transaction.ownerId',
-        'transaction.status',
-      ])
-      .addSelect("transaction.voucher->>'id'", 'transaction_id')
-      .addSelect(
-        "transaction.voucher->>'patientId'",
-        'transaction_voucher_beneficiary',
-      )
-      .where("transaction.senderCurrency IN ('eur','EUR')")
+    const vouchers = await getAllVouchersQueryBuilder(this.dataSource)
       .limit(take)
       .offset(skip)
       .getRawMany();
@@ -178,12 +166,15 @@ export class VoucherService {
     // return vouchers as VoucherListDto[];
     return vouchers.map((voucher) => {
       return {
-        voucherId: voucher.transaction_id,
-        amountInLocalCurrency: voucher.transaction_amount,
-        amountInSenderCurrency: voucher.transaction_sender_amount,
-        payerId: voucher.transaction_sender_id,
-        beneficiaryId: voucher.transaction_voucher_beneficiary,
-        voucherOwnerId: voucher.transaction_owner_id,
+        purchasedDate: voucher.purchasedDate,
+        voucherId: voucher.VoucherId,
+        amountInLocalCurrency: voucher.amountInLocalCurrency,
+        amountInSenderCurrency: voucher.amountInSenderCurrency,
+        localCurrency: voucher.localCurrency,
+        senderCurrency: voucher.senderCurrency,
+        payerId: voucher.payerId,
+        beneficiaryId: voucher.beneficiaryId,
+        voucherOwnerId: voucher.voucherOwnerId,
         voucherStatus:
           voucher.status === 'BURNED'
             ? 'burned'

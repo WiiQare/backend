@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { getAllProvidersQueryBuilder } from './querybuilders/getAllProviders.qb';
 import { ProviderDTO, ProviderSummaryDTO } from './dto/provider.dto';
+import { getCountryNameFromCode } from '../_helpers_';
 import {
   getAllClaimedVouchersQueryBuilder,
   getAllRedeemedVouchersQueryBuilder,
@@ -62,7 +63,7 @@ export class ProviderService {
         id,
         name,
         city,
-        country,
+        country: getCountryNameFromCode(country) || '',
         registrationDate,
         currency: 'EUR',
         lastBeneficiaryProviderTransaction:
@@ -106,70 +107,57 @@ export class ProviderService {
    * @returns
    */
   async getSummary() {
-    const { numberOfRegisteredProviders } = await (
-      await getNumberOfRegisteredProvidersQueryBuilder(this.dataSource)
-    ).getRawOne();
+    const { numberOfRegisteredProviders } =
+      await getNumberOfRegisteredProvidersQueryBuilder(
+        this.dataSource,
+      ).getRawOne();
 
     const {
       totalNumberOfBeneficiaryProviderTransactionWithinOneWeek,
       totalValueOfBeneficiaryProviderTransactionWithinOneWeek,
-    } = await (
-      await getTotalBeneficiaryTransactionMadeWithinOneWeekQueryBuilder(
-        this.dataSource,
-      )
+    } = await getTotalBeneficiaryTransactionMadeWithinOneWeekQueryBuilder(
+      this.dataSource,
     ).getRawOne();
 
     const {
       totalNumberOfBeneficiaryProviderTransactionWithinOneMonth,
       totalValueOfBeneficiaryProviderTransactionWithinOneMonth,
-    } = await (
-      await getTotalBeneficiaryTransactionMadeWithinOneMonthQueryBuilder(
-        this.dataSource,
-      )
+    } = await getTotalBeneficiaryTransactionMadeWithinOneMonthQueryBuilder(
+      this.dataSource,
     ).getRawOne();
 
     const {
       totalNumberOfBeneficiaryProviderTransactionWithinThreeMonths,
       totalValueOfBeneficiaryProviderTransactionWithinThreeMonths,
-    } = await (
-      await getTotalBeneficiaryTransactionMadeWithinThreeMonthsQueryBuilder(
-        this.dataSource,
-      )
+    } = await getTotalBeneficiaryTransactionMadeWithinThreeMonthsQueryBuilder(
+      this.dataSource,
     ).getRawOne();
 
     const {
       totalNumberOfBeneficiaryProviderTransactionWithinSixMonths,
       totalValueOfBeneficiaryProviderTransactionWithinSixMonths,
-    } = await (
-      await getTotalBeneficiaryTransactionMadeWithinSixMonthsQueryBuilder(
-        this.dataSource,
-      )
+    } = await getTotalBeneficiaryTransactionMadeWithinSixMonthsQueryBuilder(
+      this.dataSource,
     ).getRawOne();
 
-    const { totalBeneficiaryProviderTransaction } = await (
+    const { totalBeneficiaryProviderTransaction } =
       await getTotalBeneficiaryToProviderTransactionQueryBuilder(
         this.dataSource,
-      )
-    ).getRawOne();
+      ).getRawOne();
 
-    const { totalNumberOfUniqueBeneficiaries } = await (
-      await getTotalNumberOfUniqueBeneficiaryQueryBuilder(this.dataSource)
-    ).getRawOne();
+    const { totalNumberOfUniqueBeneficiaries } =
+      await getTotalNumberOfUniqueBeneficiaryQueryBuilder(
+        this.dataSource,
+      ).getRawOne();
 
     const { totalNumberOfUnclaimedVouchers, totalAmountOfUnclaimedVouchers } =
-      await (
-        await getAllUnclaimedVouchersQueryBuilder(this.dataSource)
-      ).getRawOne();
+      await getAllUnclaimedVouchersQueryBuilder(this.dataSource).getRawOne();
 
     const { totalNumberOfClaimedVouchers, totalAmountOfClaimedVouchers } =
-      await (
-        await getAllClaimedVouchersQueryBuilder(this.dataSource)
-      ).getRawOne();
+      await getAllClaimedVouchersQueryBuilder(this.dataSource).getRawOne();
 
     const { totalNumberOfRedeemedVouchers, totalAmountOfRedeemedVouchers } =
-      await (
-        await getAllRedeemedVouchersQueryBuilder(this.dataSource)
-      ).getRawOne();
+      await getAllRedeemedVouchersQueryBuilder(this.dataSource).getRawOne();
     return {
       numberOfRegisteredProviders: numberOfRegisteredProviders || 0,
       totalBeneficiaryTransactionsWithinOneWeek: {

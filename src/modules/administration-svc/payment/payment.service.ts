@@ -16,7 +16,9 @@ import {
   getCountPayerPaymentsQueryBuilder,
   getCountProviderPaymentsQueryBuilder,
 } from './querybuilders/getCount.qb';
-import { getCountryNameFromCode } from '../_common_';
+import { getCountryNameFromCode } from '../_helpers_';
+import { getAllProviderPaymentQueryBuilder } from './querybuilders/getPaymentsDueProvider.qb';
+import { getAllPayerPaymentsQueryBuilder } from './querybuilders/getPaymentsFromPayer.qb';
 
 @Injectable()
 export class PaymentService {
@@ -150,45 +152,21 @@ export class PaymentService {
    * @returns
    */
   async getPaymentsFromPayer(take = 10, skip = 0): Promise<PayerPaymentsDTO[]> {
-    const paymentsFromPayers = await this.transactionRepository
-      .createQueryBuilder('transaction')
-      .leftJoinAndMapOne(
-        'transaction.sender',
-        Payer,
-        'payer',
-        'payer.user = transaction.senderId',
-      )
-      .leftJoinAndMapOne(
-        'transaction.voucher',
-        Patient,
-        'patient',
-        "patient.id = uuid((transaction.voucher)->>'patientId')",
-      )
-      .select([
-        'transaction.id',
-        'transaction.createdAt',
-        'transaction.senderAmount',
-        'payer.country',
-        'patient.country',
-      ])
-      .where("transaction.senderCurrency IN ('eur','EUR')")
+    const paymentsFromPayers = await getAllPayerPaymentsQueryBuilder(
+      this.dataSource,
+    )
       .limit(take)
       .offset(skip)
       .getRawMany();
 
     return paymentsFromPayers.map((payment) => {
-      const _country_payer = getCountryNameFromCode(payment.payer_country);
-      const _country_beneficiary = getCountryNameFromCode(
-        payment.patient_country,
-      );
       return {
-        transactionId: payment.transaction_id,
-        transactionDate: new Date(
-          payment.transaction_created_at,
-        ).toLocaleDateString(),
-        paymentValue: payment.transaction_sender_amount || 0,
-        payerCountry: _country_payer || '',
-        beneficiaryCountry: _country_beneficiary || '',
+        transactionId: payment.id,
+        transactionDate: payment.transactionDate,
+        paymentValue: payment.senderAmount || 0,
+        payerCountry: getCountryNameFromCode(payment.payerCountry) || '',
+        beneficiaryCountry:
+          getCountryNameFromCode(payment.patientCountry) || '',
       };
     }) as PayerPaymentsDTO[];
   }
@@ -201,50 +179,25 @@ export class PaymentService {
     take = 10,
     skip = 0,
   ): Promise<ProviderPaymentsDTO[]> {
-    const paymentsDueProvider = await this.transactionRepository
-      .createQueryBuilder('transaction')
-      .leftJoinAndMapOne(
-        'transaction.owner',
-        Provider,
-        'provider',
-        'provider.id = transaction.ownerId',
-      )
-      .select([
-        'transaction.id',
-        'transaction.updatedAt',
-        'provider.name',
-        'provider.id',
-        'provider.city',
-        //'transaction.status',
-        'transaction.amount',
-        'transaction.senderAmount',
-      ])
-      .addSelect("provider.contact_person->>'country'", 'provider_country')
-      .where("transaction.senderCurrency IN ('eur','EUR')")
-      .andWhere(
-        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'UNCLAIMED'",
-      )
+    const paymentsDueProvider = await getAllProviderPaymentQueryBuilder(
+      this.dataSource,
+    )
       .limit(take)
       .offset(skip)
       .getRawMany();
 
     return paymentsDueProvider.map((payment) => {
-      const _country_provider = getCountryNameFromCode(
-        payment.provider_country,
-      );
       return {
-        transactionId: payment.transaction_id,
-        transactionDate: new Date(
-          payment.transaction_updated_at,
-        ).toLocaleDateString(),
-        providerName: payment.provider_name,
-        providerId: payment.provider_id,
-        providerCity: payment.provider_city,
-        providerCountry: _country_provider != null ? _country_provider : '',
+        transactionId: payment.id,
+        transactionDate: payment.transactionDate,
+        providerName: payment.providerName,
+        providerId: payment.providerId,
+        providerCity: payment.providerCity,
+        providerCountry: getCountryNameFromCode(payment.providerCountry) || '',
         //TODO : to do later
         //transactionStatus: payment.transaction_status === 'CLAIMED',
-        voucherAmountInLocalCurrency: payment.transaction_amount,
-        voucherAmountInSenderCurrency: payment.transaction_sender_amount,
+        voucherAmountInLocalCurrency: payment.amountInLocalCurrency,
+        voucherAmountInSenderCurrency: payment.amountInSenderCurrency,
       };
     }) as ProviderPaymentsDTO[];
   }

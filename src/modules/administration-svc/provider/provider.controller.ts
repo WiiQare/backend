@@ -10,7 +10,7 @@ import { Roles } from 'src/common/decorators/user-role.decorator';
 export class ProviderController {
   constructor(private readonly providerService: ProviderService) {}
   @Get()
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'API endpoint to get list of all Providers informations',
   })
@@ -22,7 +22,7 @@ export class ProviderController {
   }
 
   @Get('summary')
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'API endpoint to get summary informations related to providers',
   })

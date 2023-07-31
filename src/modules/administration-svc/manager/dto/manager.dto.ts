@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsEmail, IsString, IsUUID, IsEnum } from 'class-validator';
 import { UserRole, UserStatus } from 'src/common/constants/enums';
 
-export class createAdminAccountDTO {
+export class createManagerDTO {
   @IsNotEmpty()
   @IsEmail()
   @Transform(({ value }) => value.toLowerCase().trim())
@@ -13,7 +13,7 @@ export class createAdminAccountDTO {
   password: string;
 }
 
-export class createAdminAccountReponseDTO {
+export class createManagerReponseDTO {
   @IsNotEmpty()
   @IsUUID(4)
   userId: string;
