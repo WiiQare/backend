@@ -31,7 +31,7 @@ import { ExporterService } from './exporter/exporter.service';
   ],
   providers: [
     PayerService,
-    ManagerService,
+    //ManagerService,
     BeneficiaryService,
     PaymentService,
     VoucherService,
@@ -41,7 +41,7 @@ import { ExporterService } from './exporter/exporter.service';
   ],
   controllers: [
     PayerController,
-    ManagerController,
+    //ManagerController,
     BeneficiaryController,
     PaymentController,
     ProviderController,
