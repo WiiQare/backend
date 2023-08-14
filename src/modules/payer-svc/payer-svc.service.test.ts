@@ -49,6 +49,7 @@ describe('PayerService', () => {
     role: UserRole.PAYER,
     status: UserStatus.ACTIVE,
     password: 'password',
+    savings: []
   };
 
   const mockPayer: Payer = {

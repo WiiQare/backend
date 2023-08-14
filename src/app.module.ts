@@ -22,6 +22,7 @@ import { ProviderSvcModule } from './modules/provider-svc/provider-svc.module';
 import { SessionModule } from './modules/session/session.module';
 import { SmartContractModule } from './modules/smart-contract/smart-contract.module';
 import { SMSModule } from './modules/sms/sms.module';
+import { SavingModule } from './modules/saving/saving.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SMSModule } from './modules/sms/sms.module';
     AdministrationSvcModule,
     PatientSvcModule,
     PayerSvcModule,
+    SavingModule,
     ProviderSvcModule,
     CommonModule,
     SmartContractModule,

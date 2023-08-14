@@ -1,7 +1,8 @@
 import { Exclude } from 'class-transformer';
 import { UserRole, UserStatus } from '../../../common/constants/enums';
 import { BaseEntity } from '../../../db/base-entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Saving } from 'src/modules/saving/entities/saving.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -23,4 +24,7 @@ export class User extends BaseEntity {
   @Exclude()
   @Column({ nullable: true })
   password: string;
+
+  @OneToMany(() => Saving, saving => saving.user, {nullable: true})
+  savings: Saving[];
 }

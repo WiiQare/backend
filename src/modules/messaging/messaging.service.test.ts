@@ -31,6 +31,7 @@ describe('MessagingService', () => {
     id: 'id',
     createdAt: new Date(),
     updatedAt: new Date(),
+    savings: [],
   };
 
   beforeEach(async () => {

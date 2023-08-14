@@ -25,6 +25,7 @@ describe('PatientSvcService', () => {
     role: UserRole.PATIENT,
     status: UserStatus.INACTIVE,
     password: 'password',
+    savings: []
   };
 
   const mockPatient: Patient = {

@@ -128,6 +128,7 @@ describe('ProviderService', () => {
     role: UserRole.PATIENT,
     status: UserStatus.ACTIVE,
     password: 'password',
+    savings: []
   };
 
   const mockPatient: Patient = {
