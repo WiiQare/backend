@@ -32,4 +32,14 @@ export class SavingService {
     return this.savingRepository.save(newSaving)
 
   }
+
+  async retrieving (userId: string) : Promise<Saving[]> {
+    const savings = await this.savingRepository
+    .createQueryBuilder('saving')
+    .leftJoinAndSelect('saving.operations', 'operation')
+    .where('saving.user = :userId', { userId: userId })
+    .getMany();
+
+    return savings
+  }
 }

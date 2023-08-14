@@ -21,10 +21,19 @@ import { CreateSavingDto } from './dto/saving.dto';
     constructor( private readonly savingService: SavingService) {}
 
     @Post()
-    @ApiOperation({summary: 'Save'})
-    add(
+    @ApiOperation({summary: 'Add a new saving for user'})
+    async add(
       @Body() savingDto: CreateSavingDto
     ) {
-      return this.savingService.add(savingDto)
+      return await this.savingService.add(savingDto)
     }
+
+    @Get('/:userId')
+    @ApiOperation({summary: 'All savings for user'})
+    async retrieving(
+      @Param('userId') userId: string
+    ) {
+      return await this.savingService.retrieving(userId);
+    }
+    
 }
