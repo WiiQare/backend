@@ -7,6 +7,9 @@ export enum SavingType {
     PourMoi = 'MOI',
     Famille = 'FAMILLE',
     Enfant = 'ENFANT',
+    FemmeEnceinte = 'FEMME ENCEINTE',
+    Diabetique = 'DIABÉTIQUE',
+    Hypertendu = 'HYPER TENDU'
   }
 
   export enum SavingFrequency {
@@ -30,7 +33,7 @@ export class Saving extends BaseEntity {
     type: SavingType;
   
     @Column()
-    amount: number;
+    amount: Number;
   
     @Column()
     currency: string;
