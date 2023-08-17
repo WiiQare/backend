@@ -1,19 +1,19 @@
 version: '3.7'
 
 services:
-  # db:
-  #   image: postgres
-  #   container_name: wiiQare-db
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_DB: wiiQare-db
-  #   volumes:
-  #     - data:/var/lib/postgresql/data
-  #   networks:
-  #     - wiiqare-net
+  db:
+    image: postgres
+    container_name: wiiQare-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: wiiQare-db
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - wiiqare-net
 #  redis:
 #    container_name: wiiQare-redis
 #    image: 'bitnami/redis:latest'

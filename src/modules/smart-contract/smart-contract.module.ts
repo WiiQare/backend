@@ -7,6 +7,7 @@ import { SmartContractController } from './smart-contract.controller';
 import { nodeProvider } from './smart-contract.providers';
 import { SmartContractService } from './smart-contract.service';
 import { TransactionService } from './transaction.service';
+import { Voucher } from './entities/voucher.entity';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { TransactionService } from './transaction.service';
       apiKey: 'my_secret_key',
       apiVersion: '2022-11-15',
     }),
-    TypeOrmModule.forFeature([Transaction]),
+    TypeOrmModule.forFeature([Transaction,Voucher]),
   ],
   controllers: [SmartContractController, PaymentController],
   providers: [SmartContractService, TransactionService, nodeProvider],
