@@ -298,7 +298,14 @@ export class ProviderService {
   async getAllTransactions(providerId: string): Promise<Record<string, any>[]> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
+      .leftJoinAndMapOne(
+        'transaction.voucherEntity',
+        Voucher,
+        'voucherEntity',
+        'voucherEntity.transaction = transaction.id'
+      )
       .where('transaction.ownerId = :providerId', { providerId })
+      .orWhere('transaction.hospitalId = :providerId', { providerId })
       .orderBy('transaction.updatedAt', 'DESC')
       .getMany();
     //TODO: paginate this!.
