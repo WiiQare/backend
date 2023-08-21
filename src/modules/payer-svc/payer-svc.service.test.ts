@@ -6,8 +6,12 @@ import { Payer } from './entities/payer.entity';
 import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
 import { Patient } from '../patient-svc/entities/patient.entity';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 import {
   InviteType,
+  ReceiverType,
+  SenderType,
+  TransactionStatus,
   UserRole,
   UserStatus,
   UserType,
@@ -22,12 +26,14 @@ import {
 } from '@nestjs/common';
 import { _400, _404, _403 } from '../../common/constants/errors';
 
+
 describe('PayerService', () => {
   let service: PayerService;
   let payerRepository: Repository<Payer>;
   let transactionRepository: Repository<Transaction>;
   let patientRepository: Repository<Patient>;
   let userRepository: Repository<User>;
+  let voucherRepository: Repository<Voucher>;
 
   // Mock services
   const mockMailService = {
@@ -88,13 +94,26 @@ describe('PayerService', () => {
     senderId: mockPayer.id,
     ownerId: mockPayer.id,
     hospitalId: null,
-    ownerType: UserType.PAYER,
-    status: VoucherStatus.UNCLAIMED,
-    transactionHash: 'transactionHash',
-    shortenHash: 'shortenHash',
+    ownerType: ReceiverType.PROVIDER,
+    status: TransactionStatus.PENDING,
     stripePaymentId: 'stripePaymentId',
     voucher: { voucher: 'voucher' },
   };
+
+  const mockVoucher: Voucher = {
+    id: '',
+    updatedAt: new Date(),
+    createdAt: new Date(),
+    voucherHash: '',
+    shortenHash: '',
+    value: 1,
+    senderId: mockPayer.id,
+    senderType: SenderType.PAYER,
+    receiverId: mockPatient.id,
+    receiverType: ReceiverType.PATIENT,
+    status: VoucherStatus.PENDING,
+    transaction: mockTransaction.id
+  }
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -123,11 +142,16 @@ describe('PayerService', () => {
       findOne: jest.fn().mockResolvedValue(mockTransaction),
     } as unknown as Repository<Transaction>;
 
+    voucherRepository = {
+      findOne: jest.fn().mockResolvedValue(mockVoucher),
+    } as unknown as Repository<Voucher>;
+
     service = new PayerService(
       patientRepository,
       payerRepository,
       userRepository,
       transactionRepository,
+      voucherRepository,
       mockMailService as MailService,
       mockSmsService as SmsService,
     );

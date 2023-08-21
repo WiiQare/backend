@@ -14,7 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import _ from 'lodash';
 import { InjectStripe } from 'nestjs-stripe';
-import { UserRole, VoucherStatus } from 'src/common/constants/enums';
+import { ReceiverType, SenderType, TransactionStatus, UserRole, VoucherStatus } from 'src/common/constants/enums';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Roles } from 'src/common/decorators/user-role.decorator';
@@ -29,6 +29,7 @@ import { Transaction } from './entities/transaction.entity';
 import { SmartContractService } from './smart-contract.service';
 import { TransactionService } from './transaction.service';
 import { _400 } from 'src/common/constants/errors';
+import { Voucher } from './entities/voucher.entity';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -39,6 +40,8 @@ export class PaymentController {
     private readonly smartContractService: SmartContractService,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(Voucher)
+    private readonly voucherRepository: Repository<Voucher>,
     private readonly transactionService: TransactionService,
   ) { }
 
@@ -114,7 +117,7 @@ export class PaymentController {
             patientId: patientId,
           });
 
-          const voucherToSave = {
+          const voucherJSON = {
             id: _.get(voucherData, 'events.mintVoucherEvent.returnValues.0'),
             amount: _.get(
               voucherData,
@@ -158,12 +161,25 @@ export class PaymentController {
             senderId,
             ownerId: patientId,
             stripePaymentId,
-            transactionHash,
-            shortenHash,
-            voucher: voucherToSave,
-            status: VoucherStatus.UNCLAIMED,
+            voucher: voucherJSON,
+            status: TransactionStatus.PENDING,
           });
-          await this.transactionRepository.save(transactionToSave);
+          const savedTransaction = await this.transactionRepository.save(transactionToSave);
+
+
+          // update this
+          const voucherToSave = this.voucherRepository.create({
+            voucherHash: transactionHash,
+            shortenHash: shortenHash,
+            value: currencyPatientAmount,
+            senderId: senderId,
+            senderType: SenderType.PAYER,
+            receiverId: patientId,
+            receiverType: ReceiverType.PATIENT,
+            status: VoucherStatus.UNCLAIMED,
+            transaction: savedTransaction.id
+          });
+          await this.voucherRepository.save(voucherToSave);
 
           break;
         case 'payment_intent.payment_failed':
@@ -198,6 +214,12 @@ export class PaymentController {
         'patient',
         'patient.id = transaction.ownerId',
       )
+      .leftJoinAndMapOne(
+        'transaction.voucherEntity',
+        Voucher,
+        'voucherEntity',
+        'voucherEntity.transaction = transaction.id'
+      )
       .select([
         'transaction',
         'payer.firstName',
@@ -206,10 +228,11 @@ export class PaymentController {
         'patient.firstName',
         'patient.lastName',
         'patient.phoneNumber',
+        'voucherEntity'
       ])
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
       .getOne();
-
+      console.log( transaction );
 
       if (!transaction) throw new NotFoundException('Resource not found')
 

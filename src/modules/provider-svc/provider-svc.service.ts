@@ -8,6 +8,8 @@ import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import {
+  ReceiverType,
+  TransactionStatus,
   UserRole,
   UserStatus,
   UserType,
@@ -34,6 +36,7 @@ import {
 import { Package } from './entities/package.entity';
 import { Provider } from './entities/provider.entity';
 import { Service } from './entities/service.entity';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 
 @Injectable()
 export class ProviderService {
@@ -50,6 +53,8 @@ export class ProviderService {
     private packageRepository: Repository<Package>,
     @InjectRepository(Service)
     private servicesRepository: Repository<Service>,
+    @InjectRepository(Voucher)
+    private readonly voucherRepository: Repository<Voucher>,
     private objectStorageService: ObjectStorageService,
     private cachingService: CachingService,
     private mailService: MailService,
@@ -203,8 +208,11 @@ export class ProviderService {
   async getTransactionByShortenHash(
     shortenHash: string,
   ): Promise<Record<string, any>> {
+    const voucher = await this.voucherRepository.findOne({
+      where: { shortenHash }
+    });
     const transaction = await this.transactionRepository.findOne({
-      where: { shortenHash, ownerType: UserType.PATIENT },
+      where: { id: voucher.transaction, ownerType: ReceiverType.PATIENT },
     });
 
     if (!transaction)
@@ -219,8 +227,8 @@ export class ProviderService {
     await this.sendTxVerificationOTP(shortenHash, patient, transaction);
 
     return {
-      hash: transaction.transactionHash,
-      shortenHash: transaction.shortenHash,
+      hash: voucher.voucherHash,
+      shortenHash: voucher.shortenHash,
       amount: transaction.amount,
       currency: transaction.currency,
       patientNames: `${patient.firstName} ${patient.lastName}`,
@@ -242,9 +250,12 @@ export class ProviderService {
     securityCode: string,
   ): Promise<Record<string, any>> {
     // verify the transaction exists and if securityCode is right!
+    const voucher = this.voucherRepository.findOne({
+      where: { shortenHash }
+    })
     const [transaction, provider] = await Promise.all([
       this.transactionRepository.findOne({
-        where: { shortenHash, ownerType: UserType.PATIENT },
+        where: { id: (await voucher).transaction, ownerType: ReceiverType.PATIENT },
       }),
       this.providerRepository.findOne({ where: { id: providerId } }),
     ]);
@@ -268,7 +279,7 @@ export class ProviderService {
     // Update the transaction in the database
     const updatedTransaction = await this.transactionRepository.save({
       ...transaction,
-      ownerType: UserType.PROVIDER,
+      ownerType: ReceiverType.PROVIDER,
       hospitalId: providerId,
     });
 
@@ -287,7 +298,14 @@ export class ProviderService {
   async getAllTransactions(providerId: string): Promise<Record<string, any>[]> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
+      .leftJoinAndMapOne(
+        'transaction.voucherEntity',
+        Voucher,
+        'voucherEntity',
+        'voucherEntity.transaction = transaction.id'
+      )
       .where('transaction.ownerId = :providerId', { providerId })
+      .orWhere('transaction.hospitalId = :providerId', { providerId })
       .orderBy('transaction.updatedAt', 'DESC')
       .getMany();
     //TODO: paginate this!.
@@ -312,11 +330,11 @@ export class ProviderService {
       totalUnclaimedAmount = 0;
 
     transactions.forEach((transaction) => {
-      if (transaction.status === VoucherStatus.PENDING)
+      if (transaction.status === TransactionStatus.PENDING)
         totalPendingAmount += transaction.amount;
-      if (transaction.status === VoucherStatus.CLAIMED)
+      if (transaction.status === TransactionStatus.PAID_OUT)
         totalRedeemedAmount += transaction.amount;
-      if (transaction.status === VoucherStatus.UNCLAIMED)
+      if (transaction.status === TransactionStatus.SUCCESSFUL)
         totalUnclaimedAmount += transaction.amount;
     });
 
@@ -346,7 +364,7 @@ export class ProviderService {
 
     const updatedTransactionList = transactions.map((transaction) => ({
       ...transaction,
-      status: VoucherStatus.PENDING,
+      status: TransactionStatus.PENDING,
     }));
 
     //TODO: update the voucher details on chain.

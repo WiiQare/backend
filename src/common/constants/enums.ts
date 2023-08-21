@@ -17,11 +17,35 @@ export enum UserType {
   PROVIDER = 'PROVIDER',
 }
 
+export enum SenderType {
+  PAYER = 'PAYER',
+  PATIENT = 'PATIENT',
+  PROVIDER = 'PROVIDER',
+}
+
+export enum ReceiverType {
+  PATIENT = 'PATIENT',
+  PROVIDER = 'PROVIDER',
+  WII_QARE = 'WII_QARE',
+}
+
 export enum VoucherStatus {
-  CLAIMED = 'CLAIMED',
   UNCLAIMED = 'UNCLAIMED',
-  BURNED = 'BURNED',
+  CLAIMED = 'CLAIMED',
   PENDING = 'PENDING',
+  BURNED = 'BURNED',
+}
+
+export enum TransactionStatus {
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
+  SUCCESSFUL = 'SUCCESSFUL',
+  PAID_OUT = 'PAID_OUT',
+}
+
+export enum ReferralStatus {
+  REDEEMED = 'REDEEMED',
+  NOT_REDEEMED = 'NOT_REDEEMED',
 }
 
 export enum InviteType {

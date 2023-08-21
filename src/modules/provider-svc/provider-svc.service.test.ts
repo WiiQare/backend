@@ -16,11 +16,15 @@ import {
   VoucherStatus,
   UserRole,
   UserStatus,
+  ReceiverType,
+  TransactionStatus,
+  SenderType,
 } from '../../common/constants/enums';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { _403, _404 } from '../../common/constants/errors';
 import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import { RegisterProviderDto } from './dto/provider.dto';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 
 describe('ProviderService', () => {
   let service: ProviderService;
@@ -30,6 +34,7 @@ describe('ProviderService', () => {
   let userRepository: Repository<User>;
   let packageRepository: Repository<Package>;
   let serviceRepository: Repository<Service>;
+  let voucherRepository: Repository<Voucher>;
 
   // Mock services
   const mockObjectStorageService = {
@@ -110,10 +115,8 @@ describe('ProviderService', () => {
     senderId: 'senderId',
     ownerId: 'ownerId',
     hospitalId: 'hospitalId',
-    ownerType: UserType.PATIENT,
-    status: VoucherStatus.UNCLAIMED,
-    transactionHash: 'transactionHash',
-    shortenHash: 'shortenHash',
+    ownerType: ReceiverType.PATIENT,
+    status: TransactionStatus.PENDING,
     stripePaymentId: 'stripePaymentId',
     voucher: { voucher: 'voucher' },
   };
@@ -144,6 +147,21 @@ describe('ProviderService', () => {
     country: 'country',
   };
 
+  const mockVoucher: Voucher = {
+    id: '',
+    updatedAt: new Date(),
+    createdAt: new Date(),
+    voucherHash: '',
+    shortenHash: '',
+    value: 1,
+    senderId: mockProvider.id,
+    senderType: SenderType.PAYER,
+    receiverId: mockPatient.id,
+    receiverType: ReceiverType.PATIENT,
+    status: VoucherStatus.PENDING,
+    transaction: mockTransaction.id
+  }
+
   // Mock relations
   mockProvider.user = mockUser;
   mockPackage.services = [mockService];
@@ -166,6 +184,15 @@ describe('ProviderService', () => {
         getMany: jest.fn().mockResolvedValue([mockTransaction]),
       }),
     } as unknown as Repository<Transaction>;
+    voucherRepository = {
+      findOne: jest.fn().mockResolvedValue(mockVoucher),
+      save: jest.fn().mockResolvedValue(mockVoucher),
+      createQueryBuilder: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockVoucher]),
+      }),
+    } as unknown as Repository<Voucher>;
     patientRepository = {
       findOne: jest.fn().mockResolvedValue(mockPatient),
       save: jest.fn().mockResolvedValue(mockPatient),
@@ -187,6 +214,7 @@ describe('ProviderService', () => {
       userRepository,
       packageRepository,
       serviceRepository,
+      voucherRepository,
       mockObjectStorageService as ObjectStorageService,
       mockCachingService as CachingService,
       mockMailService as MailService,
@@ -354,8 +382,6 @@ describe('ProviderService', () => {
         mockTransaction,
       );
       expect(result).toEqual({
-        hash: mockTransaction.transactionHash,
-        shortenHash: mockTransaction.shortenHash,
         amount: mockTransaction.amount,
         currency: mockTransaction.currency,
         patientNames: `${mockPatient.firstName} ${mockPatient.lastName}`,

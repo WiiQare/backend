@@ -19,6 +19,7 @@ import { Transaction } from '../smart-contract/entities/transaction.entity';
 import { SmsService } from '../sms/sms.service';
 import { CreatePayerAccountDto, SendInviteDto } from './dto/payer.dto';
 import { Payer } from './entities/payer.entity';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 
 @Injectable()
 export class PayerService {
@@ -31,6 +32,8 @@ export class PayerService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    @InjectRepository(Voucher)
+    private readonly voucherRepository: Repository<Voucher>,
     private readonly mailService: MailService,
     private readonly smsService: SmsService,
   ) {}
@@ -158,31 +161,32 @@ export class PayerService {
     shortenHash: string,
     authUser: JwtClaimsDataDto,
   ): Promise<void> {
-    const [payer, transaction] = await Promise.all([
+    const [payer, voucher] = await Promise.all([
       this.payerRepository
         .createQueryBuilder('payer')
         .leftJoinAndSelect('payer.user', 'user')
         .where('user.id = :userId', { userId: authUser.sub })
         .getOne(),
-      this.transactionRepository.findOne({ where: { shortenHash } }),
+      this.voucherRepository.findOne({ where: { shortenHash } }),
     ]);
+    const transaction = await this.transactionRepository.findOne({ where: { id: voucher.transaction }});
 
     if (!payer) throw new NotFoundException(_404.PAYER_NOT_FOUND);
 
-    if (!transaction)
+    if (!voucher)
       throw new NotFoundException(_404.INVALID_TRANSACTION_HASH);
 
-    if (transaction.senderId !== authUser.sub)
+    if (voucher.senderId !== authUser.sub)
       throw new ForbiddenException(_403.ONLY_OWNER_CAN_SEND_VOUCHER);
 
     const patient = await this.patientRepository.findOne({
-      where: { id: transaction.ownerId },
+      where: { id: voucher.receiverId },
     });
 
     if (!patient) throw new NotFoundException(_404.PATIENT_NOT_FOUND);
 
     await this.smsService.sendVoucherAsAnSMS(
-      transaction.shortenHash,
+      voucher.shortenHash,
       patient.phoneNumber,
       authUser.names,
       transaction.amount,
