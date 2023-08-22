@@ -1,11 +1,4 @@
-import {
-  IsIn,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsIn, IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class MintVoucherDto {
   @IsNotEmpty()

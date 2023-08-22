@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AppConfigService } from '../../config/app-config.service';
 import { logError, logInfo } from '../../helpers/common.helper';
 import Web3 from 'web3';
-import { Account, AddedAccount } from 'web3-core';
+import { Account } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
 import { VoucherStatus } from '../../common/constants/enums';
@@ -50,7 +50,7 @@ export class SmartContractService {
 
       const { ownerId, amount, currency, patientId } = mintVoucherDto;
 
-      const rr = this.web3.eth.accounts.wallet.add(
+      this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
 
@@ -143,7 +143,7 @@ export class SmartContractService {
    */
   async alterVoucher(voucherId: string, ownerId: string) {
     try {
-      const rr: AddedAccount = this.web3.eth.accounts.wallet.add(
+      this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
 

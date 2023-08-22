@@ -1,7 +1,5 @@
-import { Transform } from 'class-transformer';
 import {
   IsArray,
-  IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -11,11 +9,10 @@ import {
 import { SavingFrequency, SavingType } from '../entities/saving.entity';
 
 export class CreateSavingDto {
-
   @IsNotEmpty()
   @IsString()
   user: string;
-  
+
   @IsNotEmpty()
   @IsEnum(SavingType)
   type: SavingType;

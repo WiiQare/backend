@@ -369,7 +369,7 @@ describe('ProviderService', () => {
     it('should return the details of the mock transaction', async () => {
       jest.spyOn(service, 'sendTxVerificationOTP').mockResolvedValue(null);
 
-      const result = await service.getTransactionByShortenHash(shortenHash);
+      await service.getTransactionByShortenHash(shortenHash);
       expect(transactionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'id', ownerType: UserType.PATIENT },
       });

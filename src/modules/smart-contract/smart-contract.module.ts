@@ -16,7 +16,7 @@ import { Voucher } from './entities/voucher.entity';
       apiKey: 'my_secret_key',
       apiVersion: '2022-11-15',
     }),
-    TypeOrmModule.forFeature([Transaction,Voucher]),
+    TypeOrmModule.forFeature([Transaction, Voucher]),
   ],
   controllers: [SmartContractController, PaymentController],
   providers: [SmartContractService, TransactionService, nodeProvider],

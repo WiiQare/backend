@@ -14,7 +14,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import _ from 'lodash';
 import { InjectStripe } from 'nestjs-stripe';
-import { ReceiverType, SenderType, TransactionStatus, UserRole, VoucherStatus } from 'src/common/constants/enums';
+import {
+  ReceiverType,
+  SenderType,
+  TransactionStatus,
+  UserRole,
+  VoucherStatus,
+} from 'src/common/constants/enums';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Roles } from 'src/common/decorators/user-role.decorator';
@@ -28,7 +34,6 @@ import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 import { Transaction } from './entities/transaction.entity';
 import { SmartContractService } from './smart-contract.service';
 import { TransactionService } from './transaction.service';
-import { _400 } from 'src/common/constants/errors';
 import { Voucher } from './entities/voucher.entity';
 
 @ApiTags('payment')
@@ -43,7 +48,7 @@ export class PaymentController {
     @InjectRepository(Voucher)
     private readonly voucherRepository: Repository<Voucher>,
     private readonly transactionService: TransactionService,
-  ) { }
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -76,7 +81,7 @@ export class PaymentController {
       // Verify the webhook event with Stripe to ensure it is authentic
       const webhookSecret = this.appConfigService.stripeWebHookSecret;
 
-      console.log(webhookSecret)
+      console.log(webhookSecret);
 
       const verifiedEvent = this.stripe.webhooks.constructEvent(
         req.rawBody,
@@ -164,8 +169,9 @@ export class PaymentController {
             voucher: voucherJSON,
             status: TransactionStatus.PENDING,
           });
-          const savedTransaction = await this.transactionRepository.save(transactionToSave);
-
+          const savedTransaction = await this.transactionRepository.save(
+            transactionToSave,
+          );
 
           // update this
           const voucherToSave = this.voucherRepository.create({
@@ -177,7 +183,7 @@ export class PaymentController {
             receiverId: patientId,
             receiverType: ReceiverType.PATIENT,
             status: VoucherStatus.UNCLAIMED,
-            transaction: savedTransaction.id
+            transaction: savedTransaction.id,
           });
           await this.voucherRepository.save(voucherToSave);
 
@@ -200,7 +206,7 @@ export class PaymentController {
   async retrieveVoucherByPaymentId(
     @Query('paymentId') paymentId: string,
   ): Promise<any> {
-    let transaction = await this.transactionRepository
+    const transaction = await this.transactionRepository
       .createQueryBuilder('transaction')
       .leftJoinAndMapOne(
         'transaction.sender',
@@ -218,7 +224,7 @@ export class PaymentController {
         'transaction.voucherEntity',
         Voucher,
         'voucherEntity',
-        'voucherEntity.transaction = transaction.id'
+        'voucherEntity.transaction = transaction.id',
       )
       .select([
         'transaction',
@@ -228,15 +234,14 @@ export class PaymentController {
         'patient.firstName',
         'patient.lastName',
         'patient.phoneNumber',
-        'voucherEntity'
+        'voucherEntity',
       ])
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
       .getOne();
-      console.log( transaction );
+    console.log(transaction);
 
-      if (!transaction) throw new NotFoundException('Resource not found')
+    if (!transaction) throw new NotFoundException('Resource not found');
 
-
-      return transaction
+    return transaction;
   }
 }

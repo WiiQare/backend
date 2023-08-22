@@ -39,7 +39,7 @@ describe('SessionService', () => {
     role: UserRole.PAYER,
     status: UserStatus.ACTIVE,
     password: 'password',
-    savings: []
+    savings: [],
   };
 
   // Mock payer entity

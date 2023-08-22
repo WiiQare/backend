@@ -96,7 +96,6 @@ describe('AppConfigService', () => {
       await service.sendTransactionVerificationTokenBySmsToAPatient(
         token,
         '+243979544127',
-        100,
       );
     expect(result).toBeUndefined();
     expect(messageBird.messages.create).toHaveBeenCalledWith(

@@ -22,7 +22,7 @@ import { Voucher } from '../smart-contract/entities/voucher.entity';
       Patient,
       Package,
       Service,
-      Voucher
+      Voucher,
     ]),
     ObjectStorageModule,
     MailModule,
@@ -32,4 +32,4 @@ import { Voucher } from '../smart-contract/entities/voucher.entity';
   providers: [ProviderService],
   exports: [ProviderService],
 })
-export class ProviderSvcModule { }
+export class ProviderSvcModule {}

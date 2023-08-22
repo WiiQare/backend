@@ -2,7 +2,7 @@ import { TransactionService } from './transaction.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { Transaction } from './entities/transaction.entity';
 import { Repository } from 'typeorm';
-import { ReceiverType, TransactionStatus, UserType, VoucherStatus } from '../../common/constants/enums';
+import { ReceiverType, TransactionStatus } from '../../common/constants/enums';
 
 describe('TransactionService', () => {
   // Mock transaction service

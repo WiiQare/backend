@@ -147,7 +147,7 @@ describe('SmartContractService', () => {
 
       // expect(smartContractService.getGasFees).toBeCalledTimes(1);
       expect(response).toEqual({
-         transactionHash: '0x123',
+        transactionHash: '0x123',
       });
 
       logInfoSpy.mockRestore();
