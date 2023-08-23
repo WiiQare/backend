@@ -11,6 +11,7 @@ import { Provider } from './entities/provider.entity';
 import { Service } from './entities/service.entity';
 import { ProviderController } from './provider-svc.controller';
 import { ProviderService } from './provider-svc.service';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProviderService } from './provider-svc.service';
       Patient,
       Package,
       Service,
+      Voucher,
     ]),
     ObjectStorageModule,
     MailModule,
@@ -30,4 +32,4 @@ import { ProviderService } from './provider-svc.service';
   providers: [ProviderService],
   exports: [ProviderService],
 })
-export class ProviderSvcModule { }
+export class ProviderSvcModule {}

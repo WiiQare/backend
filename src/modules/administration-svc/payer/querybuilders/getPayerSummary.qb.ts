@@ -1,6 +1,6 @@
 import { subMonths } from 'date-fns';
-import { Payer } from 'src/modules/payer-svc/entities/payer.entity';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Payer } from '../../../payer-svc/entities/payer.entity';
+import { Transaction } from '../../../smart-contract/entities/transaction.entity';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 
 export async function getNumberOfRegisteredPayersQueryBuilder(

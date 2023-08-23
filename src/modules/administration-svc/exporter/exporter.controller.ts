@@ -8,8 +8,8 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ExporterService } from './exporter.service';
 import { PageName } from '../_common_';
-import { UserRole } from 'src/common/constants/enums';
-import { Roles } from 'src/common/decorators/user-role.decorator';
+import { UserRole } from '../../../common/constants/enums';
+import { Roles } from '../../../common/decorators/user-role.decorator';
 
 @ApiTags('admin/export')
 @Controller('export')

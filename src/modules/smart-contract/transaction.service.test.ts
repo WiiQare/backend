@@ -2,7 +2,12 @@ import { TransactionService } from './transaction.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { Transaction } from './entities/transaction.entity';
 import { Repository } from 'typeorm';
-import { UserType, VoucherStatus } from '../../common/constants/enums';
+import {
+  ReceiverType,
+  TransactionStatus,
+  UserType,
+  VoucherStatus,
+} from '../../common/constants/enums';
 
 describe('TransactionService', () => {
   // Mock transaction service
@@ -24,10 +29,8 @@ describe('TransactionService', () => {
     amount: 1,
     conversionRate: 1,
     currency: 'FC',
-    ownerType: UserType.PATIENT,
-    status: VoucherStatus.UNCLAIMED,
-    transactionHash: 'transactionHash1',
-    shortenHash: 'shortenHash1',
+    ownerType: ReceiverType.PATIENT,
+    status: TransactionStatus.PENDING,
     stripePaymentId: 'stripePaymentId1',
     voucher: { voucher: 'voucher1' },
   };
@@ -44,10 +47,8 @@ describe('TransactionService', () => {
     amount: 1,
     conversionRate: 1,
     currency: 'FC',
-    ownerType: UserType.PATIENT,
-    status: VoucherStatus.UNCLAIMED,
-    transactionHash: 'transactionHash2',
-    shortenHash: 'shortenHash2',
+    ownerType: ReceiverType.PATIENT,
+    status: TransactionStatus.PENDING,
     stripePaymentId: 'stripePaymentId2',
     voucher: { voucher: 'voucher2' },
   };

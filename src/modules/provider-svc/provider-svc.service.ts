@@ -8,6 +8,8 @@ import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import {
+  ReceiverType,
+  TransactionStatus,
   UserRole,
   UserStatus,
   UserType,
@@ -34,6 +36,7 @@ import {
 import { Package } from './entities/package.entity';
 import { Provider } from './entities/provider.entity';
 import { Service } from './entities/service.entity';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 
 @Injectable()
 export class ProviderService {
@@ -50,6 +53,8 @@ export class ProviderService {
     private packageRepository: Repository<Package>,
     @InjectRepository(Service)
     private servicesRepository: Repository<Service>,
+    @InjectRepository(Voucher)
+    private readonly voucherRepository: Repository<Voucher>,
     private objectStorageService: ObjectStorageService,
     private cachingService: CachingService,
     private mailService: MailService,
@@ -203,8 +208,11 @@ export class ProviderService {
   async getTransactionByShortenHash(
     shortenHash: string,
   ): Promise<Record<string, any>> {
+    const voucher = await this.voucherRepository.findOne({
+      where: { shortenHash },
+    });
     const transaction = await this.transactionRepository.findOne({
-      where: { shortenHash, ownerType: UserType.PATIENT },
+      where: { id: voucher.transaction, ownerType: ReceiverType.PATIENT },
     });
 
     if (!transaction)
@@ -219,8 +227,8 @@ export class ProviderService {
     await this.sendTxVerificationOTP(shortenHash, patient, transaction);
 
     return {
-      hash: transaction.transactionHash,
-      shortenHash: transaction.shortenHash,
+      hash: voucher.voucherHash,
+      shortenHash: voucher.shortenHash,
       amount: transaction.amount,
       currency: transaction.currency,
       patientNames: `${patient.firstName} ${patient.lastName}`,
@@ -242,9 +250,15 @@ export class ProviderService {
     securityCode: string,
   ): Promise<Record<string, any>> {
     // verify the transaction exists and if securityCode is right!
+    const voucher = this.voucherRepository.findOne({
+      where: { shortenHash },
+    });
     const [transaction, provider] = await Promise.all([
       this.transactionRepository.findOne({
-        where: { shortenHash, ownerType: UserType.PATIENT },
+        where: {
+          id: (await voucher).transaction,
+          ownerType: ReceiverType.PATIENT,
+        },
       }),
       this.providerRepository.findOne({ where: { id: providerId } }),
     ]);
@@ -266,9 +280,9 @@ export class ProviderService {
     //Update the voucher on block-chain
 
     // Update the transaction in the database
-    const updatedTransaction = await this.transactionRepository.save({
+    await this.transactionRepository.save({
       ...transaction,
-      ownerType: UserType.PROVIDER,
+      ownerType: ReceiverType.PROVIDER,
       hospitalId: providerId,
     });
 
@@ -287,7 +301,14 @@ export class ProviderService {
   async getAllTransactions(providerId: string): Promise<Record<string, any>[]> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
+      .leftJoinAndMapOne(
+        'transaction.voucherEntity',
+        Voucher,
+        'voucherEntity',
+        'voucherEntity.transaction = transaction.id',
+      )
       .where('transaction.ownerId = :providerId', { providerId })
+      .orWhere('transaction.hospitalId = :providerId', { providerId })
       .orderBy('transaction.updatedAt', 'DESC')
       .getMany();
     //TODO: paginate this!.
@@ -312,11 +333,11 @@ export class ProviderService {
       totalUnclaimedAmount = 0;
 
     transactions.forEach((transaction) => {
-      if (transaction.status === VoucherStatus.PENDING)
+      if (transaction.status === TransactionStatus.PENDING)
         totalPendingAmount += transaction.amount;
-      if (transaction.status === VoucherStatus.CLAIMED)
+      if (transaction.status === TransactionStatus.PAID_OUT)
         totalRedeemedAmount += transaction.amount;
-      if (transaction.status === VoucherStatus.UNCLAIMED)
+      if (transaction.status === TransactionStatus.SUCCESSFUL)
         totalUnclaimedAmount += transaction.amount;
     });
 
@@ -346,7 +367,7 @@ export class ProviderService {
 
     const updatedTransactionList = transactions.map((transaction) => ({
       ...transaction,
-      status: VoucherStatus.PENDING,
+      status: TransactionStatus.PENDING,
     }));
 
     //TODO: update the voucher details on chain.
@@ -370,16 +391,15 @@ export class ProviderService {
 
     // Save service
     service = await this.servicesRepository.save(service);
-    return service
+    return service;
   }
 
   // Get services of provider
   async getServicesByProviderId(providerId: string): Promise<Service[]> {
-
     const services = await this.servicesRepository.find({
-      where: {provider: {id: providerId}},
+      where: { provider: { id: providerId } },
       relations: ['provider'],
-      select: ['id', 'createdAt', 'description', 'price', 'name']
+      select: ['id', 'createdAt', 'description', 'price', 'name'],
     });
 
     return services;
@@ -403,15 +423,14 @@ export class ProviderService {
 
     // Save package
     newPackage = await this.packageRepository.save(newPackage);
-    return newPackage
+    return newPackage;
   }
 
   // Get services of provider
   async getPackagesByProviderId(providerId: string): Promise<Package[]> {
-
     const packages = await this.packageRepository.find({
-      where: {provider: {id: providerId}},
-      relations: ['provider', 'services']
+      where: { provider: { id: providerId } },
+      relations: ['provider', 'services'],
     });
 
     return packages;
@@ -435,7 +454,7 @@ export class ProviderService {
     // Create and save new services
     const services = await Promise.all(
       payload.services.map(async (serviceDto) => {
-        let service = new Service();
+        const service = new Service();
         service.name = serviceDto.name;
         service.description = serviceDto.description;
         service.price = serviceDto.price;
@@ -453,13 +472,13 @@ export class ProviderService {
   }
 
   async listProvider(): Promise<any> {
+    const providers = await this.providerRepository
+      .createQueryBuilder('providers')
+      .leftJoinAndSelect('providers.packages', 'packages')
+      .orderBy('providers.createdAt', 'DESC')
+      .take(5)
+      .getMany();
 
-    let providers = await this.providerRepository.createQueryBuilder('providers')
-    .leftJoinAndSelect('providers.packages', 'packages')
-    .orderBy('providers.createdAt', 'DESC').take(5)
-    .getMany();
-
-    return providers
-
+    return providers;
   }
 }

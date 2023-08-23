@@ -10,10 +10,11 @@ import { SMSModule } from '../sms/sms.module';
 import { Payer } from './entities/payer.entity';
 import { PayerSvcController } from './payer-svc.controller';
 import { PayerService } from './payer.service';
+import { Voucher } from '../smart-contract/entities/voucher.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Payer, User, Patient, Transaction]),
+    TypeOrmModule.forFeature([Payer, User, Patient, Transaction, Voucher]),
     forwardRef(() => SessionModule),
     MailModule,
     PatientSvcModule,

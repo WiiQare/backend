@@ -2,8 +2,8 @@ import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProviderService } from './provider.service';
 import { ProviderDTO } from './dto/provider.dto';
-import { UserRole } from 'src/common/constants/enums';
-import { Roles } from 'src/common/decorators/user-role.decorator';
+import { UserRole } from '../../../common/constants/enums';
+import { Roles } from '../../../common/decorators/user-role.decorator';
 
 @ApiTags('admin/providers')
 @Controller('providers')

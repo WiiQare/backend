@@ -1,6 +1,6 @@
 import { subMonths } from 'date-fns';
-import { Patient } from 'src/modules/patient-svc/entities/patient.entity';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Patient } from '../../../patient-svc/entities/patient.entity';
+import { Transaction } from '../../../smart-contract/entities/transaction.entity';
 import { DataSource } from 'typeorm';
 
 function getNumberOfRegisteredBeneficiariesPerCountryQueryBuilder(
