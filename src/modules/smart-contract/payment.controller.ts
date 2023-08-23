@@ -29,6 +29,11 @@ import { Transaction } from './entities/transaction.entity';
 import { SmartContractService } from './smart-contract.service';
 import { TransactionService } from './transaction.service';
 import { _400 } from 'src/common/constants/errors';
+import { SavingService } from '../saving/saving.service';
+import { Saving } from '../saving/entities/saving.entity';
+import { User } from '../session/entities/user.entity';
+import { operationService } from '../operation-saving/operation.service';
+import { OperationType } from '../operation-saving/entities/operation.entity';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -37,6 +42,7 @@ export class PaymentController {
     @InjectStripe() private readonly stripe: Stripe,
     private readonly appConfigService: AppConfigService,
     private readonly smartContractService: SmartContractService,
+    private readonly operationService: operationService,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly transactionService: TransactionService,
@@ -73,8 +79,6 @@ export class PaymentController {
       // Verify the webhook event with Stripe to ensure it is authentic
       const webhookSecret = this.appConfigService.stripeWebHookSecret;
 
-      console.log(webhookSecret)
-
       const verifiedEvent = this.stripe.webhooks.constructEvent(
         req.rawBody,
         signature,
@@ -105,7 +109,11 @@ export class PaymentController {
             currencyPatientAmount,
             currencyPatient,
             currencyRate,
+            forSaving,
+            idSaving
           } = metadata;
+
+          if (forSaving == true && idSaving) return this.operationService.paymentSaving({saving: idSaving, amount: senderAmount, currency: senderCurrency, type: OperationType.CREDIT})
 
           const voucherData = await this.smartContractService.mintVoucher({
             amount: Math.round(currencyPatientAmount),
