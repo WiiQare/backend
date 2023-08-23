@@ -19,7 +19,7 @@ export const _400 = {
   VOUCHER_PROCESS: {
     code: 'WAIT_VOUCHER_PROCESS',
     description: 'Le voucher est en cours de traitement!',
-  }
+  },
 };
 
 export const _401 = {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Transaction } from '../../smart-contract/entities/transaction.entity';
 import { DataSource, Repository } from 'typeorm';
 import { VoucherDTO, VoucherSummaryDTO } from './dto/voucher.dto';
 import { subMonths, subWeeks } from 'date-fns';

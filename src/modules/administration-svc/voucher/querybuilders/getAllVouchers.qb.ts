@@ -1,4 +1,4 @@
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Transaction } from '../../../smart-contract/entities/transaction.entity';
 import { DataSource } from 'typeorm';
 
 export function getAllVouchersQueryBuilder(dataSource: DataSource) {

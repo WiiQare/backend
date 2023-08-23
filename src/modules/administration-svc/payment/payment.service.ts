@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Payer } from 'src/modules/payer-svc/entities/payer.entity';
-import { Patient } from 'src/modules/patient-svc/entities/patient.entity';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Transaction } from '../../smart-contract/entities/transaction.entity';
 import { Repository, DataSource } from 'typeorm';
 import {
   PayerPaymentsDTO,
@@ -11,7 +9,6 @@ import {
 } from './dto/payment.dto';
 
 import { subMonths, subWeeks } from 'date-fns';
-import { Provider } from 'src/modules/provider-svc/entities/provider.entity';
 import {
   getCountPayerPaymentsQueryBuilder,
   getCountProviderPaymentsQueryBuilder,

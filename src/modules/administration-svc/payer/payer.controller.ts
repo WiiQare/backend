@@ -1,10 +1,9 @@
 import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
 import { PayerService } from './payer.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-//import { Public } from 'src/common/decorators/public.decorator';
 import { PayerDTO, PayerSummaryDTO } from './dto/payers.dto';
-import { UserRole } from 'src/common/constants/enums';
-import { Roles } from 'src/common/decorators/user-role.decorator';
+import { UserRole } from '../../../common/constants/enums';
+import { Roles } from '../../../common/decorators/user-role.decorator';
 
 @ApiTags('admin/payers')
 @Controller('payers')

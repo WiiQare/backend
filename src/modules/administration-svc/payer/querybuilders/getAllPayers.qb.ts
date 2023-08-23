@@ -1,6 +1,6 @@
-import { Payer } from 'src/modules/payer-svc/entities/payer.entity';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
-import { DataSource, SelectQueryBuilder } from 'typeorm';
+import { Payer } from '../../../payer-svc/entities/payer.entity';
+import { Transaction } from '../../../smart-contract/entities/transaction.entity';
+import { DataSource } from 'typeorm';
 
 /**
  * QueryBuilder used to get payers Id,full Name, country code and registration date

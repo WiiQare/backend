@@ -1,6 +1,6 @@
-import { Patient } from 'src/modules/patient-svc/entities/patient.entity';
-import { Payer } from 'src/modules/payer-svc/entities/payer.entity';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Patient } from '../../../patient-svc/entities/patient.entity';
+import { Payer } from '../../../payer-svc/entities/payer.entity';
+import { Transaction } from '../../../smart-contract/entities/transaction.entity';
 import { DataSource } from 'typeorm';
 
 export function getAllPayerPaymentsQueryBuilder(dataSource: DataSource) {
