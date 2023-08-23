@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:ci": "jest --ci --coverage && codecov",
@@ -25,6 +25,7 @@
     "seed:run": "ts-node ./node_modules/typeorm-seeding/dist/cli.js seed"
   },
   "dependencies": {
+    "@json2csv/node": "^7.0.1",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
@@ -33,6 +34,7 @@
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/sequelize": "^9.0.0",
+    "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "^9.0.1",
     "bcrypt": "^5.1.0",
@@ -41,6 +43,8 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "codecov": "^3.8.3",
+    "country-code-lookup": "^0.1.0",
+    "date-fns": "^2.30.0",
     "dotenv": "^16.0.3",
     "google-libphonenumber": "^3.2.32",
     "handlebars": "^4.7.7",
