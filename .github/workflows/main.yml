@@ -30,7 +30,7 @@ jobs:
             if [ -d "./.git" ]; then
               git pull origin main
             else
-              git@github.com:WiiQare/WiiQare.git .
+              git@github.com:WiiQare/backend.git .
             fi
 
             # Install dependencies and build app
