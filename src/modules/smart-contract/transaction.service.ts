@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Patient } from '../patient-svc/entities/patient.entity';
 import { Payer } from '../payer-svc/entities/payer.entity';
 import { Transaction } from './entities/transaction.entity';
+import { Voucher } from './entities/voucher.entity';
 
 @Injectable()
 export class TransactionService {
@@ -49,6 +50,12 @@ export class TransactionService {
         'patient',
         'patient.id = transaction.ownerId',
       )
+      .leftJoinAndMapOne(
+        'transaction.voucherEntity',
+        Voucher,
+        'voucherEntity',
+        'voucherEntity.transaction = transaction.id'
+      )
       .select([
         'transaction',
         'payer.firstName',
@@ -57,6 +64,7 @@ export class TransactionService {
         'patient.firstName',
         'patient.lastName',
         'patient.phoneNumber',
+        'voucherEntity'
       ])
       .where('transaction.senderId = :senderId', { senderId })
       .orderBy('transaction.createdAt', 'DESC')

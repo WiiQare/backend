@@ -34,6 +34,7 @@ export enum VoucherStatus {
   CLAIMED = 'CLAIMED',
   PENDING = 'PENDING',
   BURNED = 'BURNED',
+  // SPLIT = 'SPLIT'
 }
 
 export enum TransactionStatus {
@@ -41,6 +42,7 @@ export enum TransactionStatus {
   FAILED = 'FAILED',
   SUCCESSFUL = 'SUCCESSFUL',
   PAID_OUT = 'PAID_OUT',
+  // SPLIT = 'SPLIT'
 }
 
 export enum ReferralStatus {

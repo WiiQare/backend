@@ -208,29 +208,27 @@ export class ProviderService {
   async getTransactionByShortenHash(
     shortenHash: string,
   ): Promise<Record<string, any>> {
-    const voucher = await this.voucherRepository.findOne({
-      where: { shortenHash }
-    });
-    const transaction = await this.transactionRepository.findOne({
-      where: { id: voucher.transaction, ownerType: ReceiverType.PATIENT },
+    const voucher:any = await this.voucherRepository.findOne({
+      where: { shortenHash },
+      relations: [ 'transaction' ]
     });
 
-    if (!transaction)
+    if (!voucher.transaction)
       throw new NotFoundException(_404.INVALID_TRANSACTION_HASH);
 
     const patient = await this.patientRepository.findOne({
-      where: { id: transaction.ownerId },
+      where: { id: voucher?.transaction?.ownerId },
     });
 
     if (!patient) throw new NotFoundException(_404.PATIENT_NOT_FOUND);
 
-    await this.sendTxVerificationOTP(shortenHash, patient, transaction);
+    await this.sendTxVerificationOTP(shortenHash, patient, voucher.transaction);
 
     return {
       hash: voucher.voucherHash,
       shortenHash: voucher.shortenHash,
-      amount: transaction.amount,
-      currency: transaction.currency,
+      amount: voucher.transaction.amount,
+      currency: voucher.transaction.currency,
       patientNames: `${patient.firstName} ${patient.lastName}`,
       patientPhoneNumber: patient.phoneNumber,
     };
