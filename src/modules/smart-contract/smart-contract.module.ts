@@ -22,6 +22,6 @@ import { operationService } from '../operation-saving/operation.service';
     TypeOrmModule.forFeature([Transaction, Voucher, OperationSaving, Saving]),
   ],
   controllers: [SmartContractController, PaymentController],
-  providers: [SmartContractService, TransactionService, nodeProvider, operationService],
+  providers: [SmartContractService, TransactionService, nodeProvider],
 })
 export class SmartContractModule {}

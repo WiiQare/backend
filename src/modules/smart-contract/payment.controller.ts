@@ -46,7 +46,6 @@ export class PaymentController {
     @InjectStripe() private readonly stripe: Stripe,
     private readonly appConfigService: AppConfigService,
     private readonly smartContractService: SmartContractService,
-    private readonly operationService: operationService,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     @InjectRepository(Voucher)
@@ -117,11 +116,7 @@ export class PaymentController {
             currencyPatientAmount,
             currencyPatient,
             currencyRate,
-            forSaving,
-            idSaving
           } = metadata;
-
-          if (forSaving == true && idSaving) return this.operationService.paymentSaving({saving: idSaving, amount: senderAmount, currency: senderCurrency, type: OperationType.CREDIT})
 
           const voucherData = await this.smartContractService.mintVoucher({
             amount: Math.round(currencyPatientAmount),
@@ -246,7 +241,7 @@ export class PaymentController {
       ])
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
       .getOne();
-    console.log(transaction);
+    // console.log(transaction);
 
     if (!transaction) throw new NotFoundException('Resource not found');
 

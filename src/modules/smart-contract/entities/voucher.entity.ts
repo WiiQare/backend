@@ -1,4 +1,3 @@
-import { BaseEntity } from '../../../db/base-entity';
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import {
   ReceiverType,
@@ -6,6 +5,7 @@ import {
   VoucherStatus,
 } from '../../../common/constants/enums';
 import { Transaction } from './transaction.entity';
+import { BaseEntity } from './../../../db/base-entity';
 
 @Entity()
 export class Voucher extends BaseEntity {

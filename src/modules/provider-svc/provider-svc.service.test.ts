@@ -148,7 +148,7 @@ describe('ProviderService', () => {
   };
 
   const mockVoucher: Voucher = {
-    id: '',
+    id: 'id',
     updatedAt: new Date(),
     createdAt: new Date(),
     voucherHash: '',
@@ -161,6 +161,11 @@ describe('ProviderService', () => {
     status: VoucherStatus.PENDING,
     transaction: mockTransaction.id,
   };
+
+  const mockVoucherWithTransaction = {
+    ...mockVoucher,
+    transaction: mockTransaction
+  }
 
   // Mock relations
   mockProvider.user = mockUser;
@@ -185,7 +190,7 @@ describe('ProviderService', () => {
       }),
     } as unknown as Repository<Transaction>;
     voucherRepository = {
-      findOne: jest.fn().mockResolvedValue(mockVoucher),
+      findOne: jest.fn().mockResolvedValue(mockVoucherWithTransaction),
       save: jest.fn().mockResolvedValue(mockVoucher),
       createQueryBuilder: jest.fn().mockReturnValue({
         where: jest.fn().mockReturnThis(),
@@ -370,8 +375,10 @@ describe('ProviderService', () => {
       jest.spyOn(service, 'sendTxVerificationOTP').mockResolvedValue(null);
 
       const result = await service.getTransactionByShortenHash(shortenHash);
-      expect(transactionRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'id', ownerType: UserType.PATIENT },
+      expect(voucherRepository.findOne).toHaveBeenCalledWith({
+        // where: { id: mockTransaction.ownerId, ownerType: UserType.PATIENT },
+        where: { shortenHash },
+        relations: [ 'transaction' ]
       });
       expect(patientRepository.findOne).toHaveBeenCalledWith({
         where: { id: mockTransaction.ownerId },
@@ -382,8 +389,8 @@ describe('ProviderService', () => {
         mockTransaction,
       );
       expect(result).toEqual({
-        shortenHash: '',
-        hash: '',
+        hash: mockVoucher.voucherHash,
+        shortenHash: mockVoucher.shortenHash,
         amount: mockTransaction.amount,
         currency: mockTransaction.currency,
         patientNames: `${mockPatient.firstName} ${mockPatient.lastName}`,

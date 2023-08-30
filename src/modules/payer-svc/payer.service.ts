@@ -169,13 +169,12 @@ export class PayerService {
         .getOne(),
       this.voucherRepository.findOne({ where: { shortenHash } }),
     ]);
-    const transaction = await this.transactionRepository.findOne({
-      where: { id: voucher.transaction },
-    });
+    const transaction = await this.transactionRepository.findOne({ where: { id: voucher.transaction }});
 
     if (!payer) throw new NotFoundException(_404.PAYER_NOT_FOUND);
 
-    if (!voucher) throw new NotFoundException(_404.INVALID_TRANSACTION_HASH);
+    if (!voucher)
+      throw new NotFoundException(_404.INVALID_TRANSACTION_HASH);
 
     if (voucher.senderId !== authUser.sub)
       throw new ForbiddenException(_403.ONLY_OWNER_CAN_SEND_VOUCHER);
