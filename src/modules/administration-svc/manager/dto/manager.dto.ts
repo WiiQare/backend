@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsEmail, IsString, IsUUID, IsEnum } from 'class-validator';
-import { UserRole, UserStatus } from 'src/common/constants/enums';
+import { UserRole, UserStatus } from '../../../../common/constants/enums';
 
 export class createManagerDTO {
   @IsNotEmpty()

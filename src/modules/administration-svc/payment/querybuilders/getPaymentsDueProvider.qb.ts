@@ -1,5 +1,5 @@
-import { Provider } from 'src/modules/provider-svc/entities/provider.entity';
-import { Transaction } from 'src/modules/smart-contract/entities/transaction.entity';
+import { Provider } from '../../../provider-svc/entities/provider.entity';
+import { Transaction } from '../../../smart-contract/entities/transaction.entity';
 import { DataSource } from 'typeorm';
 
 export function getAllProviderPaymentQueryBuilder(dataSource: DataSource) {

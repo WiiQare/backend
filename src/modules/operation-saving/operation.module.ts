@@ -2,8 +2,8 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SessionModule } from '../session/session.module';
 import { OperationSaving } from './entities/operation.entity';
-import { OperationController } from './saving.controller';
-import { operationService } from './saving.service';
+import { OperationController } from './operation.controller';
+import { operationService } from './operation.service';
 
 @Module({
   imports: [

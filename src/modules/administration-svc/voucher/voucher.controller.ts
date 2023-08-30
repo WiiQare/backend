@@ -2,8 +2,8 @@ import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
 import { VoucherService } from './voucher.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { VoucherDTO, VoucherSummaryDTO } from './dto/voucher.dto';
-import { UserRole } from 'src/common/constants/enums';
-import { Roles } from 'src/common/decorators/user-role.decorator';
+import { UserRole } from '../../../common/constants/enums';
+import { Roles } from '../../../common/decorators/user-role.decorator';
 
 @ApiTags('admin/vouchers')
 @Controller('vouchers')

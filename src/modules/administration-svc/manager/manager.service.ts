@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createManagerDTO } from './dto/manager.dto';
 import { User } from '../../session/entities/user.entity';
-import { UserRole, UserStatus } from 'src/common/constants/enums';
-import { SALT_ROUNDS } from 'src/common/constants/constants';
+import { UserRole, UserStatus } from '../../../common/constants/enums';
+import { SALT_ROUNDS } from '../../../common/constants/constants';
 
 @Injectable()
 export class ManagerService {

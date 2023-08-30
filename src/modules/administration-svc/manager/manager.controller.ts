@@ -1,14 +1,12 @@
 import { Body, ConflictException, Controller, Get, Post } from '@nestjs/common';
 import { ManagerService } from './manager.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { createManagerDTO, createManagerReponseDTO } from './dto/manager.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../session/entities/user.entity';
-import { Public } from 'src/common/decorators/public.decorator';
-import { Roles } from 'src/common/decorators/user-role.decorator';
-import { UserRole } from 'src/common/constants/enums';
-import { _409 } from 'src/common/constants/errors';
+import { Public } from '../../../common/decorators/public.decorator';
+import { _409 } from '../../../common/constants/errors';
 
 @ApiTags('admin/managers')
 @Controller('managers')

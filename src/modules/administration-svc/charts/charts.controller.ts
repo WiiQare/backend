@@ -1,8 +1,8 @@
 import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
 import { ChartsService } from './charts.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UserRole } from 'src/common/constants/enums';
-import { Roles } from 'src/common/decorators/user-role.decorator';
+import { UserRole } from '../../../common/constants/enums';
+import { Roles } from '../../../common/decorators/user-role.decorator';
 import { ChartDTO } from './dto/chart.dto';
 
 @ApiTags('admin/charts')
