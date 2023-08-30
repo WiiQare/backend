@@ -302,13 +302,6 @@ export class ProviderService {
         'voucherEntity',
         'voucherEntity.transaction = transaction.id'
       )
-      .leftJoinAndMapOne(
-        'transaction.owner',
-        Patient,
-        'owner',
-        'owner.id = transaction.ownerId'
-      )
-      .select(['transaction', 'voucherEntity', 'owner.firstName', 'owner.lastName'])
       .where('transaction.ownerId = :providerId', { providerId })
       .orWhere('transaction.hospitalId = :providerId', { providerId })
       .orderBy('transaction.updatedAt', 'DESC')
