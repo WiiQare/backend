@@ -241,7 +241,6 @@ export class PaymentController {
       ])
       .where('transaction.stripePaymentId = :paymentId', { paymentId })
       .getOne();
-    // console.log(transaction);
 
     if (!transaction) throw new NotFoundException('Resource not found');
 
