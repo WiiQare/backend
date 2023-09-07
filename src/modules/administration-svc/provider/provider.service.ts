@@ -14,6 +14,7 @@ import {
   getTotalBeneficiaryTransactionMadeWithinSixMonthsQueryBuilder,
   getTotalBeneficiaryTransactionMadeWithinThreeMonthsQueryBuilder,
   getTotalNumberOfUniqueBeneficiaryQueryBuilder,
+  getTotalVouchersQueryBuilder,
 } from './querybuilders/getProviderSummary.qb';
 
 @Injectable()
@@ -158,6 +159,9 @@ export class ProviderService {
 
     const { totalNumberOfRedeemedVouchers, totalAmountOfRedeemedVouchers } =
       await getAllRedeemedVouchersQueryBuilder(this.dataSource).getRawOne();
+
+    const { totalNumberOfVouchers, totalAmountOfVouchers } =
+      await getTotalVouchersQueryBuilder(this.dataSource).getRawOne();
     return {
       numberOfRegisteredProviders: numberOfRegisteredProviders || 0,
       totalBeneficiaryTransactionsWithinOneWeek: {
@@ -173,7 +177,7 @@ export class ProviderService {
       totalBeneficiaryTransactionsWithinThreeMonths: {
         numberOfTransactions:
           totalNumberOfBeneficiaryProviderTransactionWithinThreeMonths || 0,
-        value: totalValueOfBeneficiaryProviderTransactionWithinThreeMonths,
+        value: totalValueOfBeneficiaryProviderTransactionWithinThreeMonths || 0,
       },
       totalBeneficiaryTransactionsWithinSixMonths: {
         numberOfTransactions:
@@ -195,6 +199,10 @@ export class ProviderService {
       redeemedVouchers: {
         numberOfVouchers: totalNumberOfRedeemedVouchers || 0,
         value: totalAmountOfRedeemedVouchers || 0,
+      },
+      totalVouchers: {
+        numberOfVouchers: totalNumberOfVouchers || 0,
+        value: totalAmountOfVouchers || 0,
       },
     } as ProviderSummaryDTO;
   }

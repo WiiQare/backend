@@ -22,7 +22,7 @@ export function getAllProviderPaymentQueryBuilder(dataSource: DataSource) {
       .addSelect("provider.contact_person->>'country'", 'providerCountry')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere(
-        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'UNCLAIMED'",
+        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'SUCCESSFUL'",
       )
   );
 }

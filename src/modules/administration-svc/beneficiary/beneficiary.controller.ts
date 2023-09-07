@@ -11,7 +11,7 @@ export class BeneficiaryController {
   constructor(private readonly beneficiaryService: BeneficiaryService) {}
 
   @Get()
-  @Roles(UserRole.WIIQARE_ADMIN)
+  @Roles(UserRole.WIIQARE_ADMIN, UserRole.WIIQARE_MANAGER)
   @ApiOperation({
     summary: 'API endpoint to get list of all Beneficiaries informations',
   })
