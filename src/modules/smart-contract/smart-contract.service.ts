@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AppConfigService } from '../../config/app-config.service';
 import { logError, logInfo } from '../../helpers/common.helper';
 import Web3 from 'web3';
-// import { Account, AddedAccount } from 'web3-core';
+import { Account, AddedAccount } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
-// import { AbiItem } from 'web3-utils';
+import { AbiItem } from 'web3-utils';
 import { VoucherStatus } from '../../common/constants/enums';
 import abi from './abi/abi.json';
 import { MintVoucherDto } from './dto/mint-voucher.dto';
@@ -12,19 +12,19 @@ import { MintVoucherDto } from './dto/mint-voucher.dto';
 @Injectable()
 export class SmartContractService {
   private web3: Web3;
-  private readonly wiiqareContract;
-  private readonly wiiQareAccount;
+  private readonly wiiqareContract: Contract;
+  private readonly wiiQareAccount: Account;
 
   constructor(
     private readonly appConfigService: AppConfigService,
     @Inject('WEB3') web3: Web3,
   ) {
     this.web3 = web3;
-    // const abiItem: AbiItem = abi.abi as unknown as AbiItem;
-    // this.wiiqareContract = new this.web3.eth.Contract(
-    //   abiItem,
-    //   this.appConfigService.smartContractAddress,
-    // );
+    const abiItem: AbiItem = abi.abi as unknown as AbiItem;
+    this.wiiqareContract = new this.web3.eth.Contract(
+      abiItem,
+      this.appConfigService.smartContractAddress,
+    );
     this.wiiQareAccount = this.web3.eth.accounts.privateKeyToAccount(
       this.appConfigService.smartContractPrivateKey,
     );
@@ -143,9 +143,9 @@ export class SmartContractService {
    */
   async alterVoucher(voucherId: string, ownerId: string) {
     try {
-      // const rr: AddedAccount = this.web3.eth.accounts.wallet.add(
-      //   this.appConfigService.smartContractPrivateKey,
-      // );
+      const rr: AddedAccount = this.web3.eth.accounts.wallet.add(
+        this.appConfigService.smartContractPrivateKey,
+      );
 
       const result = await this.wiiqareContract.methods
         .alterVoucher(voucherId, [

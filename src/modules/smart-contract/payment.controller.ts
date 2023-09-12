@@ -172,8 +172,9 @@ export class PaymentController {
             voucher: voucherJSON,
             status: TransactionStatus.PENDING,
           });
-          const savedTransaction =
-            await this.transactionRepository.save(transactionToSave);
+          const savedTransaction = await this.transactionRepository.save(
+            transactionToSave,
+          );
 
           // update this
           const voucherToSave = this.voucherRepository.create({

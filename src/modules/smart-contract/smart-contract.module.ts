@@ -17,7 +17,7 @@ import { operationService } from '../operation-saving/operation.service';
     StripeModule.forRoot({
       // NOTICE: no keys we are using so far only webhooks!
       apiKey: 'my_secret_key',
-      apiVersion: '2023-08-16',
+      apiVersion: '2022-11-15',
     }),
     TypeOrmModule.forFeature([Transaction, Voucher, OperationSaving, Saving]),
   ],

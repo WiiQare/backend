@@ -50,7 +50,7 @@ import { SavingModule } from './modules/saving/saving.module';
     SavingModule,
     ProviderSvcModule,
     CommonModule,
-    // SmartContractModule,
+    SmartContractModule,
     MessagingModule,
     SMSModule,
     ObjectStorageModule,

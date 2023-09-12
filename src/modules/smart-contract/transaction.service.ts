@@ -54,7 +54,7 @@ export class TransactionService {
         'transaction.voucherEntity',
         Voucher,
         'voucherEntity',
-        'voucherEntity.transaction = transaction.id',
+        'voucherEntity.transaction = transaction.id'
       )
       .select([
         'transaction',
@@ -64,7 +64,7 @@ export class TransactionService {
         'patient.firstName',
         'patient.lastName',
         'patient.phoneNumber',
-        'voucherEntity',
+        'voucherEntity'
       ])
       .where('transaction.senderId = :senderId', { senderId })
       .orderBy('transaction.createdAt', 'DESC')

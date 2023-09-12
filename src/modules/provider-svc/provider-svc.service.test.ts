@@ -164,8 +164,8 @@ describe('ProviderService', () => {
 
   const mockVoucherWithTransaction = {
     ...mockVoucher,
-    transaction: mockTransaction,
-  };
+    transaction: mockTransaction
+  }
 
   // Mock relations
   mockProvider.user = mockUser;
@@ -378,7 +378,7 @@ describe('ProviderService', () => {
       expect(voucherRepository.findOne).toHaveBeenCalledWith({
         // where: { id: mockTransaction.ownerId, ownerType: UserType.PATIENT },
         where: { shortenHash },
-        relations: ['transaction'],
+        relations: [ 'transaction' ]
       });
       expect(patientRepository.findOne).toHaveBeenCalledWith({
         where: { id: mockTransaction.ownerId },
