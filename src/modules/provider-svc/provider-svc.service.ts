@@ -311,8 +311,8 @@ export class ProviderService {
         'owner.id = transaction.ownerId'
       )
       .select(['transaction', 'voucherEntity', 'owner.firstName', 'owner.lastName'])
-      // .where('transaction.ownerId = :providerId', { providerId })
-      .where('transaction.hospitalId = :providerId', { providerId })
+      .where('transaction.ownerId = :providerId', { providerId })
+      .orWhere('transaction.hospitalId = :providerId', { providerId })
       .orderBy('transaction.updatedAt', 'DESC')
       .getMany();
     //TODO: paginate this!.
