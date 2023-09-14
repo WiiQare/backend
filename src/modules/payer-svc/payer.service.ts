@@ -169,7 +169,7 @@ export class PayerService {
         .getOne(),
       this.voucherRepository.findOne({ where: { shortenHash } }),
     ]);
-    const transaction = await this.transactionRepository.findOne({ where: { id: voucher.transaction }});
+    const transaction = await this.transactionRepository.findOne({ where: { id: voucher.transaction.id }});
 
     if (!payer) throw new NotFoundException(_404.PAYER_NOT_FOUND);
 

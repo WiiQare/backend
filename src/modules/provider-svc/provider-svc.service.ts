@@ -250,12 +250,13 @@ export class ProviderService {
     securityCode: string,
   ): Promise<Record<string, any>> {
     // verify the transaction exists and if securityCode is right!
-    const voucher = this.voucherRepository.findOne({
-      where: { shortenHash }
+    const voucher = await this.voucherRepository.findOne({
+      where: { shortenHash },
+      relations: ['transaction']
     })
     const [transaction, provider] = await Promise.all([
       this.transactionRepository.findOne({
-        where: { id: (await voucher).transaction, ownerType: ReceiverType.PATIENT },
+        where: { id: voucher.transaction.id, ownerType: ReceiverType.PATIENT },
       }),
       this.providerRepository.findOne({ where: { id: providerId } }),
     ]);
@@ -273,15 +274,28 @@ export class ProviderService {
         _403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE,
       );
 
+    // console.log( transaction, provider, providerId, voucher );
+    // return {
+    //   code: 200,
+    //   message: 'Voucher transfer authorized successfully',
+    // };
+
     // transfer voucher from patient to provider
     //Update the voucher on block-chain
 
+    //Update the voucher in the database
+    const updatedVoucher = await this.voucherRepository.save({
+      ...voucher,
+      status: VoucherStatus.CLAIMED
+    });
     // Update the transaction in the database
     const updatedTransaction = await this.transactionRepository.save({
       ...transaction,
       ownerType: ReceiverType.PROVIDER,
       hospitalId: providerId,
+      status: TransactionStatus.SUCCESSFUL
     });
+    // console.log('updated', updatedTransaction, updatedVoucher );
 
     return {
       code: 200,

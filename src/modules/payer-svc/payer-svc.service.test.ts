@@ -111,7 +111,7 @@ describe('PayerService', () => {
     receiverId: mockPatient.id,
     receiverType: ReceiverType.PATIENT,
     status: VoucherStatus.PENDING,
-    transaction: mockTransaction.id,
+    transaction: mockTransaction,
   };
 
   beforeEach(async () => {
