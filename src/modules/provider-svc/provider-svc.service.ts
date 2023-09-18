@@ -284,16 +284,15 @@ export class ProviderService {
     //Update the voucher on block-chain
 
     //Update the voucher in the database
-    const updatedVoucher = await this.voucherRepository.save({
-      ...voucher,
-      status: VoucherStatus.CLAIMED
-    });
+    // const updatedVoucher = await this.voucherRepository.save({
+    //   ...voucher,
+    //   status: VoucherStatus.CLAIMED
+    // });
     // Update the transaction in the database
     const updatedTransaction = await this.transactionRepository.save({
       ...transaction,
       ownerType: ReceiverType.PROVIDER,
       hospitalId: providerId,
-      status: TransactionStatus.SUCCESSFUL
     });
     // console.log('updated', updatedTransaction, updatedVoucher );
 
@@ -343,7 +342,7 @@ export class ProviderService {
   ): Promise<Record<string, any>> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .where('transaction.ownerId = :providerId', { providerId })
+      .where('transaction.hospitalId = :providerId', { providerId })
       .getMany();
 
     let totalRedeemedAmount = 0,
@@ -372,24 +371,44 @@ export class ProviderService {
    * This method is used to redeem voucher
    *
    */
-  async redeemVoucher(hashes: string[]): Promise<Record<string, any>[]> {
+  async redeemVoucher(ids: string[]): Promise<Record<string, any>[]> {
     const transactions = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .where(`transaction.transactionHash In (:...hashes)`, { hashes })
+      .where(`id In (:...ids)`, { ids })
       .andWhere(`transaction.status = :status`, {
-        status: VoucherStatus.UNCLAIMED,
+        status: TransactionStatus.PENDING,
       })
       .getMany();
 
     // update transactions status to pending!.
-
     const updatedTransactionList = transactions.map((transaction) => ({
       ...transaction,
-      status: TransactionStatus.PENDING,
+      status: TransactionStatus.SUCCESSFUL,
+      voucher: {
+        ...transaction.voucher,
+        status: VoucherStatus.CLAIMED
+      }
     }));
 
+    const updatedTransactions = await this.transactionRepository.save(updatedTransactionList);
+
+    //update voucher status to claimed
+    const vouchers = await this.voucherRepository
+    .createQueryBuilder('voucher')
+    .where(`voucher.transaction_id In (:...ids)`, { ids: transactions.map( e=>e.id )})
+    .andWhere(`voucher.status = :status`, {
+      status: VoucherStatus.UNCLAIMED,
+    })
+    .getMany();
+
+    const updatedVoucherList = vouchers.map((voucher) => ({
+      ...voucher,
+      status: VoucherStatus.PENDING
+    }));
+    await this.voucherRepository.save(updatedVoucherList);
+
     //TODO: update the voucher details on chain.
-    return this.transactionRepository.save(updatedTransactionList);
+    return updatedTransactions;
   }
 
   // Add service to provider
