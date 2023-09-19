@@ -557,20 +557,30 @@ describe('ProviderService', () => {
     const mockTx1 = {
       ...mockTransaction,
       transactionHash: 'hash1',
+      id: 'hash1',
     };
     const mockTx2 = {
       ...mockTransaction,
       transactionHash: 'hash2',
+      id: 'hash2',
     };
 
     const newTxList = [
       {
         ...mockTx1,
-        status: VoucherStatus.PENDING,
+        status: TransactionStatus.SUCCESSFUL,
+        voucher: {
+          status: VoucherStatus.CLAIMED,
+          voucher: "voucher"
+        }
       },
       {
         ...mockTx2,
-        status: VoucherStatus.PENDING,
+        status: TransactionStatus.SUCCESSFUL,
+        voucher: {
+          status: VoucherStatus.CLAIMED,
+          voucher: "voucher"
+        }
       },
     ];
 
