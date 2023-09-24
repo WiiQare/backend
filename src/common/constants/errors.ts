@@ -110,6 +110,10 @@ export const _404 = {
     code: 'INVALID_TRANSACTION_HASH',
     description: 'Le code de transaction fourni est invalide!',
   },
+  VOUCHER_USED: {
+    code: 'VOUCHER_USED',
+    description: 'Ce bon a déjà été utilisé!'
+  }
 };
 
 export const _409 = {

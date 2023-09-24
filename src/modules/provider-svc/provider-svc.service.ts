@@ -212,8 +212,12 @@ export class ProviderService {
       where: { shortenHash },
       relations: [ 'transaction' ]
     });
+    console.log( voucher );
+    if(voucher.transaction.hospitalId){
+      console.log('invalid vouch');
+      throw new NotFoundException(_404.VOUCHER_USED);
 
-    console.log('v', voucher );
+    }
 
     if (!voucher.transaction)
       throw new NotFoundException(_404.INVALID_TRANSACTION_HASH);
@@ -351,11 +355,11 @@ export class ProviderService {
 
     transactions.forEach((transaction) => {
       if (transaction.status === TransactionStatus.PENDING)
-        totalPendingAmount += transaction.amount;
+        totalUnclaimedAmount += transaction.amount;  
       if (transaction.status === TransactionStatus.PAID_OUT)
         totalRedeemedAmount += transaction.amount;
       if (transaction.status === TransactionStatus.SUCCESSFUL)
-        totalUnclaimedAmount += transaction.amount;
+        totalPendingAmount += transaction.amount;  
     });
 
     return {
