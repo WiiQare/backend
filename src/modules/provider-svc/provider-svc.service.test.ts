@@ -114,7 +114,7 @@ describe('ProviderService', () => {
     currency: 'currency',
     senderId: 'senderId',
     ownerId: 'ownerId',
-    hospitalId: 'hospitalId',
+    hospitalId: null,
     ownerType: ReceiverType.PATIENT,
     status: TransactionStatus.PENDING,
     stripePaymentId: 'stripePaymentId',
@@ -571,16 +571,16 @@ describe('ProviderService', () => {
         status: TransactionStatus.SUCCESSFUL,
         voucher: {
           status: VoucherStatus.CLAIMED,
-          voucher: 'voucher',
-        },
+          voucher: "voucher"
+        }
       },
       {
         ...mockTx2,
         status: TransactionStatus.SUCCESSFUL,
         voucher: {
           status: VoucherStatus.CLAIMED,
-          voucher: 'voucher',
-        },
+          voucher: "voucher"
+        }
       },
     ];
 
