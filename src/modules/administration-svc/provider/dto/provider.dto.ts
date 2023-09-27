@@ -97,4 +97,7 @@ export class ProviderSummaryDTO {
 
   @IsString()
   currency: string;
+
+  @ValidateNested()
+  totalVouchers: VoucherTotalsInfo;
 }

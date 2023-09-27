@@ -22,7 +22,7 @@ export class VoucherService {
     // Vouchers made in one week
     const vouchersInOneWeek = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere('transaction.createdAt >= :datePrior', {
@@ -32,7 +32,7 @@ export class VoucherService {
     // Vouchers made in one month
     const vouchersInOneMonth = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere('transaction.createdAt >= :datePrior', {
@@ -42,7 +42,7 @@ export class VoucherService {
     // Vouchers made in three months
     const vouchersInThreeMonths = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere('transaction.createdAt >= :datePrior', {
@@ -52,7 +52,7 @@ export class VoucherService {
     // Vouchers made in six months
     const vouchersInInSixMonths = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere('transaction.createdAt >= :datePrior', {
@@ -62,14 +62,14 @@ export class VoucherService {
     // Vouchers made in max time
     const vouchersInMaxTime = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .getRawOne();
     // Pending vouchers
     const pendingVouchers = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere("transaction.status = 'PENDING'")
@@ -81,33 +81,33 @@ export class VoucherService {
     // Redeemed vouchers
     const redeemedVouchers = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere(
-        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'BURNED'",
+        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'PAID_OUT'",
       )
       .getRawOne();
 
     // Unclaimed vouchers
     const unclaimedVouchers = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere(
-        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'UNCLAIMED'",
+        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'SUCCESSFUL'",
       )
       .getRawOne();
 
     // Claimed vouchers
     const claimedVouchers = await this.transactionRepository
       .createQueryBuilder('transaction')
-      .select('COUNT(*)::integer', 'number')
+      .select("COUNT(DISTINCT transaction.voucher->>'id')::integer", 'number')
       .addSelect('SUM(transaction.senderAmount)', 'value')
       .where("transaction.senderCurrency IN ('eur','EUR')")
       .andWhere(
-        "transaction.ownerType = 'PROVIDER' AND transaction.status = 'CLAIMED'",
+        "transaction.ownerType = 'PROVIDER' AND transaction.voucher->>'status' = 'CLAIMED'",
       )
       .getRawOne();
 

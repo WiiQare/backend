@@ -29,7 +29,7 @@ function getLastProviderToBeneficiaryTransactionDateQueryBuilder(
       'lastBeneficiaryProviderTransaction',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
@@ -47,7 +47,7 @@ function getUniqueBeneficiaryCountPerProviderQueryBuilder(
       'UniqueBeneficiaryCount',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
@@ -65,7 +65,7 @@ function getTotalBeneficiaryProviderTransactionsWithinOneWeekQueryBuilder(
       'totalBeneficiaryProviderTransactionWithinOneWeek',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere('transaction.updatedAt >= :datePrior', {
       datePrior: subWeeks(Date.now(), 1),
@@ -85,7 +85,7 @@ function getTotalBeneficiaryProviderTransactionsWithinOneMonthQueryBuilder(
       'totalBeneficiaryProviderTransactionWithinOneMonth',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere('transaction.updatedAt >= :datePrior', {
       datePrior: subMonths(Date.now(), 1),
@@ -105,7 +105,7 @@ function getTotalBeneficiaryProviderTransactionsWithinThreeMonthQueryBuilder(
       'totalBeneficiaryProviderTransactionWithinThreeMonth',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere('transaction.updatedAt >= :datePrior', {
       datePrior: subMonths(Date.now(), 3),
@@ -125,7 +125,7 @@ function getTotalBeneficiaryProviderTransactionsWithinSixMonthQueryBuilder(
       'totalBeneficiaryProviderTransactionWithinSixMonth',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere('transaction.updatedAt >= :datePrior', {
       datePrior: subMonths(Date.now(), 6),
@@ -146,7 +146,7 @@ function getTotalBeneficiaryTransactionPerProviderQueryBuilder(
       'totalBeneficiaryProviderTransaction',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
@@ -165,7 +165,7 @@ function getTotalValueAndCountOfReceivedVouchersPerProviderQueryBuilder(
     )
     .addSelect('SUM(transaction.senderAmount)', 'totalAmountOfReceivedVouchers')
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .andWhere("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
@@ -186,7 +186,7 @@ function getUnclaimedVouchersPerProviderQueryBuilder(
       'totalAmountOfUnclaimedVouchers',
     )
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status ='UNCLAIMED'")
+    .andWhere("transaction.status ='SUCCESSFUL'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
@@ -205,7 +205,7 @@ function getClaimedVouchersPerProviderQueryBuilder(
     )
     .addSelect('SUM(transaction.senderAmount)', 'totalAmountOfClaimedVouchers')
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status = 'CLAIMED'")
+    .andWhere("transaction.voucher->>'status' = 'CLAIMED'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }
@@ -223,7 +223,7 @@ function getRedeemedVouchersPerProviderQueryBuilder(
     )
     .addSelect('SUM(transaction.senderAmount)', 'totalAmountOfRedeemedVouchers')
     .where("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status ='BURNED'")
+    .andWhere("transaction.status ='PAID_OUT'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"providerId"`);
 }

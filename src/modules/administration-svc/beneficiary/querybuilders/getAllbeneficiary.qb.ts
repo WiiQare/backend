@@ -61,7 +61,7 @@ function getTotalPaymentPerPatientQueryBuilder(
       "((transaction.status ='PENDING' AND transaction.ownerType ='PATIENT')",
     )
     .orWhere(
-      "(transaction.status IN ('UNCLAIMED','CLAIMED','BURNED') AND transaction.ownerType='PROVIDER'))",
+      "(transaction.status IN ('SUCCESSFUL','PAID_OUT') AND transaction.ownerType='PROVIDER'))",
     )
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"patientId"`);
@@ -80,7 +80,7 @@ function getActiveVoucherPerPatientQueryBuilder(
       "(transaction.status ='PENDING' AND transaction.ownerType ='PATIENT')",
     )
     .orWhere(
-      "(transaction.status IN ('UNCLAIMED','CLAIMED') AND transaction.ownerType='PROVIDER')",
+      "(transaction.status IN ('SUCCESSFUL','PAID_OUT') AND transaction.ownerType='PROVIDER')",
     )
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"patientId"`);
@@ -116,7 +116,7 @@ function getUnclaimedVoucherPerPatientQueryBuilder(
       'SUM(transaction.senderAmount)',
       'totalAmountOfUnclaimedVouchers',
     )
-    .where("transaction.status='UNCLAIMED'")
+    .where("transaction.status='SUCCESSFUL'")
     .andWhere("transaction.ownerType='PROVIDER'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"patientId"`);
@@ -132,7 +132,7 @@ function getRedeemedVoucherPerPatientQueryBuilder(
     .addSelect('COUNT(transaction.voucher)', 'numberOfRedeemedVouchers')
 
     .addSelect('SUM(transaction.senderAmount)', 'totalAmountOfRedeemedVouchers')
-    .where("transaction.status='BURNED'")
+    .where("transaction.status='PAID_OUT'")
     .andWhere("transaction.ownerType='PROVIDER'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')")
     .groupBy(`"patientId"`);

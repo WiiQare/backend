@@ -70,7 +70,7 @@ function getUnclaimedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
     )
     .where("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status='UNCLAIMED'")
+    .andWhere("transaction.status='SUCCESSFUL'")
     .groupBy('"payerId"');
 }
 function getRedeemedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
@@ -83,7 +83,7 @@ function getRedeemedVouchersPerPayerQueryBuilder(dataSource: DataSource) {
     .addSelect('SUM(transaction.senderAmount)', 'totalAmountOfRedeemedVouchers')
     .where("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status='BURNED'")
+    .andWhere("transaction.status='PAID_OUT'")
     .groupBy('"payerId"');
 }
 

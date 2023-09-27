@@ -53,7 +53,7 @@ export async function getAllPayersRedeemedVouchersInfoQueryBuilder(
     .addSelect('SUM(transaction.senderAmount)', 'totalValueOfRedeemedVouchers')
     .where("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere("transaction.ownerType='PROVIDER'")
-    .andWhere("transaction.status='BURNED'");
+    .andWhere("transaction.status='PAID_OUT'");
 }
 
 export async function getNumberOfActivePayersQueryBuilder(

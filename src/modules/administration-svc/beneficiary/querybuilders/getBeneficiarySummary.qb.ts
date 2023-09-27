@@ -36,7 +36,7 @@ export function getRedeemedVouchersForAllBeneficiariesQueryBuilder(
       'numberOfRedeemedVouchers',
     )
     .addSelect('SUM(transaction.senderAmount)', 'totalAmountOfRedeemedVouchers')
-    .where("transaction.status='BURNED'")
+    .where("transaction.status='PAID_OUT'")
     .andWhere("transaction.ownerType='PROVIDER'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }
@@ -52,7 +52,7 @@ export function getBeneficiaryToProviderTransactionsQueryBuilder(
       'SUM(transaction.senderAmount)',
       'totalAmountOfProviderTransactions',
     )
-    .where("transaction.status IN ('UNCLAIMED','CLAIMED','BURNED')")
+    .where("transaction.status IN ('SUCCESSFUL','PAID_OUT','FAILED')")
     .andWhere("transaction.ownerType='PROVIDER'")
     .andWhere("transaction.senderCurrency IN ('eur','EUR')");
 }

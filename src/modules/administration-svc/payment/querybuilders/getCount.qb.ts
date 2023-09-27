@@ -11,7 +11,7 @@ export function getCountProviderPaymentsQueryBuilder(dataSource: DataSource) {
     .addSelect('COUNT(transaction.id)::integer', 'numberOfProviderPayments')
     .where("transaction.senderCurrency IN ('eur','EUR')")
     .andWhere(
-      "transaction.ownerType = 'PROVIDER' AND transaction.status = 'UNCLAIMED'",
+      "transaction.ownerType = 'PROVIDER' AND transaction.status = 'SUCCESSFUL'",
     );
 }
 
