@@ -1,6 +1,5 @@
 # WiiQare backend
 
-[![Deploy BE to AWS Lightsail](https://github.com/WiiQare/backend/actions/workflows/main.yml/badge.svg)](https://github.com/WiiQare/backend/actions/workflows/main.yml)
 [![Test and CodeCov](https://github.com/WiiQare/backend/actions/workflows/test.js.yml/badge.svg)](https://github.com/WiiQare/backend/actions/workflows/test.js.yml)
 [![codecov](https://codecov.io/github/WiiQare/backend/branch/main/graph/badge.svg?token=VJTCQPYQBP)](https://codecov.io/github/WiiQare/backend)
 
