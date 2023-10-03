@@ -419,6 +419,7 @@ describe('ProviderService', () => {
     const shortenHash = 'shortenHash';
     const providerId = 'id';
     const securityCode = 'securityCode';
+    const services = ['id1', 'id2'];
     const cachedToken = `${APP_NAME}:transaction:${shortenHash}`;
 
     // it('should authorize a voucher transfer', async () => {
@@ -475,7 +476,7 @@ describe('ProviderService', () => {
       mockCachingService.get = jest.fn().mockResolvedValue('savedSecurityCode');
 
       await expect(
-        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode),
+        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000 ),
       ).rejects.toThrow(
         new ForbiddenException(_403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE),
       );

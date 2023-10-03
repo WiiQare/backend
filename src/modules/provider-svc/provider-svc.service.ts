@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,8 +17,8 @@ import {
   VoucherStatus,
 } from '../../common/constants/enums';
 import { _403, _404 } from '../../common/constants/errors';
-import { generateToken, randomSixDigit } from '../../helpers/common.helper';
-import { Repository } from 'typeorm';
+import { convertCurrency, generateToken, randomSixDigit } from '../../helpers/common.helper';
+import { In, Repository } from 'typeorm';
 import { CachingService } from '../caching/caching.service';
 import { MailService } from '../mail/mail.service';
 import { ObjectStorageService } from '../object-storage/object-storage.service';
@@ -37,9 +38,13 @@ import { Package } from './entities/package.entity';
 import { Provider } from './entities/provider.entity';
 import { Service } from './entities/service.entity';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
+import { SmartContractService } from '../smart-contract/smart-contract.service';
+import Web3 from 'web3';
 
 @Injectable()
 export class ProviderService {
+  private web3: Web3;
+
   constructor(
     @InjectRepository(Provider)
     private readonly providerRepository: Repository<Provider>,
@@ -59,7 +64,11 @@ export class ProviderService {
     private cachingService: CachingService,
     private mailService: MailService,
     private smsService: SmsService,
-  ) {}
+    private readonly smartContractService: SmartContractService,
+    @Inject('WEB3') web3: Web3,
+  ) {
+    this.web3 = web3;
+  }
 
   /**
    * This function retrieve provider account related by the provider id
@@ -252,17 +261,20 @@ export class ProviderService {
     shortenHash: string,
     providerId: string,
     securityCode: string,
+    serviceIds: string[],
+    total: number
   ): Promise<Record<string, any>> {
     // verify the transaction exists and if securityCode is right!
     const voucher = await this.voucherRepository.findOne({
       where: { shortenHash },
       relations: ['transaction'],
     });
-    const [transaction, provider] = await Promise.all([
+    const [transaction, provider, services ] = await Promise.all([
       this.transactionRepository.findOne({
         where: { id: voucher.transaction.id, ownerType: ReceiverType.PATIENT },
       }),
       this.providerRepository.findOne({ where: { id: providerId } }),
+      this.servicesRepository.find({ where: { id: In( serviceIds )}} )
     ]);
 
     if (!transaction)
@@ -277,6 +289,78 @@ export class ProviderService {
       throw new ForbiddenException(
         _403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE,
       );
+    
+    //compute total price of services ( hospital currency )
+    const serviceTotal = services.reduce( ( acc, el ) => { acc += parseInt( el.price.toString() ); return acc; }, 0 );
+    const voucherValueExchange = await convertCurrency('USD', voucher.value, 'CDF');
+    const voucherValueInCDF = parseInt( voucherValueExchange.result );
+
+    console.log('aight', serviceTotal, voucherValueInCDF );
+    //if services value is smaller than voucher
+    const threshold = 0.1;
+    if( (voucherValueInCDF - serviceTotal) > voucherValueInCDF*threshold ){
+      console.log('we should split ', serviceTotal, voucherValueInCDF-serviceTotal );
+
+      // const firstVoucher = [
+      //   this.web3.utils.toWei( serviceTotal ),
+      //   "USD",
+      //   "wiiqare_admin",
+      //   "hospitalA",
+      //   "pacientA",
+      //   "unclaimed",
+      // ];
+
+      // const secondVoucher = [
+      //   ethers.BigNumber.from(200),
+      //   "USD",
+      //   "hospitalA",
+      //   "hospitalA",
+      //   "pacientA",
+      //   "claimed",
+      // ];
+
+      // const voucherData = await this.smartContractService.splitVoucher({
+        
+      // });
+
+      // const voucherJSON = {
+      //   id: _.get(voucherData, 'events.mintVoucherEvent.returnValues.0'),
+      //   amount: _.get(
+      //     voucherData,
+      //     'events.mintVoucherEvent.returnValues.1.[0]',
+      //   ),
+      //   currency: _.get(
+      //     voucherData,
+      //     'events.mintVoucherEvent.returnValues.1.[1]',
+      //   ),
+      //   ownerId: _.get(
+      //     voucherData,
+      //     'events.mintVoucherEvent.returnValues.1.[2]',
+      //   ),
+      //   hospitalId: _.get(
+      //     voucherData,
+      //     'events.mintVoucherEvent.returnValues.1.[3]',
+      //   ),
+      //   patientId: _.get(
+      //     voucherData,
+      //     'events.mintVoucherEvent.returnValues.1.[4]',
+      //   ),
+      //   status: _.get(
+      //     voucherData,
+      //     'events.mintVoucherEvent.returnValues.1.[5]',
+      //   ),
+      // };
+
+
+    }
+    
+
+    return {
+      code: 200,
+      message: 'Voucher transfer authorized successfully',
+    };
+
+
 
     // console.log( transaction, provider, providerId, voucher );
     // return {

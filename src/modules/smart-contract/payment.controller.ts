@@ -24,7 +24,7 @@ import {
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Roles } from 'src/common/decorators/user-role.decorator';
-import { logError, logInfo } from 'src/helpers/common.helper';
+import { convertCurrency, logError, logInfo } from 'src/helpers/common.helper';
 import { Stripe } from 'stripe';
 import { Repository } from 'typeorm';
 import { AppConfigService } from '../../config/app-config.service';
@@ -118,8 +118,14 @@ export class PaymentController {
             currencyRate,
           } = metadata;
 
+          //convert sender currency into dollar ( stable currency for exchange )
+          const convertedAmount = await convertCurrency( senderCurrency, senderAmount/100, 'usd' );
+          const dollarAmount = parseFloat( convertedAmount.result );
+
+          console.log('CONVERTED AMOUNT:', dollarAmount );
+
           const voucherData = await this.smartContractService.mintVoucher({
-            amount: Math.round(currencyPatientAmount),
+            amount: Math.floor( dollarAmount ),
             ownerId: patientId,
             currency: currencyPatient,
             patientId: patientId,
@@ -163,7 +169,7 @@ export class PaymentController {
           const transactionToSave = this.transactionRepository.create({
             senderAmount: senderAmount / 100,
             senderCurrency: senderCurrency.toUpperCase(),
-            amount: Math.round(currencyPatientAmount),
+            amount: currencyPatientAmount,
             currency: currencyPatient,
             conversionRate: currencyRate,
             senderId,
@@ -180,7 +186,7 @@ export class PaymentController {
           const voucherToSave = this.voucherRepository.create({
             voucherHash: transactionHash,
             shortenHash: shortenHash,
-            value: currencyPatientAmount,
+            value: Math.floor( dollarAmount ),
             senderId: senderId,
             senderType: SenderType.PAYER,
             receiverId: patientId,
@@ -209,6 +215,7 @@ export class PaymentController {
   async retrieveVoucherByPaymentId(
     @Query('paymentId') paymentId: string,
   ): Promise<any> {
+
     let transaction = await this.transactionRepository
       .createQueryBuilder('transaction')
       .leftJoinAndMapOne(
