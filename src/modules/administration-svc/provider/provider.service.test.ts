@@ -89,6 +89,12 @@ describe('ProviderService', () => {
       .mockReturnValue({
         getRawOne: jest.fn().mockResolvedValue({}),
       } as any);
+
+    jest
+      .spyOn(ProviderSummary, 'getTotalVouchersQueryBuilder')
+      .mockReturnValue({
+        getRawOne: jest.fn().mockResolvedValue({}),
+      } as any);
     const summary = await service.getSummary();
     expect(summary).toBeDefined();
   });
