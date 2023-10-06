@@ -53,7 +53,7 @@ describe('SessionService', () => {
     country: 'country',
     homeAddress: 'homeAddress',
     referralCode: 'referralCode',
-    kyc: false
+    kyc: false,
   };
 
   // Mock provider entity

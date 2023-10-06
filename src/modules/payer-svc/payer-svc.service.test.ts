@@ -65,7 +65,7 @@ describe('PayerService', () => {
     user: mockUser,
     country: 'country',
     referralCode: 'REF-f01a2f',
-    kyc: false
+    kyc: false,
   };
 
   const mockPatient: Patient = {

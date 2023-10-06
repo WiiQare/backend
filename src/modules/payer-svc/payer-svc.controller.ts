@@ -156,9 +156,7 @@ export class PayerSvcController {
     @AuthUser() authUser: JwtClaimsDataDto,
     @Body() kycData: KYCDto,
   ): Promise<any> {
-
     const updatedPayer = await this.payerService.updateKYC(authUser, kycData);
     return { message: 'Mise à jour réussie', data: updatedPayer };
-    
   }
 }

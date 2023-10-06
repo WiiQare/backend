@@ -571,16 +571,16 @@ describe('ProviderService', () => {
         status: TransactionStatus.SUCCESSFUL,
         voucher: {
           status: VoucherStatus.CLAIMED,
-          voucher: "voucher"
-        }
+          voucher: 'voucher',
+        },
       },
       {
         ...mockTx2,
         status: TransactionStatus.SUCCESSFUL,
         voucher: {
           status: VoucherStatus.CLAIMED,
-          voucher: "voucher"
-        }
+          voucher: 'voucher',
+        },
       },
     ];
 

@@ -195,7 +195,7 @@ export class PayerService {
     );
   }
 
-  async updateKYC( authUser: JwtClaimsDataDto, kycData: KYCDto): Promise<Payer> {
+  async updateKYC(authUser: JwtClaimsDataDto, kycData: KYCDto): Promise<Payer> {
     const payer = await this.payerRepository.findOne({
       where: {
         user: {

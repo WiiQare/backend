@@ -112,8 +112,8 @@ export const _404 = {
   },
   VOUCHER_USED: {
     code: 'VOUCHER_USED',
-    description: 'Ce bon a déjà été utilisé!'
-  }
+    description: 'Ce bon a déjà été utilisé!',
+  },
 };
 
 export const _409 = {
