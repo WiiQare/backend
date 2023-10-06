@@ -26,6 +26,18 @@ export class Payer extends BaseEntity {
   @Column({ nullable: true })
   city?: string;
 
+  @Column({ nullable: true })
+  birthday?: string;
+
+  @Column({ nullable: true })
+  cardID?: string;
+
+  @Column({ nullable: true })
+  expire?: string;
+
+  @Column({ default: false })
+  kyc: boolean;
+
   @Column({ unique: true, nullable: true }) // TODO: remove this nullable later!
   referralCode: string;
 }
