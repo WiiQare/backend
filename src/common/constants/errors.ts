@@ -84,9 +84,9 @@ export const _403 = {
     description: 'Invalid voucher transfer verification code provided!',
   },
   ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS: {
-    code: "ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS",
-    description: "Seul le payer peux check son status"
-  }
+    code: 'ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS',
+    description: 'Seul le payer peux check son status',
+  },
 };
 
 export const _404 = {

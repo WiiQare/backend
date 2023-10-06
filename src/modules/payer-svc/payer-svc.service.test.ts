@@ -374,7 +374,7 @@ describe('PayerService', () => {
   //   ).rejects.toThrow(new BadRequestException(_403.ACCESS_NOT_ALLOWED));
   // });
 
-  it("should retrieve if payer has already fill his KYC", async () => {
+  it('should retrieve if payer has already fill his KYC', async () => {
     const authUser: JwtClaimsDataDto = {
       sub: 'anotherPayerId',
       type: UserRole.PAYER,
@@ -383,8 +383,8 @@ describe('PayerService', () => {
       status: UserStatus.ACTIVE,
     };
 
-    expect(async () =>
-      service.checkKyc(authUser),
-    ).rejects.toThrow(new ForbiddenException(_403.ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS));
+    expect(async () => service.checkKyc(authUser)).rejects.toThrow(
+      new ForbiddenException(_403.ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS),
+    );
   });
 });

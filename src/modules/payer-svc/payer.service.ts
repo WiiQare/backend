@@ -218,13 +218,13 @@ export class PayerService {
     const payer = await this.payerRepository.findOne({
       where: {
         user: {
-          id: authUser.sub
+          id: authUser.sub,
         },
       },
     });
 
     if (!payer) throw new NotFoundException(_404.PAYER_NOT_FOUND);
 
-    return payer.kyc
+    return payer.kyc;
   }
 }

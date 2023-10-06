@@ -161,9 +161,7 @@ export class PayerSvcController {
   }
 
   @Post('check-kyc')
-  async checkKyc(
-    @AuthUser() authUser: JwtClaimsDataDto
-  ): Promise<boolean> {
+  async checkKyc(@AuthUser() authUser: JwtClaimsDataDto): Promise<boolean> {
     return await this.payerService.checkKyc(authUser);
   }
 }
