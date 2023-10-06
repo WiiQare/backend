@@ -159,4 +159,11 @@ export class PayerSvcController {
     const updatedPayer = await this.payerService.updateKYC(authUser, kycData);
     return { message: 'Mise à jour réussie', data: updatedPayer };
   }
+
+  @Post('check-kyc')
+  async checkKyc(
+    @AuthUser() authUser: JwtClaimsDataDto
+  ): Promise<boolean> {
+    return await this.payerService.checkKyc(authUser);
+  }
 }
