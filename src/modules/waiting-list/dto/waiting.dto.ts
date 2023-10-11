@@ -18,6 +18,5 @@ export class CreateWaitingDto {
 
   @IsNotEmpty()
   @IsString()
-  @IsEmail()
   phone: string;
 }
