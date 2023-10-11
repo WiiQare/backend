@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsISO31661Alpha2,
@@ -72,4 +73,22 @@ export class SendSmsVoucherDto {
   @IsString()
   @Length(8, 8)
   shortenHash: string;
+}
+
+export class KYCDto {
+  @IsNotEmpty()
+  @IsString()
+  expire: string;
+
+  @IsNotEmpty()
+  @IsString()
+  cardID: string;
+
+  @IsNotEmpty()
+  @IsString()
+  birthday: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  kyc: boolean;
 }

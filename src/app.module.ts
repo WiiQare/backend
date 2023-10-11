@@ -24,6 +24,7 @@ import { SmartContractModule } from './modules/smart-contract/smart-contract.mod
 import { SMSModule } from './modules/sms/sms.module';
 import { SavingModule } from './modules/saving/saving.module';
 import { OperationModule } from './modules/operation-saving/operation.module';
+import { WaitingModule } from './modules/waiting-list/waiting.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { OperationModule } from './modules/operation-saving/operation.module';
     }),
     CachingModule,
     MailModule,
+    WaitingModule,
     AuthModule,
     SessionModule,
     AdministrationSvcModule,

@@ -212,11 +212,10 @@ export class ProviderService {
       where: { shortenHash },
       relations: ['transaction'],
     });
-    console.log( voucher );
-    if(voucher.transaction.hospitalId){
+    console.log(voucher);
+    if (voucher.transaction.hospitalId) {
       console.log('invalid vouch');
       throw new NotFoundException(_404.VOUCHER_USED);
-
     }
 
     if (!voucher.transaction)
@@ -360,11 +359,11 @@ export class ProviderService {
 
     transactions.forEach((transaction) => {
       if (transaction.status === TransactionStatus.PENDING)
-        totalUnclaimedAmount += transaction.amount;  
+        totalUnclaimedAmount += transaction.amount;
       if (transaction.status === TransactionStatus.PAID_OUT)
         totalRedeemedAmount += transaction.amount;
       if (transaction.status === TransactionStatus.SUCCESSFUL)
-        totalPendingAmount += transaction.amount;  
+        totalPendingAmount += transaction.amount;
     });
 
     return {
@@ -395,24 +394,28 @@ export class ProviderService {
       status: TransactionStatus.SUCCESSFUL,
       voucher: {
         ...transaction.voucher,
-        status: VoucherStatus.CLAIMED
-      }
+        status: VoucherStatus.CLAIMED,
+      },
     }));
 
-    const updatedTransactions = await this.transactionRepository.save(updatedTransactionList);
+    const updatedTransactions = await this.transactionRepository.save(
+      updatedTransactionList,
+    );
 
     //update voucher status to claimed
     const vouchers = await this.voucherRepository
-    .createQueryBuilder('voucher')
-    .where(`voucher.transaction_id In (:...ids)`, { ids: transactions.map( e=>e.id )})
-    .andWhere(`voucher.status = :status`, {
-      status: VoucherStatus.UNCLAIMED,
-    })
-    .getMany();
+      .createQueryBuilder('voucher')
+      .where(`voucher.transaction_id In (:...ids)`, {
+        ids: transactions.map((e) => e.id),
+      })
+      .andWhere(`voucher.status = :status`, {
+        status: VoucherStatus.UNCLAIMED,
+      })
+      .getMany();
 
     const updatedVoucherList = vouchers.map((voucher) => ({
       ...voucher,
-      status: VoucherStatus.PENDING
+      status: VoucherStatus.PENDING,
     }));
     await this.voucherRepository.save(updatedVoucherList);
 

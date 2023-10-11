@@ -17,7 +17,7 @@ import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
 import { SmsService } from '../sms/sms.service';
-import { CreatePayerAccountDto, SendInviteDto } from './dto/payer.dto';
+import { CreatePayerAccountDto, KYCDto, SendInviteDto } from './dto/payer.dto';
 import { Payer } from './entities/payer.entity';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
 
@@ -193,5 +193,38 @@ export class PayerService {
       transaction.amount,
       transaction.currency,
     );
+  }
+
+  async updateKYC(authUser: JwtClaimsDataDto, kycData: KYCDto): Promise<Payer> {
+    const payer = await this.payerRepository.findOne({
+      where: {
+        user: {
+          id: authUser.sub,
+        },
+      },
+    });
+
+    if (!payer) throw new NotFoundException(_404.PAYER_NOT_FOUND);
+
+    payer.expire = kycData.expire;
+    payer.cardID = kycData.cardID;
+    payer.birthday = kycData.birthday;
+    payer.kyc = kycData.kyc;
+
+    return this.payerRepository.save(payer);
+  }
+
+  async checkKyc(authUser: JwtClaimsDataDto): Promise<boolean> {
+    const payer = await this.payerRepository.findOne({
+      where: {
+        user: {
+          id: authUser.sub,
+        },
+      },
+    });
+
+    if (!payer) throw new NotFoundException(_404.PAYER_NOT_FOUND);
+
+    return payer.kyc;
   }
 }

@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -30,6 +31,7 @@ import { User } from '../session/entities/user.entity';
 import { SessionService } from '../session/session.service';
 import {
   CreatePayerAccountDto,
+  KYCDto,
   SearchPatientDto,
   SendInviteDto,
   SendSmsVoucherDto,
@@ -147,5 +149,19 @@ export class PayerSvcController {
   ): Promise<void> {
     const { shortenHash } = sendSmsVoucherDto;
     return await this.payerService.sendSmsVoucher(shortenHash, authUser);
+  }
+
+  @Put('kyc')
+  async updatePayer(
+    @AuthUser() authUser: JwtClaimsDataDto,
+    @Body() kycData: KYCDto,
+  ): Promise<any> {
+    const updatedPayer = await this.payerService.updateKYC(authUser, kycData);
+    return { message: 'Mise à jour réussie', data: updatedPayer };
+  }
+
+  @Post('check-kyc')
+  async checkKyc(@AuthUser() authUser: JwtClaimsDataDto): Promise<boolean> {
+    return await this.payerService.checkKyc(authUser);
   }
 }

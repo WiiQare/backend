@@ -89,4 +89,19 @@ export class MailService {
       },
     });
   }
+
+  async sendConfirmationEmailForWaiting(
+    email: string | string[],
+    name: string,
+  ): Promise<void> {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Vous avez rejoins la liste d\'attente WiiQare',
+      template: './waiting-confirmation',
+      context: {
+        names: name,
+        year: `© ${new Date().getFullYear()}`,
+      },
+    });
+  }
 }

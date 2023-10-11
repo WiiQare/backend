@@ -16,7 +16,7 @@ import {
   UserStatus,
   VoucherStatus,
 } from '../../common/constants/enums';
-import { SendInviteDto } from './dto/payer.dto';
+import { KYCDto, SendInviteDto } from './dto/payer.dto';
 import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 import {
   BadRequestException,
@@ -65,6 +65,7 @@ describe('PayerService', () => {
     user: mockUser,
     country: 'country',
     referralCode: 'REF-f01a2f',
+    kyc: false,
   };
 
   const mockPatient: Patient = {
@@ -351,5 +352,39 @@ describe('PayerService', () => {
     expect(async () =>
       service.sendSmsVoucher('shortenHash', authUser),
     ).rejects.toThrow(new ForbiddenException(_403.ONLY_OWNER_CAN_SEND_VOUCHER));
+  });
+
+  // it("should save information when we scan KYC face", async () => {
+  //   const authUser: JwtClaimsDataDto = {
+  //     sub: 'anotherPayerId',
+  //     type: UserRole.PAYER,
+  //     phoneNumber: mockPayer.user.phoneNumber,
+  //     names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+  //     status: UserStatus.ACTIVE
+  //   };
+
+  //   const kycData: KYCDto = {
+  //     expire: "2017/05",
+  //     cardID: "ABCD",
+  //     birthday: "2002-05-10",
+  //     kyc: true
+  //   }
+  //   expect(async () =>
+  //     service.updateKYC(authUser, kycData),
+  //   ).rejects.toThrow(new BadRequestException(_403.ACCESS_NOT_ALLOWED));
+  // });
+
+  it('should retrieve if payer has already fill his KYC', async () => {
+    const authUser: JwtClaimsDataDto = {
+      sub: 'anotherPayerId',
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
+
+    expect(async () => service.checkKyc(authUser)).rejects.toThrow(
+      new ForbiddenException(_403.ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS),
+    );
   });
 });
