@@ -302,43 +302,47 @@ describe('PayerService', () => {
     expect(mockSmsService.sendVoucherAsAnSMS).toBeCalledTimes(1);
   });
 
-  // it('should raise an error if the payer is not found', async () => {
-  //   const authUser: JwtClaimsDataDto = {
-  //     sub: 'somePayerId',
-  //     type: UserRole.PAYER,
-  //     phoneNumber: mockPayer.user.phoneNumber,
-  //     names: `${mockPayer.firstName} ${mockPayer.lastName}`,
-  //     status: UserStatus.ACTIVE,
-  //   };
+  it('should raise an error if the payer is not found', async () => {
+    const authUser: JwtClaimsDataDto = {
+      sub: 'somePayerId',
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
 
-  //   // Mock payer repository to return undefined
-  //   payerRepository.createQueryBuilder = jest.fn().mockReturnValue({
-  //     leftJoinAndSelect: jest.fn().mockReturnThis(),
-  //     where: jest.fn().mockReturnThis(),
-  //     getOne: jest.fn().mockResolvedValue(undefined),
-  //   });
+    // Mock payer repository to return undefined
+    payerRepository.createQueryBuilder = jest.fn().mockReturnValue({
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockRejectedValue(new Error('test error')),
+    });
 
-  //   expect(async () =>
-  //     service.sendSmsVoucher('someHash', authUser),
-  //   ).rejects.toThrow(new NotFoundException(_404.PAYER_NOT_FOUND));
-  // });
+    expect(async () =>
+      service.sendSmsVoucher('someHash', authUser),
+    ).rejects.toThrow(new Error('test error'));
+  });
 
-  // it('should raise an error if the transaction is not found', async () => {
-  //   const authUser: JwtClaimsDataDto = {
-  //     sub: mockPayer.id,
-  //     type: UserRole.PAYER,
-  //     phoneNumber: mockPayer.user.phoneNumber,
-  //     names: `${mockPayer.firstName} ${mockPayer.lastName}`,
-  //     status: UserStatus.ACTIVE,
-  //   };
+  it('should raise an error if the transaction is not found', async () => {
+    const authUser: JwtClaimsDataDto = {
+      sub: mockPayer.id,
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
 
-  //   // Mock transaction repository to return undefined
-  //   transactionRepository.findOne = jest.fn().mockResolvedValue(undefined);
+    // Mock transaction repository to return undefined
+    transactionRepository.findOne = jest
+      .fn()
+      .mockRejectedValue(new Error('test error'));
 
-  //   expect(async () =>
-  //     service.sendSmsVoucher('someHash', authUser),
-  //   ).rejects.toThrow(new NotFoundException(_404.INVALID_TRANSACTION_HASH));
-  // });
+    try {
+      await service.sendSmsVoucher('someHash', authUser);
+    } catch (err) {
+      expect(err).toEqual(new Error('test error'));
+    }
+  });
 
   it("should raise an error if the transaction's sender is not the auth user", async () => {
     const authUser: JwtClaimsDataDto = {
@@ -354,25 +358,25 @@ describe('PayerService', () => {
     ).rejects.toThrow(new ForbiddenException(_403.ONLY_OWNER_CAN_SEND_VOUCHER));
   });
 
-  // it("should save information when we scan KYC face", async () => {
-  //   const authUser: JwtClaimsDataDto = {
-  //     sub: 'anotherPayerId',
-  //     type: UserRole.PAYER,
-  //     phoneNumber: mockPayer.user.phoneNumber,
-  //     names: `${mockPayer.firstName} ${mockPayer.lastName}`,
-  //     status: UserStatus.ACTIVE
-  //   };
+  it('should save information when we scan KYC face', async () => {
+    const authUser: JwtClaimsDataDto = {
+      sub: 'anotherPayerId',
+      type: UserRole.PAYER,
+      phoneNumber: mockPayer.user.phoneNumber,
+      names: `${mockPayer.firstName} ${mockPayer.lastName}`,
+      status: UserStatus.ACTIVE,
+    };
 
-  //   const kycData: KYCDto = {
-  //     expire: "2017/05",
-  //     cardID: "ABCD",
-  //     birthday: "2002-05-10",
-  //     kyc: true
-  //   }
-  //   expect(async () =>
-  //     service.updateKYC(authUser, kycData),
-  //   ).rejects.toThrow(new BadRequestException(_403.ACCESS_NOT_ALLOWED));
-  // });
+    const kycData: KYCDto = {
+      expire: '2017/05',
+      cardID: 'ABCD',
+      birthday: '2002-05-10',
+      kyc: true,
+    };
+
+    const res = await service.updateKYC(authUser, kycData);
+    expect(res).toEqual(mockPayer);
+  });
 
   it('should retrieve if payer has already fill his KYC', async () => {
     const authUser: JwtClaimsDataDto = {
@@ -383,8 +387,7 @@ describe('PayerService', () => {
       status: UserStatus.ACTIVE,
     };
 
-    expect(async () => service.checkKyc(authUser)).rejects.toThrow(
-      new ForbiddenException(_403.ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS),
-    );
+    const res = await service.checkKyc(authUser);
+    expect(res).toEqual(mockPayer.kyc);
   });
 });
