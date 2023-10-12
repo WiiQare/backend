@@ -12,6 +12,6 @@ import { MailModule } from '../mail/mail.module';
   ],
   controllers: [WaitingController],
   providers: [WaitingService],
-  exports: [WaitingService], 
+  exports: [WaitingService],
 })
 export class WaitingModule {}

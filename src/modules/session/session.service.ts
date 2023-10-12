@@ -63,6 +63,12 @@ export class SessionService {
     if (user.status !== UserStatus.ACTIVE)
       throw new ForbiddenException(_403.USER_ACCOUNT_NOT_ACTIVE);
 
+    const isValidPassword = bcrypt.compareSync(password, user.password);
+
+    if (!isValidPassword) {
+      throw new UnauthorizedException(_401.INVALID_CREDENTIALS);
+    }
+
     let detailsInformation, otherData;
 
     if (user.role === UserRole.PAYER) {
@@ -75,11 +81,6 @@ export class SessionService {
         ...otherData,
         payerId: detailsInformation.id,
       };
-
-      const isValidPassword = bcrypt.compareSync(password, user.password);
-
-      if (!isValidPassword)
-        throw new UnauthorizedException(_401.INVALID_CREDENTIALS);
     }
 
     if (user.role === UserRole.PROVIDER) {
@@ -94,11 +95,6 @@ export class SessionService {
         ...otherData,
         providerId: detailsInformation.id,
       };
-
-      const isValidPassword = bcrypt.compareSync(password, user.password);
-
-      if (!isValidPassword)
-        throw new UnauthorizedException(_401.INVALID_CREDENTIALS);
     }
 
     //TODO: improve this!.
