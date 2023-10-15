@@ -31,3 +31,30 @@ export const randomSixDigit = (): string => {
 export const generateToken = (): string => {
   return crypto.randomBytes(16).toString('hex');
 };
+
+
+/** 
+ * This helper function will convert currency using the api
+ */
+export async function convertCurrency(from: string, amount: number, to: string ) {
+  try {
+    const Options = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        //this should be moved to env vars
+        apikey: `i6sKwItIpG9o1PLxB6nykJ5OFecFsW8X`,
+      },
+    };
+
+    const response = await fetch(
+      `https://api.apilayer.com/exchangerates_data/convert?to=${to}&from=${from}&amount=${amount}`,
+      Options,
+    );
+    const json = await response.json();
+
+    return json;
+  } catch (error) {
+    return error;
+  }
+}

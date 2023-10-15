@@ -133,6 +133,14 @@ export class AuthorizeVoucherTransferDto {
   @IsNotEmpty()
   @IsString()
   securityCode: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  services: string[];
+
+  @IsNotEmpty()
+  @IsNumber()
+  total: number;
 }
 
 export class SearchTransactionDto {
