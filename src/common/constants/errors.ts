@@ -83,6 +83,10 @@ export const _403 = {
     code: 'INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE',
     description: 'Invalid voucher transfer verification code provided!',
   },
+  WRONG_VOUCHER_CURRENCY: {
+    code: 'WRONG_VOUCHER_CURRENCY',
+    description: 'Voucher currency is different from hospital accepted currency',
+  }
 };
 
 export const _404 = {

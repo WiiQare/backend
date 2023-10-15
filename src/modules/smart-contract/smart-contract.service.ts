@@ -190,4 +190,24 @@ export class SmartContractService {
       logError(`Error in getVoucher: ${err}`);
     }
   }
+
+  async burnVoucher( voucherID: number ) {
+    const rr = this.web3.eth.accounts.wallet.add(
+      this.appConfigService.smartContractPrivateKey,
+    );
+
+    const response = await this.wiiqareContract.methods
+      .burn([
+        voucherID
+      ])
+      .send({
+        from: this.wiiQareAccount.address,
+        gasPrice: '30000000000',
+        gas: '3996000',
+      });
+
+    logInfo(`response -> ${response}`);
+
+    return response;
+  }
 }

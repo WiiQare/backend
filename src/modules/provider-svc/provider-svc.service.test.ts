@@ -25,6 +25,8 @@ import { _403, _404 } from '../../common/constants/errors';
 import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import { RegisterProviderDto } from './dto/provider.dto';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
+import { SmartContractService } from '../smart-contract/smart-contract.service';
+import Web3 from 'web3';
 
 describe('ProviderService', () => {
   let service: ProviderService;
@@ -53,6 +55,11 @@ describe('ProviderService', () => {
   const mockSmsService = {
     sendTransactionVerificationTokenBySmsToAPatient: jest.fn(),
   } as unknown as SmsService;
+
+  const mockSmartContractService = {
+    burnVoucher: () => {},
+    mintVoucher: () => {}
+  } as unknown as SmartContractService;
 
   // Mock entities
   const mockProvider: Provider = {
@@ -98,7 +105,7 @@ describe('ProviderService', () => {
     updatedAt: new Date(),
     name: 'name',
     description: 'description',
-    price: 1,
+    price: 100,
     provider: new Provider(),
     packages: [mockPackage],
   };
@@ -107,11 +114,11 @@ describe('ProviderService', () => {
     id: 'id',
     createdAt: new Date(),
     updatedAt: new Date(),
-    senderAmount: 1,
+    senderAmount: 1000,
     senderCurrency: 'senderCurrency',
-    amount: 1,
+    amount: 1000,
     conversionRate: 1,
-    currency: 'currency',
+    currency: 'CDF',
     senderId: 'senderId',
     ownerId: 'ownerId',
     hospitalId: null,
@@ -151,9 +158,10 @@ describe('ProviderService', () => {
     id: 'id',
     updatedAt: new Date(),
     createdAt: new Date(),
+    vid: 1,
     voucherHash: '',
     shortenHash: '',
-    value: 1,
+    value: 1000,
     senderId: mockProvider.id,
     senderType: SenderType.PAYER,
     receiverId: mockPatient.id,
@@ -224,6 +232,7 @@ describe('ProviderService', () => {
       mockCachingService as CachingService,
       mockMailService as MailService,
       mockSmsService as SmsService,
+      mockSmartContractService as SmartContractService,
     );
   });
 
@@ -419,7 +428,7 @@ describe('ProviderService', () => {
     const shortenHash = 'shortenHash';
     const providerId = 'id';
     const securityCode = 'securityCode';
-    const services = ['id1', 'id2'];
+    const services = ['id'];
     const cachedToken = `${APP_NAME}:transaction:${shortenHash}`;
 
     // it('should authorize a voucher transfer', async () => {
@@ -480,6 +489,49 @@ describe('ProviderService', () => {
       ).rejects.toThrow(
         new ForbiddenException(_403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE),
       );
+    });
+
+    it('should throw an error if the voucher currency is not CDF', async () => {
+      transactionRepository.findOne = jest.fn().mockResolvedValue( {...mockTransaction, currency: 'USD'} );
+
+      await expect(
+        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000 ),
+      ).rejects.toThrow(
+        new ForbiddenException(_403.WRONG_VOUCHER_CURRENCY),
+      );
+    });
+
+    it('should split into 2 vouchers with values summing the first voucher', async () => {
+      mockCachingService.get = jest.fn().mockResolvedValue( securityCode );
+      const voucher1 = { value: 100 };
+      const voucher2 = { value: 900 };
+      transactionRepository.create = jest.fn().
+        mockImplementationOnce( ( obj ) => { return {value: obj.amount} } ).
+        mockImplementationOnce( ( obj ) => { return {value: obj.amount} } );
+      
+      voucherRepository.findOne = jest.fn().mockResolvedValue( mockVoucher );
+      voucherRepository.create = jest.fn().mockResolvedValue( 
+        {}
+       );
+      providerRepository.findOne = jest.fn().mockResolvedValue( mockProvider );
+      serviceRepository.find = jest.fn().mockResolvedValue( [ mockService ] );
+
+      const mockMintedVoucher = {
+        events: {
+          mintVoucherEvent: {
+            transactionHash: 'hash1',
+            returnValues: {
+              '0': 1,
+              '1': [100, 'CDF', 'ownerId', 'hospitalId', 'patientId', 'UNCLAIMED']
+            }
+          }
+        }
+      }
+      mockSmartContractService.mintVoucher = jest.fn().mockResolvedValue( mockMintedVoucher );
+
+        const result = await service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000 );
+        expect( transactionRepository.create ).toHaveNthReturnedWith( 1, voucher1 );
+        expect( transactionRepository.create ).toHaveNthReturnedWith( 2, voucher2 );
     });
   });
 

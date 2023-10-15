@@ -12,6 +12,8 @@ import { Service } from './entities/service.entity';
 import { ProviderController } from './provider-svc.controller';
 import { ProviderService } from './provider-svc.service';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
+import { SmartContractService } from '../smart-contract/smart-contract.service';
+import { SmartContractModule } from '../smart-contract/smart-contract.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { Voucher } from '../smart-contract/entities/voucher.entity';
     ObjectStorageModule,
     MailModule,
     SMSModule,
+    SmartContractModule
   ],
   controllers: [ProviderController],
   providers: [ProviderService],

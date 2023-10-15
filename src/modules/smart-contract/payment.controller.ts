@@ -118,18 +118,14 @@ export class PaymentController {
             currencyRate,
           } = metadata;
 
-          //convert sender currency into dollar ( stable currency for exchange )
-          const convertedAmount = await convertCurrency( senderCurrency, senderAmount/100, 'usd' );
-          const dollarAmount = parseFloat( convertedAmount.result );
-
-          console.log('CONVERTED AMOUNT:', dollarAmount );
-
           const voucherData = await this.smartContractService.mintVoucher({
-            amount: Math.floor( dollarAmount ),
+            amount: Math.round( currencyPatientAmount ),
             ownerId: patientId,
             currency: currencyPatient,
             patientId: patientId,
           });
+
+          // console.log('vdata', voucherData.events.mintVoucherEvent.returnValues.voucherID );
 
           const voucherJSON = {
             id: _.get(voucherData, 'events.mintVoucherEvent.returnValues.0'),
@@ -156,7 +152,7 @@ export class PaymentController {
             status: _.get(
               voucherData,
               'events.mintVoucherEvent.returnValues.1.[5]',
-            ),
+            )
           };
 
           const transactionHash = _.get(
@@ -169,7 +165,7 @@ export class PaymentController {
           const transactionToSave = this.transactionRepository.create({
             senderAmount: senderAmount / 100,
             senderCurrency: senderCurrency.toUpperCase(),
-            amount: currencyPatientAmount,
+            amount: Math.round( currencyPatientAmount ),
             currency: currencyPatient,
             conversionRate: currencyRate,
             senderId,
@@ -184,9 +180,10 @@ export class PaymentController {
 
           // update this
           const voucherToSave = this.voucherRepository.create({
+            vid: voucherJSON.id,
             voucherHash: transactionHash,
             shortenHash: shortenHash,
-            value: Math.floor( dollarAmount ),
+            value: Math.round( currencyPatientAmount ),
             senderId: senderId,
             senderType: SenderType.PAYER,
             receiverId: patientId,

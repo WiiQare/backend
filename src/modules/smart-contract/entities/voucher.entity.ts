@@ -9,6 +9,9 @@ import { BaseEntity } from './../../../db/base-entity';
 
 @Entity()
 export class Voucher extends BaseEntity {
+  @Column( { nullable: true })
+  vid: number;
+  
   @Column()
   voucherHash: string;
 
