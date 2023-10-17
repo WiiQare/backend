@@ -297,7 +297,7 @@ export class ProviderService {
       );
     }
 
-    const voucherValueInCDF = voucher.value;
+    const voucherValueInCDF = Math.round( voucher.value );
 
     // console.log('aight', serviceTotal, voucher.value, voucher.vid );
     //if services value is smaller than voucher
@@ -313,14 +313,14 @@ export class ProviderService {
       // string status;
 
       const firstVoucher = {
-        amount: serviceTotal,
+        amount: Math.round( serviceTotal ),
         ownerId: transaction.senderId,
         currency: 'CDF',
         patientId: transaction.ownerId
       }
 
       const secondVoucher = {
-        amount: (voucherValueInCDF - serviceTotal),
+        amount: (voucherValueInCDF - Math.round(serviceTotal)),
         ownerId: transaction.senderId,
         currency: 'CDF',
         patientId: transaction.ownerId
