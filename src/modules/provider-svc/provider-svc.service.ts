@@ -313,14 +313,14 @@ export class ProviderService {
       // string status;
 
       const firstVoucher = {
-        amount: serviceTotal,
+        amount: Math.round( serviceTotal ),
         ownerId: transaction.senderId,
         currency: 'CDF',
         patientId: transaction.ownerId
       }
 
       const secondVoucher = {
-        amount: (voucherValueInCDF - serviceTotal),
+        amount: Math.round(voucherValueInCDF - serviceTotal),
         ownerId: transaction.senderId,
         currency: 'CDF',
         patientId: transaction.ownerId
@@ -592,6 +592,8 @@ export class ProviderService {
         status: TransactionStatus.PENDING,
       })
       .getMany();
+
+      console.log('TARNS', transactions );
 
     // update transactions status to pending!.
     const updatedTransactionList = transactions.map((transaction) => ({
