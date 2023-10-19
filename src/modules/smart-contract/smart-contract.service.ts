@@ -197,9 +197,9 @@ export class SmartContractService {
     );
 
     const response = await this.wiiqareContract.methods
-      .burn([
+      .burn(
         voucherID
-      ])
+      )
       .send({
         from: this.wiiQareAccount.address,
         gasPrice: '30000000000',
