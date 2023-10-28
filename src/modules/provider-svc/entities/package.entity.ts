@@ -18,5 +18,6 @@ export class Package extends BaseEntity {
   provider: Provider;
 
   @ManyToMany(() => Service, (service) => service.packages)
+  @JoinTable()
   services: Service[];
 }
