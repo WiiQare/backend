@@ -103,6 +103,7 @@ describe('PayerService', () => {
     id: '',
     updatedAt: new Date(),
     createdAt: new Date(),
+    vid: 1,
     voucherHash: '',
     shortenHash: '',
     value: 1,

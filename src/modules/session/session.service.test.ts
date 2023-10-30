@@ -188,6 +188,8 @@ describe('SessionService', () => {
         .fn()
         .mockResolvedValue(undefined);
 
+      jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
+
       await expect(sessionService.authenticateUser(payload)).rejects.toThrow(
         new NotFoundException(_404.PAYER_NOT_FOUND),
       );
@@ -229,6 +231,8 @@ describe('SessionService', () => {
       mockProviderService.findProviderByUserId = jest
         .fn()
         .mockResolvedValue(undefined);
+
+      jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
 
       await expect(sessionService.authenticateUser(payload)).rejects.toThrow(
         new NotFoundException(_404.PROVIDER_NOT_FOUND),

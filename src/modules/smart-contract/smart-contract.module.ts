@@ -23,5 +23,6 @@ import { operationService } from '../operation-saving/operation.service';
   ],
   controllers: [SmartContractController, PaymentController],
   providers: [SmartContractService, TransactionService, nodeProvider],
+  exports: [SmartContractService],
 })
 export class SmartContractModule {}

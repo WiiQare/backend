@@ -85,11 +85,13 @@ export class ProviderController {
   providerAuthorizeVoucherTransfer(
     @Body() payload: AuthorizeVoucherTransferDto,
   ): Promise<Record<string, any>> {
-    const { shortenHash, providerId, securityCode } = payload;
+    const { shortenHash, providerId, securityCode, services, total } = payload;
     return this.providerService.authorizeVoucherTransfer(
       shortenHash,
       providerId,
       securityCode,
+      services,
+      total
     );
   }
 

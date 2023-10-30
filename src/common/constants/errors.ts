@@ -87,6 +87,10 @@ export const _403 = {
     code: 'ONLY_PAYER_CAN_CHECK_HIS_KYC_STATUS',
     description: 'Seul le payer peux check son status',
   },
+  WRONG_VOUCHER_CURRENCY: {
+    code: 'WRONG_VOUCHER_CURRENCY',
+    description: 'Voucher currency is different from hospital accepted currency',
+  }
 };
 
 export const _404 = {

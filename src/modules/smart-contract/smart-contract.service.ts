@@ -167,4 +167,47 @@ export class SmartContractService {
       logError(`Error in getVoucher: ${err}`);
     }
   }
+
+
+  /**
+   * This function is used to make a voucher split
+   *  ** splitVoucher
+   *
+   * @param voucherID id of the target voucher
+   * @param firstVoucher metadata for the first voucher of the split
+   * @param secondVoucher metadata for the second voucher of the split
+   */
+  async splitVoucher(voucherID: string, firstVoucher: any, secondVoucher: any ) {
+    try {
+      const accounts = await this.web3.eth.getAccounts();
+
+      const result = await this.wiiqareContract.methods
+        .splitVoucher( voucherID, firstVoucher, secondVoucher )
+        .call({ from: accounts[0] });
+
+      return result;
+    } catch (err) {
+      logError(`Error in getVoucher: ${err}`);
+    }
+  }
+
+  async burnVoucher( voucherID: number ) {
+    const rr = this.web3.eth.accounts.wallet.add(
+      this.appConfigService.smartContractPrivateKey,
+    );
+
+    const response = await this.wiiqareContract.methods
+      .burn(
+        voucherID
+      )
+      .send({
+        from: this.wiiQareAccount.address,
+        gasPrice: '30000000000',
+        gas: '3996000',
+      });
+
+    logInfo(`response -> ${response}`);
+
+    return response;
+  }
 }

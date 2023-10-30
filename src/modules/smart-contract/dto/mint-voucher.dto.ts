@@ -35,3 +35,15 @@ export class TransferVoucherDto {
   @IsString()
   ownerId: string;
 }
+
+export class SplitVoucherDto {
+  @IsNotEmpty()
+  @IsString()
+  voucherId: string;
+
+  @IsNotEmpty()
+  firstVoucher: string;
+
+  @IsNotEmpty()
+  secondVoucher: string;
+}

@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import * as _ from 'lodash';
 import { APP_NAME, DAY, HOUR } from '../../common/constants/constants';
 import {
   ReceiverType,
+  SenderType,
   TransactionStatus,
   UserRole,
   UserStatus,
@@ -16,8 +18,8 @@ import {
   VoucherStatus,
 } from '../../common/constants/enums';
 import { _403, _404 } from '../../common/constants/errors';
-import { generateToken, randomSixDigit } from '../../helpers/common.helper';
-import { Repository } from 'typeorm';
+import { convertCurrency, generateToken, randomSixDigit } from '../../helpers/common.helper';
+import { In, Repository } from 'typeorm';
 import { CachingService } from '../caching/caching.service';
 import { MailService } from '../mail/mail.service';
 import { ObjectStorageService } from '../object-storage/object-storage.service';
@@ -37,9 +39,13 @@ import { Package } from './entities/package.entity';
 import { Provider } from './entities/provider.entity';
 import { Service } from './entities/service.entity';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
+import { SmartContractService } from '../smart-contract/smart-contract.service';
+import Web3 from 'web3';
 
 @Injectable()
 export class ProviderService {
+  private web3: Web3;
+
   constructor(
     @InjectRepository(Provider)
     private readonly providerRepository: Repository<Provider>,
@@ -59,7 +65,10 @@ export class ProviderService {
     private cachingService: CachingService,
     private mailService: MailService,
     private smsService: SmsService,
-  ) {}
+    private contractService: SmartContractService,
+  ) {
+
+  }
 
   /**
    * This function retrieve provider account related by the provider id
@@ -251,17 +260,20 @@ export class ProviderService {
     shortenHash: string,
     providerId: string,
     securityCode: string,
+    serviceIds: string[],
+    total: number
   ): Promise<Record<string, any>> {
     // verify the transaction exists and if securityCode is right!
     const voucher = await this.voucherRepository.findOne({
       where: { shortenHash },
       relations: ['transaction'],
     });
-    const [transaction, provider] = await Promise.all([
+    const [transaction, provider, services ] = await Promise.all([
       this.transactionRepository.findOne({
         where: { id: voucher.transaction.id, ownerType: ReceiverType.PATIENT },
       }),
       this.providerRepository.findOne({ where: { id: providerId } }),
+      this.servicesRepository.find({ where: { id: In( serviceIds )}} )
     ]);
 
     if (!transaction)
@@ -276,33 +288,226 @@ export class ProviderService {
       throw new ForbiddenException(
         _403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE,
       );
+    
+    //compute total price of services ( hospital currency )
+    const serviceTotal = services.reduce( ( acc, el ) => { acc += parseInt( el.price.toString() ); return acc; }, 0 );
+    if( transaction.currency !== 'CDF'){
+      throw new ForbiddenException(
+        _403.WRONG_VOUCHER_CURRENCY
+      );
+    }
 
+    const voucherValueInCDF = Math.round( voucher.value );
+
+    // console.log('aight', serviceTotal, voucher.value, voucher.vid );
+    //if services value is smaller than voucher
+    const threshold = 0.1;
+    // console.log('web3 aight', Web3.utils.toWei( serviceTotal.toString(), 'ether' ) );
+    if( (voucherValueInCDF - serviceTotal) > voucherValueInCDF*threshold ){
+      
+      // uint256 value;
+      // string currencySymbol;
+      // string ownerID;
+      // string providerID;
+      // string beneficiaryID;
+      // string status;
+
+      const firstVoucher = {
+        amount: Math.round( serviceTotal ),
+        ownerId: transaction.senderId,
+        currency: 'CDF',
+        patientId: transaction.ownerId
+      }
+
+      const secondVoucher = {
+        amount: (voucherValueInCDF - Math.round(serviceTotal)),
+        ownerId: transaction.senderId,
+        currency: 'CDF',
+        patientId: transaction.ownerId
+      }
+
+      // console.log('vouchers', firstVoucher[0], secondVoucher[0] );
+
+      //split voucher -- update this when contract bug is fixed
+      // const voucherData = await this.contractService.splitVoucher(
+      //   voucher.voucherHash,
+      //   firstVoucher,
+      //   secondVoucher
+      // );
+
+      // console.log( 'data', voucherData );
+
+      //burn voucher
+      const burnedData = await this.contractService.burnVoucher( voucher.vid );
+
+      //mint new vouchers
+      const firstSplitVoucher = await this.contractService.mintVoucher( firstVoucher );
+      const secondSplitVoucher = await this.contractService.mintVoucher( secondVoucher );
+
+      const firstVoucherJSON = {
+        id: _.get(firstSplitVoucher, 'events.mintVoucherEvent.returnValues.0'),
+        amount: _.get(
+          firstSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[0]',
+        ),
+        currency: _.get(
+          firstSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[1]',
+        ),
+        ownerId: _.get(
+          firstSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[2]',
+        ),
+        hospitalId: _.get(
+          firstSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[3]',
+        ),
+        patientId: _.get(
+          firstSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[4]',
+        ),
+        status: _.get(
+          firstSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[5]',
+        ),
+      };
+      const firstTransactionHash = _.get(
+        firstSplitVoucher,
+        'events.mintVoucherEvent.transactionHash',
+      );
+      const firstShortenHash = firstTransactionHash.slice(0, 8);
+
+      const secondVoucherJSON = {
+        id: _.get(secondSplitVoucher, 'events.mintVoucherEvent.returnValues.0'),
+        amount: _.get(
+          secondSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[0]',
+        ),
+        currency: _.get(
+          secondSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[1]',
+        ),
+        ownerId: _.get(
+          secondSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[2]',
+        ),
+        hospitalId: _.get(
+          secondSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[3]',
+        ),
+        patientId: _.get(
+          secondSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[4]',
+        ),
+        status: _.get(
+          secondSplitVoucher,
+          'events.mintVoucherEvent.returnValues.1.[5]',
+        ),
+      };
+      const secondTransactionHash = _.get(
+        secondSplitVoucher,
+        'events.mintVoucherEvent.transactionHash',
+      );
+      const secondShortenHash = secondTransactionHash.slice(0, 8);
+      
+
+      const updatedTransaction = await this.transactionRepository.save({
+        ...transaction,
+        ownerType: ReceiverType.PROVIDER,
+        hospitalId: null,
+        status: TransactionStatus.SPLIT
+      });
+      const updatedVoucher = await this.voucherRepository.save({
+        ...voucher,
+        status: VoucherStatus.SPLIT
+      });
+      
+      //save first transaction split
+      const transactionToSave1 = this.transactionRepository.create({
+        senderAmount: firstVoucher.amount,
+        senderCurrency: 'CDF',
+        amount: firstVoucher.amount,
+        currency: 'CDF',
+        conversionRate: 0,
+        senderId: transaction.senderId,
+        ownerId: transaction.ownerId,
+        stripePaymentId: transaction.id,
+        voucher: firstVoucherJSON,
+        status: TransactionStatus.PENDING,
+        ownerType: ReceiverType.PROVIDER,
+        hospitalId: providerId,
+      });
+      // console.log('saved', transactionToSave1 );
+      const firstSavedTransaction = await this.transactionRepository.save(
+        transactionToSave1,
+      );
+      const voucherToSave1 = this.voucherRepository.create({
+        vid: firstVoucherJSON.id,
+        voucherHash: firstTransactionHash,
+        shortenHash: firstShortenHash,
+        value: firstVoucherJSON.amount,
+        senderId: transaction.senderId,
+        senderType: SenderType.PAYER,
+        receiverId: transaction.ownerId,
+        receiverType: ReceiverType.PATIENT,
+        status: VoucherStatus.UNCLAIMED,
+        transaction: transactionToSave1,
+      });
+      await this.voucherRepository.save( voucherToSave1 );
+
+      //save second transaction split
+      const transactionToSave2 = this.transactionRepository.create({
+        senderAmount: secondVoucher.amount,
+        senderCurrency: 'CDF',
+        amount: secondVoucher.amount,
+        currency: 'CDF',
+        conversionRate: 0,
+        senderId: transaction.senderId,
+        ownerId: transaction.ownerId,
+        stripePaymentId: transaction.id,
+        voucher: secondVoucherJSON,
+        status: TransactionStatus.PENDING,
+      });
+      const secondSavedTransaction = await this.transactionRepository.save(
+        transactionToSave2,
+      );
+      const voucherToSave2 = this.voucherRepository.create({
+        vid: firstVoucherJSON.id,
+        voucherHash: secondTransactionHash,
+        shortenHash: secondShortenHash,
+        value: secondVoucherJSON.amount,
+        senderId: transaction.senderId,
+        senderType: SenderType.PAYER,
+        receiverId: transaction.ownerId,
+        receiverType: ReceiverType.PATIENT,
+        status: VoucherStatus.UNCLAIMED,
+        transaction: transactionToSave2,
+      });
+      await this.voucherRepository.save( voucherToSave2 );
+
+      return {
+        code: 200,
+        message: 'Voucher transfer authorized successfully',
+      };
+      
+    } else {
+      // transfer voucher from patient to provider
+      //Update the voucher on block-chain
+
+      // Update the transaction in the database
+      const updatedTransaction = await this.transactionRepository.save({
+        ...transaction,
+        ownerType: ReceiverType.PROVIDER,
+        hospitalId: providerId,
+      });
+      // console.log('updated', updatedTransaction, updatedVoucher );
+
+      return {
+        code: 200,
+        message: 'Voucher transfer authorized successfully',
+      };
+    }
     // console.log( transaction, provider, providerId, voucher );
-    // return {
-    //   code: 200,
-    //   message: 'Voucher transfer authorized successfully',
-    // };
-
-    // transfer voucher from patient to provider
-    //Update the voucher on block-chain
-
-    //Update the voucher in the database
-    // const updatedVoucher = await this.voucherRepository.save({
-    //   ...voucher,
-    //   status: VoucherStatus.CLAIMED
-    // });
-    // Update the transaction in the database
-    const updatedTransaction = await this.transactionRepository.save({
-      ...transaction,
-      ownerType: ReceiverType.PROVIDER,
-      hospitalId: providerId,
-    });
-    // console.log('updated', updatedTransaction, updatedVoucher );
-
-    return {
-      code: 200,
-      message: 'Voucher transfer authorized successfully',
-    };
   }
 
   /**
