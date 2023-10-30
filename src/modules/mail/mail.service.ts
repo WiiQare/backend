@@ -104,4 +104,23 @@ export class MailService {
       },
     });
   }
+
+  async receiveMailToWiiqare(
+    email: string,
+    name: string,
+    object: string,
+    message: string
+  ): Promise<void> {
+    await this.mailerService.sendMail({
+      to: "support@wiiqare.com",
+      subject: object,
+      template: './contact',
+      context: {
+        name: name.toUpperCase(),
+        email,
+        message,
+        year: `© ${new Date().getFullYear()}`,
+      },
+    });
+  }
 }

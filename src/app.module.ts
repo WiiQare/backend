@@ -25,6 +25,7 @@ import { SMSModule } from './modules/sms/sms.module';
 import { SavingModule } from './modules/saving/saving.module';
 import { OperationModule } from './modules/operation-saving/operation.module';
 import { WaitingModule } from './modules/waiting-list/waiting.module';
+import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { WaitingModule } from './modules/waiting-list/waiting.module';
     CachingModule,
     MailModule,
     WaitingModule,
+    ContactModule,
     AuthModule,
     SessionModule,
     AdministrationSvcModule,
