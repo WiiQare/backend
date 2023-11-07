@@ -26,6 +26,7 @@ import { SavingModule } from './modules/saving/saving.module';
 import { OperationModule } from './modules/operation-saving/operation.module';
 import { WaitingModule } from './modules/waiting-list/waiting.module';
 import { ContactModule } from './modules/contact/contact.module';
+import { BlogModule } from './modules/blog/blog.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { ContactModule } from './modules/contact/contact.module';
     MessagingModule,
     SMSModule,
     ObjectStorageModule,
+    BlogModule
   ],
   controllers: [],
   providers: [
