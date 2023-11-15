@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MailService {
-  constructor(private mailerService: MailerService) {}
+  constructor(private mailerService: MailerService) { }
 
   /**
    * This method sends  OTP email during registration
@@ -12,7 +12,7 @@ export class MailService {
    * @param token
    */
   async sendOTPEmail(email: string, token: string): Promise<void> {
-    const url = `https://wiiqare-app.com/auth/confirm?token=${token}`;
+    const url = `https://app.wiiqare.com/auth/confirm?token=${token}`;
 
     await this.mailerService.sendMail({
       to: email,
@@ -34,7 +34,7 @@ export class MailService {
    * @param token
    */
   async sendResetPasswordEmail(email: string, token: string): Promise<void> {
-    const resetUrl = `https://wiiqare-app.com/reset-password/${token}`;
+    const resetUrl = `https://app.wiiqare.com/reset-password/${token}`;
 
     await this.mailerService.sendMail({
       to: email,
@@ -76,7 +76,7 @@ export class MailService {
     email: string,
     token: string,
   ): Promise<void> {
-    const verifyEmail = `https://wiiqare-app.com/register?email-verification=${token}`;
+    const verifyEmail = `https://app.wiiqare.com/register?email-verification=${token}`;
 
     await this.mailerService.sendMail({
       to: email,
