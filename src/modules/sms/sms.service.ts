@@ -24,7 +24,7 @@ export class SmsService {
     const params = {
       originator: 'WiiQare',
       recipients: phoneNumbers,
-      body: `Vous avez été invité par ${names} pour rejoindre WiiQare. Merci de vous inscrire avec le lien suivant https://wiiqare-app.com/register?referralCode=${referralCode}`,
+      body: `Vous avez été invité par ${names} pour rejoindre WiiQare. Merci de vous inscrire avec le lien suivant https://app.wiiqare.com/register?referralCode=${referralCode}`,
     };
 
     this.messageBird.messages.create(params, function (err, response) {

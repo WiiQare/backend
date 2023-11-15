@@ -24,7 +24,7 @@ describe('AppConfigService', () => {
     const params = {
       originator: 'WiiQare',
       recipients: ['+243979544127'],
-      body: `Vous avez été invité par ${'names'} pour rejoindre WiiQare. Merci de vous inscrire avec le lien suivant https://wiiqare-app.com/register?referralCode=${'referralCode'}`,
+      body: `Vous avez été invité par ${'names'} pour rejoindre WiiQare. Merci de vous inscrire avec le lien suivant https://app.wiiqare.com/register?referralCode=${'referralCode'}`,
     };
     const messageBird = {
       messages: {
