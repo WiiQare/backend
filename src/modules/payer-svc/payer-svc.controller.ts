@@ -23,6 +23,7 @@ import { _403, _404, _409 } from '../../common/constants/errors';
 import { CachingService } from '../caching/caching.service';
 import {
   CreatePatientDto,
+  EditPatientDto,
   PatientResponseDto,
 } from '../patient-svc/dto/patient.dto';
 import { PatientSvcService } from '../patient-svc/patient-svc.service';
@@ -123,6 +124,17 @@ export class PayerSvcController {
     @Body() createPatientAccountDto: CreatePatientDto,
   ): Promise<PatientResponseDto> {
     return await this.patientService.registerPatient(createPatientAccountDto);
+  }
+
+  @Put('patient')
+  @Roles(UserRole.PAYER)
+  @ApiOperation({
+    summary: 'This API is used update the Patient by PAYER.',
+  })
+  async updatePatient(
+    @Body() editPatientAccountDto: EditPatientDto,
+  ): Promise<PatientResponseDto> {
+    return await this.patientService.updatePatient(editPatientAccountDto);
   }
 
   @Post('send-invite')

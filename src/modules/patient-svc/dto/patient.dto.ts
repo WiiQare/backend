@@ -37,6 +37,13 @@ export class CreatePatientDto {
   city?: string;
 }
 
+export class EditPatientDto extends CreatePatientDto {
+  @IsNotEmpty()
+  @IsUUID()
+  @IsString()
+  id: string;
+}
+
 export class PatientResponseDto {
   @IsNotEmpty()
   @IsUUID()
