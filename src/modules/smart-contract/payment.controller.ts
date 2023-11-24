@@ -38,6 +38,7 @@ import { _400 } from 'src/common/constants/errors';
 import { Voucher } from './entities/voucher.entity';
 import { operationService } from '../operation-saving/operation.service';
 import { OperationType } from '../operation-saving/entities/operation.entity';
+import { PaymentWithoutStripe } from './dto/mint-voucher.dto';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -51,7 +52,7 @@ export class PaymentController {
     @InjectRepository(Voucher)
     private readonly voucherRepository: Repository<Voucher>,
     private readonly transactionService: TransactionService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({
@@ -119,7 +120,7 @@ export class PaymentController {
           } = metadata;
 
           const voucherData = await this.smartContractService.mintVoucher({
-            amount: Math.round( currencyPatientAmount ),
+            amount: Math.round(currencyPatientAmount),
             ownerId: patientId,
             currency: currencyPatient,
             patientId: patientId,
@@ -165,7 +166,7 @@ export class PaymentController {
           const transactionToSave = this.transactionRepository.create({
             senderAmount: senderAmount / 100,
             senderCurrency: senderCurrency.toUpperCase(),
-            amount: Math.round( currencyPatientAmount ),
+            amount: Math.round(currencyPatientAmount),
             currency: currencyPatient,
             conversionRate: currencyRate,
             senderId,
@@ -183,7 +184,7 @@ export class PaymentController {
             vid: voucherJSON.id,
             voucherHash: transactionHash,
             shortenHash: shortenHash,
-            value: Math.round( currencyPatientAmount ),
+            value: Math.round(currencyPatientAmount),
             senderId: senderId,
             senderType: SenderType.PAYER,
             receiverId: patientId,
@@ -199,6 +200,132 @@ export class PaymentController {
           break;
         default:
           logInfo(`Unhandled Stripe event type: ${verifiedEvent.type}`);
+      }
+    } catch (err) {
+      logError(`Error processing webhook event: ${err}`);
+      return { error: 'Failed to process webhook event' };
+    }
+  }
+
+  @Post('notification/without-stripe')
+  @Public()
+  @ApiOperation({
+    summary: 'This API receive payment notification without stripe webhook',
+  })
+  async handlePaymentWithoutStripe(
+    @Body() event: PaymentWithoutStripe,
+  ) {
+    try {
+
+      let status = 'payment_intent.succeeded';
+
+      // Handle the event based on its type
+      switch (status) {
+        case 'payment_intent.succeeded':
+
+          // const {
+          //   id: stripePaymentId,
+          //   amount: senderAmount,
+          //   currency: senderCurrency,
+          // } = verifiedEvent.data.object as Stripe.PaymentIntent;
+
+          // const { metadata } = verifiedEvent.data.object as unknown as Record<
+          //   string,
+          //   any
+          // >;
+
+          //TODO: Please use our own BE exchange rate API to get the latest exchange rate!!
+          const {
+            senderId,
+            patientId,
+            currencyPatientAmount,
+            currencyPatient,
+            currencyRate,
+            senderAmount,
+            senderCurrency
+          } = event;
+
+          const voucherData = await this.smartContractService.mintVoucher({
+            amount: Math.round(currencyPatientAmount),
+            ownerId: patientId,
+            currency: currencyPatient,
+            patientId: patientId,
+          });
+
+          // console.log('vdata', voucherData.events.mintVoucherEvent.returnValues.voucherID );
+
+          const voucherJSON = {
+            id: _.get(voucherData, 'events.mintVoucherEvent.returnValues.0'),
+            amount: _.get(
+              voucherData,
+              'events.mintVoucherEvent.returnValues.1.[0]',
+            ),
+            currency: _.get(
+              voucherData,
+              'events.mintVoucherEvent.returnValues.1.[1]',
+            ),
+            ownerId: _.get(
+              voucherData,
+              'events.mintVoucherEvent.returnValues.1.[2]',
+            ),
+            hospitalId: _.get(
+              voucherData,
+              'events.mintVoucherEvent.returnValues.1.[3]',
+            ),
+            patientId: _.get(
+              voucherData,
+              'events.mintVoucherEvent.returnValues.1.[4]',
+            ),
+            status: _.get(
+              voucherData,
+              'events.mintVoucherEvent.returnValues.1.[5]',
+            )
+          };
+
+          const transactionHash = _.get(
+            voucherData,
+            'events.mintVoucherEvent.transactionHash',
+          );
+
+          const shortenHash = transactionHash.slice(0, 8);
+
+          const transactionToSave = this.transactionRepository.create({
+            senderAmount,
+            senderCurrency: senderCurrency.toUpperCase(),
+            amount: Math.round(currencyPatientAmount),
+            currency: currencyPatient,
+            conversionRate: currencyRate,
+            senderId,
+            ownerId: patientId,
+            stripePaymentId: null,
+            voucher: voucherJSON,
+            status: TransactionStatus.PENDING,
+          });
+          const savedTransaction = await this.transactionRepository.save(
+            transactionToSave,
+          );
+
+          // update this
+          const voucherToSave = this.voucherRepository.create({
+            vid: voucherJSON.id,
+            voucherHash: transactionHash,
+            shortenHash: shortenHash,
+            value: Math.round(currencyPatientAmount),
+            senderId: senderId,
+            senderType: SenderType.PAYER,
+            receiverId: patientId,
+            receiverType: ReceiverType.PATIENT,
+            status: VoucherStatus.UNCLAIMED,
+            transaction: transactionToSave,
+          });
+          await this.voucherRepository.save(voucherToSave);
+
+          break;
+        case 'payment_intent.payment_failed':
+          // Handle the failure in some way
+          break;
+        default:
+          logInfo(`Unhandled Stripe event type: `);
       }
     } catch (err) {
       logError(`Error processing webhook event: ${err}`);
