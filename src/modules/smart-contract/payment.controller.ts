@@ -207,7 +207,7 @@ export class PaymentController {
     }
   }
 
-  @Post('notification/without-stripe')
+  @Post('notification/admin-pmt')
   @Public()
   @ApiOperation({
     summary: 'This API receive payment notification without stripe webhook',
