@@ -297,7 +297,7 @@ export class PaymentController {
             conversionRate: currencyRate,
             senderId,
             ownerId: patientId,
-            stripePaymentId: null,
+            stripePaymentId: "admin",
             voucher: voucherJSON,
             status: TransactionStatus.PENDING,
           });
@@ -329,7 +329,7 @@ export class PaymentController {
       }
     } catch (err) {
       logError(`Error processing webhook event: ${err}`);
-      return { error: 'Failed to process webhook event' };
+      return { error: 'Failed to process payment event' };
     }
   }
 
