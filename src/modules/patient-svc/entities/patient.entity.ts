@@ -28,4 +28,7 @@ export class Patient extends BaseEntity {
 
   @Column({ nullable: true })
   city?: string;
+
+  @Column({ nullable: true })
+  addedBy?: string
 }

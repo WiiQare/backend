@@ -35,6 +35,10 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   city?: string;
+
+  @IsOptional()
+  @IsString()
+  addedBy?: string
 }
 
 export class EditPatientDto extends CreatePatientDto {
