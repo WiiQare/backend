@@ -48,13 +48,6 @@ export class EditPatientDto extends CreatePatientDto {
   id: string;
 }
 
-export class EditPatientDto extends CreatePatientDto {
-  @IsNotEmpty()
-  @IsUUID()
-  @IsString()
-  id: string;
-}
-
 export class PatientResponseDto {
   @IsNotEmpty()
   @IsUUID()

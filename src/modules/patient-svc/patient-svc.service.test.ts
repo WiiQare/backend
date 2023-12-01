@@ -68,8 +68,11 @@ describe('PatientSvcService', () => {
     create: jest.fn().mockReturnValue(mockPatient),
     save: jest.fn().mockResolvedValue(mockPatient),
     createQueryBuilder: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
       whereInIds: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockResolvedValue([mockPatient, mockPatient]),
+      getRawMany: jest.fn().mockResolvedValue([mockPatient, mockPatient]),
     }),
   } as unknown as Repository<Patient>;
 
