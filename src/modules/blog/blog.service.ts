@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { _404 } from '../../common/constants/errors';
-import { MailService } from '../mail/mail.service';
 import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dto/blog.dto';
-import Slugify from 'slugify';
 import slugify from 'slugify';
 
 @Injectable()
