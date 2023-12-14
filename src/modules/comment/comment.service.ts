@@ -11,6 +11,7 @@ export class CommentService {
     constructor(
         @InjectRepository(Comment)
         private commentRepository: Repository<Comment>,
+        @InjectRepository(Blog)
         private blogRepository: Repository<Blog>,
 
     ) { }

@@ -34,7 +34,11 @@ export class BlogService {
   }
 
   async getBlogDetailsWithComments(slug: string): Promise<any> {
-    const blog = await this.blogRepository.findOne({ where: { slug }, relations: ['comments'] });
+    const blog = await this.blogRepository.createQueryBuilder('blog')
+      .leftJoinAndSelect('blog.comments', 'comments')
+      .where('blog.slug = :slug', { slug })
+      .orderBy('comments.createdAt', 'DESC')
+      .getOne();
 
     const last = await this.blogRepository.find({
       where: { slug: Not(slug) },

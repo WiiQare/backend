@@ -19,10 +19,6 @@ export class CreateCommentDto {
 
     @IsNotEmpty()
     @IsString()
-    content: string;
-
-    @IsNotEmpty()
-    @IsString()
     blog: string;
 
 }

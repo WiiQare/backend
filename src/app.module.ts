@@ -27,6 +27,7 @@ import { OperationModule } from './modules/operation-saving/operation.module';
 import { WaitingModule } from './modules/waiting-list/waiting.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { BlogModule } from './modules/blog/blog.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { BlogModule } from './modules/blog/blog.module';
     CachingModule,
     MailModule,
     WaitingModule,
+    CommentModule,
     ContactModule,
     AuthModule,
     SessionModule,
@@ -70,4 +72,4 @@ import { BlogModule } from './modules/blog/blog.module';
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule {}
+export class AppModule { }
