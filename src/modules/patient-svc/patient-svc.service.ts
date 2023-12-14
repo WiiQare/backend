@@ -8,7 +8,7 @@ import { _403, _404 } from '../../common/constants/errors';
 import { Repository } from 'typeorm';
 import { UserType } from '../../common/constants/enums';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
-import { CreatePatientDto, PatientResponseDto } from './dto/patient.dto';
+import { CreatePatientDto, EditPatientDto, PatientResponseDto } from './dto/patient.dto';
 import { Patient } from './entities/patient.entity';
 
 @Injectable()
@@ -34,6 +34,18 @@ export class PatientSvcService {
 
     const patient = this.patientRepository.create(patientDto);
     return await this.patientRepository.save(patient);
+  }
+
+  async updatePatient(patientDto: EditPatientDto): Promise<Patient> {
+    const patient = await this.patientRepository.findOne({
+      where: { id: patientDto.id },
+    });
+
+    const updateData = patientDto;
+    delete updateData.id;
+    await this.patientRepository.save( {...patient, ...updateData } );
+
+    return { ...patient,...updateData};
   }
 
   /**
@@ -78,13 +90,27 @@ export class PatientSvcService {
       .groupBy('transaction.ownerId')
       .getRawMany();
 
+    const addedByUser = await this.patientRepository
+      .createQueryBuilder('patient')
+      .select('patient.id', 'id')
+      .where('patient.added_by = :payerId', { payerId })
+      .getRawMany();
+    const addedByUserUniqueIds = addedByUser.map( result => result.id );
+
     const uniquePatientIds = uniquePatientIdsQuery.map(
       (result) => result.ownerId,
     );
 
+    const combinedPatientIds = Object.values( [...uniquePatientIds, ...addedByUserUniqueIds ].reduce( ( acc, item ) => {
+      acc[ item ] = item;
+      return acc;
+    }, {} ));
+
+    console.log('combined', combinedPatientIds );
+
     const patients = await this.patientRepository
       .createQueryBuilder('patient')
-      .whereInIds(uniquePatientIds)
+      .whereInIds(combinedPatientIds)
       .getMany();
 
     return patients.map((patient) => {

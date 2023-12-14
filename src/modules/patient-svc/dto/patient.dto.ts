@@ -35,6 +35,17 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   city?: string;
+
+  @IsOptional()
+  @IsString()
+  addedBy?: string
+}
+
+export class EditPatientDto extends CreatePatientDto {
+  @IsNotEmpty()
+  @IsUUID()
+  @IsString()
+  id: string;
 }
 
 export class PatientResponseDto {
