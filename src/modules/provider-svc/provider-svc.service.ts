@@ -291,6 +291,9 @@ export class ProviderService {
     
     //compute total price of services ( hospital currency )
     const serviceTotal = services.reduce( ( acc, el ) => { acc += parseInt( el.price.toString() ); return acc; }, 0 );
+
+    console.log('computed.total', serviceTotal );
+
     if( transaction.currency !== 'CDF'){
       throw new ForbiddenException(
         _403.WRONG_VOUCHER_CURRENCY
@@ -299,10 +302,11 @@ export class ProviderService {
 
     const voucherValueInCDF = Math.round( voucher.value );
 
-    // console.log('aight', serviceTotal, voucher.value, voucher.vid );
+    console.log('computed.voucher.value.cdf', serviceTotal );
+
     //if services value is smaller than voucher
     const threshold = 0.1;
-    // console.log('web3 aight', Web3.utils.toWei( serviceTotal.toString(), 'ether' ) );
+    
     if( (voucherValueInCDF - serviceTotal) > voucherValueInCDF*threshold ){
       
       // uint256 value;
@@ -326,7 +330,7 @@ export class ProviderService {
         patientId: transaction.ownerId
       }
 
-      // console.log('vouchers', firstVoucher[0], secondVoucher[0] );
+      console.log('computed.vouchers', firstVoucher[0], secondVoucher[0] );
 
       //split voucher -- update this when contract bug is fixed
       // const voucherData = await this.contractService.splitVoucher(
@@ -335,14 +339,17 @@ export class ProviderService {
       //   secondVoucher
       // );
 
-      // console.log( 'data', voucherData );
-
+      console.log('attempting.to.burn.voucher');
       //burn voucher
       const burnedData = await this.contractService.burnVoucher( voucher.vid );
+
+      console.log('post.burn.voucher');
 
       //mint new vouchers
       const firstSplitVoucher = await this.contractService.mintVoucher( firstVoucher );
       const secondSplitVoucher = await this.contractService.mintVoucher( secondVoucher );
+
+      console.log('minted.vouchers')
 
       const firstVoucherJSON = {
         id: _.get(firstSplitVoucher, 'events.mintVoucherEvent.returnValues.0'),
@@ -410,6 +417,7 @@ export class ProviderService {
       );
       const secondShortenHash = secondTransactionHash.slice(0, 8);
       
+      console.log('pre.transaction.save');
 
       const updatedTransaction = await this.transactionRepository.save({
         ...transaction,
@@ -417,11 +425,16 @@ export class ProviderService {
         hospitalId: null,
         status: TransactionStatus.SPLIT
       });
+
+      console.log('pre.voucher.save');
+
       const updatedVoucher = await this.voucherRepository.save({
         ...voucher,
         status: VoucherStatus.SPLIT
       });
-      
+
+      console.log('post.voucher.save');
+
       //save first transaction split
       const transactionToSave1 = this.transactionRepository.create({
         senderAmount: firstVoucher.amount,
@@ -437,7 +450,9 @@ export class ProviderService {
         ownerType: ReceiverType.PROVIDER,
         hospitalId: providerId,
       });
-      // console.log('saved', transactionToSave1 );
+
+      console.log('pre.transaction1.save', transactionToSave1 );
+
       const firstSavedTransaction = await this.transactionRepository.save(
         transactionToSave1,
       );
@@ -471,6 +486,9 @@ export class ProviderService {
       const secondSavedTransaction = await this.transactionRepository.save(
         transactionToSave2,
       );
+
+      console.log('pre.transaction2.save', transactionToSave1 );
+
       const voucherToSave2 = this.voucherRepository.create({
         vid: firstVoucherJSON.id,
         voucherHash: secondTransactionHash,
@@ -494,6 +512,8 @@ export class ProviderService {
       // transfer voucher from patient to provider
       //Update the voucher on block-chain
 
+      console.log('nonsplit.pre.transaction.update');
+      
       // Update the transaction in the database
       const updatedTransaction = await this.transactionRepository.save({
         ...transaction,
