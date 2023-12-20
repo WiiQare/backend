@@ -167,7 +167,10 @@ export class PayerService {
         .leftJoinAndSelect('payer.user', 'user')
         .where('user.id = :userId', { userId: authUser.sub })
         .getOne(),
-      this.voucherRepository.findOne({ where: { shortenHash } }),
+      this.voucherRepository.findOne({
+        where: { shortenHash },
+        relations: { transaction: true },
+      }),
     ]);
     const transaction = await this.transactionRepository.findOne({
       where: { id: voucher.transaction.id },
