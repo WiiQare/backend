@@ -21,6 +21,7 @@ export enum SenderType {
   PAYER = 'PAYER',
   PATIENT = 'PATIENT',
   PROVIDER = 'PROVIDER',
+  WIIQARE_MANAGER = 'WIIQARE_MANAGER'
 }
 
 export enum ReceiverType {
