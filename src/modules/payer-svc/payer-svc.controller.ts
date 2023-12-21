@@ -50,7 +50,7 @@ export class PayerSvcController {
     private readonly cachingService: CachingService,
     private readonly sessionService: SessionService,
     private readonly patientService: PatientSvcService,
-  ) {}
+  ) { }
 
   @Get('patient')
   @Roles(UserRole.PAYER)
@@ -123,6 +123,19 @@ export class PayerSvcController {
   async registerNewPatient(
     @Body() createPatientAccountDto: CreatePatientDto,
   ): Promise<PatientResponseDto> {
+    return await this.patientService.registerPatient(createPatientAccountDto);
+  }
+
+  @Post('patient/admin')
+  @Roles(UserRole.WIIQARE_MANAGER)
+  @ApiOperation({
+    summary: 'This API is used register new Patient by WIIQARE MANAGER.',
+  })
+  async registerNewPatientForAdmin(
+    @Body() createPatientAccountDto: CreatePatientDto,
+    @AuthUser() authUser: JwtClaimsDataDto,
+  ): Promise<PatientResponseDto> {
+    console.log(authUser);
     return await this.patientService.registerPatient(createPatientAccountDto);
   }
 

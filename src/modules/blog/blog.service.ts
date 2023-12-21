@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { _404 } from '../../common/constants/errors';
-import { MailService } from '../mail/mail.service';
 import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dto/blog.dto';
-import Slugify from 'slugify';
 import slugify from 'slugify';
 
 @Injectable()
@@ -36,7 +34,11 @@ export class BlogService {
   }
 
   async getBlogDetailsWithComments(slug: string): Promise<any> {
-    const blog = await this.blogRepository.findOne({ where: { slug }, relations: ['comments'] });
+    const blog = await this.blogRepository.createQueryBuilder('blog')
+      .leftJoinAndSelect('blog.comments', 'comments')
+      .where('blog.slug = :slug', { slug })
+      .orderBy('comments.createdAt', 'DESC')
+      .getOne();
 
     const last = await this.blogRepository.find({
       where: { slug: Not(slug) },

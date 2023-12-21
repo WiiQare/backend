@@ -1,6 +1,6 @@
 import { Blog } from 'src/modules/blog/entities/blog.entity';
 import { BaseEntity } from '../../../db/base-entity';
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Comment extends BaseEntity {

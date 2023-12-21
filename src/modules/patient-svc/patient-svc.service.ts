@@ -18,7 +18,7 @@ export class PatientSvcService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-  ) {}
+  ) { }
 
   /**
    * This function is used to register a patient account
@@ -43,9 +43,9 @@ export class PatientSvcService {
 
     const updateData = patientDto;
     delete updateData.id;
-    await this.patientRepository.save( {...patient, ...updateData } );
+    await this.patientRepository.save({ ...patient, ...updateData });
 
-    return { ...patient,...updateData};
+    return { ...patient, ...updateData };
   }
 
   /**
@@ -95,18 +95,18 @@ export class PatientSvcService {
       .select('patient.id', 'id')
       .where('patient.added_by = :payerId', { payerId })
       .getRawMany();
-    const addedByUserUniqueIds = addedByUser.map( result => result.id );
+    const addedByUserUniqueIds = addedByUser.map(result => result.id);
 
     const uniquePatientIds = uniquePatientIdsQuery.map(
       (result) => result.ownerId,
     );
 
-    const combinedPatientIds = Object.values( [...uniquePatientIds, ...addedByUserUniqueIds ].reduce( ( acc, item ) => {
-      acc[ item ] = item;
+    const combinedPatientIds = Object.values([...uniquePatientIds, ...addedByUserUniqueIds].reduce((acc, item) => {
+      acc[item] = item;
       return acc;
-    }, {} ));
+    }, {}));
 
-    console.log('combined', combinedPatientIds );
+    console.log('combined', combinedPatientIds);
 
     const patients = await this.patientRepository
       .createQueryBuilder('patient')

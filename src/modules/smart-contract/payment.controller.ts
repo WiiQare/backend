@@ -38,6 +38,8 @@ import { _400 } from 'src/common/constants/errors';
 import { Voucher } from './entities/voucher.entity';
 import { operationService } from '../operation-saving/operation.service';
 import { OperationType } from '../operation-saving/entities/operation.entity';
+import { PaymentWithoutStripe } from './dto/mint-voucher.dto';
+import randomstring from 'randomstring';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -51,7 +53,7 @@ export class PaymentController {
     @InjectRepository(Voucher)
     private readonly voucherRepository: Repository<Voucher>,
     private readonly transactionService: TransactionService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({
@@ -80,6 +82,8 @@ export class PaymentController {
     @Body() event: Stripe.Event,
     @Req() req: RawBodyRequest<Request>,
   ) {
+    console.log("test");
+
     try {
       // Verify the webhook event with Stripe to ensure it is authentic
       const webhookSecret = this.appConfigService.stripeWebHookSecret;
@@ -119,7 +123,7 @@ export class PaymentController {
           } = metadata;
 
           const voucherData = await this.smartContractService.mintVoucher({
-            amount: Math.round( currencyPatientAmount ),
+            amount: Math.round(currencyPatientAmount),
             ownerId: patientId,
             currency: currencyPatient,
             patientId: patientId,
@@ -165,7 +169,7 @@ export class PaymentController {
           const transactionToSave = this.transactionRepository.create({
             senderAmount: senderAmount / 100,
             senderCurrency: senderCurrency.toUpperCase(),
-            amount: Math.round( currencyPatientAmount ),
+            amount: Math.round(currencyPatientAmount),
             currency: currencyPatient,
             conversionRate: currencyRate,
             senderId,
@@ -183,7 +187,7 @@ export class PaymentController {
             vid: voucherJSON.id,
             voucherHash: transactionHash,
             shortenHash: shortenHash,
-            value: Math.round( currencyPatientAmount ),
+            value: Math.round(currencyPatientAmount),
             senderId: senderId,
             senderType: SenderType.PAYER,
             receiverId: patientId,
@@ -203,6 +207,111 @@ export class PaymentController {
     } catch (err) {
       logError(`Error processing webhook event: ${err}`);
       return { error: 'Failed to process webhook event' };
+    }
+  }
+
+  @Post('notification/admin-pmt')
+  @Roles(UserRole.WIIQARE_MANAGER)
+  // @Public()
+  @ApiOperation({
+    summary: 'This API receive payment notification without stripe webhook',
+  })
+  async handlePaymentWithoutStripe(
+    @Body() event: PaymentWithoutStripe,
+  ) {
+    try {
+
+      //TODO: Please use our own BE exchange rate API to get the latest exchange rate!!
+      const {
+        senderId,
+        patientId,
+        currencyPatientAmount,
+        currencyPatient,
+        currencyRate,
+        senderAmount,
+        senderCurrency
+      } = event;
+
+      const voucherData = await this.smartContractService.mintVoucher({
+        amount: Math.round(currencyPatientAmount),
+        ownerId: patientId,
+        currency: currencyPatient,
+        patientId: patientId,
+      });
+
+      // console.log('vdata', voucherData.events.mintVoucherEvent.returnValues.voucherID );
+
+      const voucherJSON = {
+        id: _.get(voucherData, 'events.mintVoucherEvent.returnValues.0'),
+        amount: _.get(
+          voucherData,
+          'events.mintVoucherEvent.returnValues.1.[0]',
+        ),
+        currency: _.get(
+          voucherData,
+          'events.mintVoucherEvent.returnValues.1.[1]',
+        ),
+        ownerId: _.get(
+          voucherData,
+          'events.mintVoucherEvent.returnValues.1.[2]',
+        ),
+        hospitalId: _.get(
+          voucherData,
+          'events.mintVoucherEvent.returnValues.1.[3]',
+        ),
+        patientId: _.get(
+          voucherData,
+          'events.mintVoucherEvent.returnValues.1.[4]',
+        ),
+        status: _.get(
+          voucherData,
+          'events.mintVoucherEvent.returnValues.1.[5]',
+        )
+      };
+
+      const transactionHash = _.get(
+        voucherData,
+        'events.mintVoucherEvent.transactionHash',
+      );
+
+      const shortenHash = transactionHash.slice(0, 8);
+
+      const transactionToSave = this.transactionRepository.create({
+        senderAmount,
+        senderCurrency: senderCurrency.toUpperCase(),
+        amount: Math.round(currencyPatientAmount),
+        currency: currencyPatient,
+        conversionRate: currencyRate,
+        senderId,
+        ownerId: patientId,
+        stripePaymentId: randomstring.generate(12),
+        voucher: voucherJSON,
+        status: TransactionStatus.PENDING,
+      });
+      const savedTransaction = await this.transactionRepository.save(
+        transactionToSave,
+      );
+
+      // update this
+      const voucherToSave = this.voucherRepository.create({
+        vid: voucherJSON.id,
+        voucherHash: transactionHash,
+        shortenHash: shortenHash,
+        value: Math.round(currencyPatientAmount),
+        senderId: senderId,
+        senderType: SenderType.WIIQARE_MANAGER,
+        receiverId: patientId,
+        receiverType: ReceiverType.PATIENT,
+        status: VoucherStatus.UNCLAIMED,
+        transaction: transactionToSave,
+      });
+      await this.voucherRepository.save(voucherToSave);
+
+      return savedTransaction
+
+    } catch (err) {
+      logError(`Error processing webhook event: ${err}`);
+      return { error: 'Failed to process payment event' };
     }
   }
 
