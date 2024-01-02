@@ -13,7 +13,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import _ from 'lodash';
-import { InjectStripe } from 'nestjs-stripe';
 import {
   ReceiverType,
   SenderType,
@@ -25,7 +24,6 @@ import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Roles } from 'src/common/decorators/user-role.decorator';
 import { convertCurrency, logError, logInfo } from 'src/helpers/common.helper';
-import { Stripe } from 'stripe';
 import { Repository } from 'typeorm';
 import { AppConfigService } from '../../config/app-config.service';
 import { Patient } from '../patient-svc/entities/patient.entity';
@@ -40,12 +38,14 @@ import { operationService } from '../operation-saving/operation.service';
 import { OperationType } from '../operation-saving/entities/operation.entity';
 import { PaymentWithoutStripe } from './dto/mint-voucher.dto';
 import randomstring from 'randomstring';
+import { PaymentService } from '../payment-svc/payment-svc.service';
+import { PaymentGatewayEvent } from '../payment-svc/payment-svc.types';
 
 @ApiTags('payment')
 @Controller('payment')
 export class PaymentController {
   constructor(
-    @InjectStripe() private readonly stripe: Stripe,
+    private readonly payg: PaymentService,
     private readonly appConfigService: AppConfigService,
     private readonly smartContractService: SmartContractService,
     @InjectRepository(Transaction)
@@ -79,10 +79,10 @@ export class PaymentController {
   })
   async handlePaymentWebhookEvent(
     @Headers('stripe-signature') signature: string,
-    @Body() event: Stripe.Event,
+    @Body() event: PaymentGatewayEvent,
     @Req() req: RawBodyRequest<Request>,
   ) {
-    console.log("test");
+    console.log('test');
 
     try {
       // Verify the webhook event with Stripe to ensure it is authentic
@@ -90,7 +90,7 @@ export class PaymentController {
 
       console.log(webhookSecret);
 
-      const verifiedEvent = this.stripe.webhooks.constructEvent(
+      const verifiedEvent = this.payg.constructEvent(
         req.rawBody,
         signature,
         webhookSecret,
@@ -106,12 +106,10 @@ export class PaymentController {
             id: stripePaymentId,
             amount: senderAmount,
             currency: senderCurrency,
-          } = verifiedEvent.data.object as Stripe.PaymentIntent;
-
-          const { metadata } = verifiedEvent.data.object as unknown as Record<
-            string,
-            any
-          >;
+          } = this.payg.getVerifiedEventData(verifiedEvent);
+          const { metadata } = this.payg.getVerifiedEventData(
+            verifiedEvent,
+          ) as unknown as Record<string, any>;
 
           //TODO: Please use our own BE exchange rate API to get the latest exchange rate!!
           const {

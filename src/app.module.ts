@@ -28,6 +28,7 @@ import { WaitingModule } from './modules/waiting-list/waiting.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { BlogModule } from './modules/blog/blog.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { PaymentSvcModule } from './modules/payment-svc/payment-svc.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { CommentModule } from './modules/comment/comment.module';
         module: AdministrationSvcModule,
       },
     ]),
+    PaymentSvcModule,
     PatientSvcModule,
     PayerSvcModule,
     SavingModule,
