@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PaymentService } from './payment-svc.service';
 import { StripeModule } from 'nestjs-stripe';
+import { PaymentSwapService } from './payment-swap-svc.service';
+// import { PaymentService } from './payment-svc.service';
+
+export class GenericPaymentService extends PaymentSwapService {}
 
 @Module({
   imports: [
@@ -10,7 +13,7 @@ import { StripeModule } from 'nestjs-stripe';
       apiVersion: '2022-11-15',
     }),
   ],
-  providers: [PaymentService],
-  exports: [PaymentService],
+  providers: [GenericPaymentService],
+  exports: [GenericPaymentService],
 })
 export class PaymentSvcModule {}

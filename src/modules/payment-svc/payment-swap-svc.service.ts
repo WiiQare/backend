@@ -36,7 +36,7 @@ export class PaymentSwapService {
     };
   }
 
-  getVerifiedEventData(verifiedEvent: PaymentGatewayEvent) {
+  getVerifiedEventData(verifiedEvent: GenericPaymentGatewayEvent) {
     return verifiedEvent.data.object as GenericPaymentGatewayIntent;
   }
 }

@@ -11,6 +11,7 @@ import { OperationSaving } from '../operation-saving/entities/operation.entity';
 import { Saving } from '../saving/entities/saving.entity';
 import { operationService } from '../operation-saving/operation.service';
 import { PaymentService } from '../payment-svc/payment-svc.service';
+import { GenericPaymentService } from '../payment-svc/payment-svc.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PaymentService } from '../payment-svc/payment-svc.service';
     SmartContractService,
     TransactionService,
     nodeProvider,
+    GenericPaymentService,
   ],
   exports: [SmartContractService],
 })

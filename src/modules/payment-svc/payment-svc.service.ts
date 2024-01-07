@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectStripe } from 'nestjs-stripe';
 import Stripe from 'stripe';
 import {
-  GenericPaymentGatewayIntent,
   PaymentGateway,
   PaymentGatewayEvent,
+  PaymentGatewayIntent,
 } from './payment-svc.types';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class PaymentService {
 
   getVerifiedEventData(
     verifiedEvent: PaymentGatewayEvent,
-  ): GenericPaymentGatewayIntent {
-    return verifiedEvent.data.object as GenericPaymentGatewayIntent;
+  ): PaymentGatewayIntent {
+    return verifiedEvent.data.object as PaymentGatewayIntent;
   }
 }

@@ -38,14 +38,14 @@ import { operationService } from '../operation-saving/operation.service';
 import { OperationType } from '../operation-saving/entities/operation.entity';
 import { PaymentWithoutStripe } from './dto/mint-voucher.dto';
 import randomstring from 'randomstring';
-import { PaymentService } from '../payment-svc/payment-svc.service';
 import { PaymentGatewayEvent } from '../payment-svc/payment-svc.types';
+import { GenericPaymentService } from '../payment-svc/payment-svc.module';
 
 @ApiTags('payment')
 @Controller('payment')
 export class PaymentController {
   constructor(
-    private readonly payg: PaymentService,
+    private readonly payg: GenericPaymentService,
     private readonly appConfigService: AppConfigService,
     private readonly smartContractService: SmartContractService,
     @InjectRepository(Transaction)

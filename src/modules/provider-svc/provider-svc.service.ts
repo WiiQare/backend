@@ -26,7 +26,6 @@ import { ObjectStorageService } from '../object-storage/object-storage.service';
 import { Patient } from '../patient-svc/entities/patient.entity';
 import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
-import { SmsService } from '../sms/sms.service';
 import {
   AddServiceToPackageDto,
   ContactPersonDto,
@@ -41,6 +40,7 @@ import { Service } from './entities/service.entity';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
 import { SmartContractService } from '../smart-contract/smart-contract.service';
 import Web3 from 'web3';
+import { SmsGatewayService } from '../sms/sms.module';
 
 @Injectable()
 export class ProviderService {
@@ -64,7 +64,7 @@ export class ProviderService {
     private objectStorageService: ObjectStorageService,
     private cachingService: CachingService,
     private mailService: MailService,
-    private smsService: SmsService,
+    private smsService: SmsGatewayService,
     private contractService: SmartContractService,
   ) {
 

@@ -1,4 +1,6 @@
 import Stripe from 'stripe';
+import { GenericPaymentService } from './payment-svc.module';
+import { PaymentService } from './payment-svc.service';
 
 export type GenericPaymentMetadata = {
   senderId: string;
@@ -31,10 +33,9 @@ export type GenericPaymentGatewaySignature = {
   webhooks: GenericPaymentGatewayWebhooks;
 };
 
-//change this to true to enable stripe completion
-type useStripe = true;
-
-type ConditionalType<T, S> = useStripe extends null ? S : T;
+type ConditionalType<T, S> = GenericPaymentService extends PaymentService
+  ? S
+  : T;
 
 export type PaymentGateway = ConditionalType<
   Stripe,
@@ -43,4 +44,8 @@ export type PaymentGateway = ConditionalType<
 export type PaymentGatewayEvent = ConditionalType<
   Stripe.Event,
   GenericPaymentGatewayEvent
+>;
+export type PaymentGatewayIntent = ConditionalType<
+  Stripe.PaymentIntent,
+  GenericPaymentGatewayIntent
 >;
