@@ -46,6 +46,7 @@
     "country-code-lookup": "^0.1.0",
     "date-fns": "^2.30.0",
     "dotenv": "^16.0.3",
+    "ethers": "^6.9.2",
     "google-libphonenumber": "^3.2.32",
     "handlebars": "^4.7.7",
     "helmet": "^6.0.1",

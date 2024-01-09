@@ -8,6 +8,7 @@ import { AbiItem } from 'web3-utils';
 import { VoucherStatus } from '../../common/constants/enums';
 import abi from './abi/abi.json';
 import { MintVoucherDto } from './dto/mint-voucher.dto';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class SmartContractService {
@@ -53,6 +54,7 @@ export class SmartContractService {
       const rr = this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
+      const gasPrice = await this.getGasFees()
 
       const response = await this.wiiqareContract.methods
         .mintVoucher([
@@ -65,7 +67,7 @@ export class SmartContractService {
         ])
         .send({
           from: this.wiiQareAccount.address,
-          gasPrice: '30000000000',
+          gasPrice: gasPrice,
           gas: '3996000',
         });
 
@@ -177,12 +179,12 @@ export class SmartContractService {
    * @param firstVoucher metadata for the first voucher of the split
    * @param secondVoucher metadata for the second voucher of the split
    */
-  async splitVoucher(voucherID: string, firstVoucher: any, secondVoucher: any ) {
+  async splitVoucher(voucherID: string, firstVoucher: any, secondVoucher: any) {
     try {
       const accounts = await this.web3.eth.getAccounts();
 
       const result = await this.wiiqareContract.methods
-        .splitVoucher( voucherID, firstVoucher, secondVoucher )
+        .splitVoucher(voucherID, firstVoucher, secondVoucher)
         .call({ from: accounts[0] });
 
       return result;
@@ -191,7 +193,7 @@ export class SmartContractService {
     }
   }
 
-  async burnVoucher( voucherID: number ) {
+  async burnVoucher(voucherID: number) {
     const rr = this.web3.eth.accounts.wallet.add(
       this.appConfigService.smartContractPrivateKey,
     );
@@ -209,5 +211,12 @@ export class SmartContractService {
     logInfo(`response -> ${response}`);
 
     return response;
+  }
+
+  private async getGasFees(): Promise<string> {
+    const rpcURL = "https://polygon.llamarpc.com";
+    const provider = new ethers.JsonRpcProvider(rpcURL);
+    const hexGasEstimate = (await provider.getFeeData()).gasPrice;
+    return BigInt(hexGasEstimate).toString();
   }
 }
