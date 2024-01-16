@@ -13,22 +13,23 @@ export class WaitingService {
     private waitingRepository: Repository<WaitingList>,
     private readonly mailService: MailService,
 
-  ) {}
+  ) { }
 
   async add(waiting: CreateWaitingDto): Promise<WaitingList> {
-    
+
     const newWaiting = this.waitingRepository.create({
       fullname: waiting.fullname,
       email: waiting.email,
-      phone: waiting.phone
+      phone: waiting.phone,
+      country: waiting.country
     });
 
     const waitingSave = this.waitingRepository.save(newWaiting);
 
     await this.mailService.sendConfirmationEmailForWaiting(
-        waiting.email,
-        waiting.fullname
-      );
+      waiting.email,
+      waiting.fullname
+    );
 
     return waitingSave
   }

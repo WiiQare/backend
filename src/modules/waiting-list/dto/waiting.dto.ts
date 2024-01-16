@@ -19,4 +19,7 @@ export class CreateWaitingDto {
   @IsNotEmpty()
   @IsString()
   phone: string;
+
+  @IsString()
+  country?: string;
 }
