@@ -3,7 +3,6 @@ import { ProviderService } from './provider-svc.service';
 import { ObjectStorageService } from '../object-storage/object-storage.service';
 import { CachingService } from '../caching/caching.service';
 import { MailService } from '../mail/mail.service';
-import { SmsService } from '../sms/sms.service';
 import { Provider } from './entities/provider.entity';
 import { Package } from './entities/package.entity';
 import { Service } from './entities/service.entity';
@@ -27,6 +26,7 @@ import { RegisterProviderDto } from './dto/provider.dto';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
 import { SmartContractService } from '../smart-contract/smart-contract.service';
 import Web3 from 'web3';
+import { SmsGatewayService } from '../sms/sms.module';
 
 describe('ProviderService', () => {
   let service: ProviderService;
@@ -54,7 +54,7 @@ describe('ProviderService', () => {
   } as unknown as MailService;
   const mockSmsService = {
     sendTransactionVerificationTokenBySmsToAPatient: jest.fn(),
-  } as unknown as SmsService;
+  } as unknown as SmsGatewayService;
 
   const mockSmartContractService = {
     burnVoucher: () => {},
@@ -231,7 +231,7 @@ describe('ProviderService', () => {
       mockObjectStorageService as ObjectStorageService,
       mockCachingService as CachingService,
       mockMailService as MailService,
-      mockSmsService as SmsService,
+      mockSmsService as SmsGatewayService,
       mockSmartContractService as SmartContractService,
     );
   });

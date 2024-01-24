@@ -16,7 +16,7 @@ import { Patient } from '../patient-svc/entities/patient.entity';
 import { JwtClaimsDataDto } from '../session/dto/jwt-claims-data.dto';
 import { User } from '../session/entities/user.entity';
 import { Transaction } from '../smart-contract/entities/transaction.entity';
-import { SmsService } from '../sms/sms.service';
+import { SmsGatewayService } from '../sms/sms.module';
 import { CreatePayerAccountDto, KYCDto, SendInviteDto } from './dto/payer.dto';
 import { Payer } from './entities/payer.entity';
 import { Voucher } from '../smart-contract/entities/voucher.entity';
@@ -35,7 +35,7 @@ export class PayerService {
     @InjectRepository(Voucher)
     private readonly voucherRepository: Repository<Voucher>,
     private readonly mailService: MailService,
-    private readonly smsService: SmsService,
+    private readonly smsService: SmsGatewayService,
   ) {}
 
   /**
@@ -167,7 +167,10 @@ export class PayerService {
         .leftJoinAndSelect('payer.user', 'user')
         .where('user.id = :userId', { userId: authUser.sub })
         .getOne(),
-      this.voucherRepository.findOne({ where: { shortenHash } }),
+      this.voucherRepository.findOne({
+        where: { shortenHash },
+        relations: { transaction: true },
+      }),
     ]);
     const transaction = await this.transactionRepository.findOne({
       where: { id: voucher.transaction.id },

@@ -24,6 +24,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { _400, _404, _403 } from '../../common/constants/errors';
+import { SmsGatewayService } from '../sms/sms.module';
 
 describe('PayerService', () => {
   let service: PayerService;
@@ -40,7 +41,7 @@ describe('PayerService', () => {
   const mockSmsService = {
     sendSmsTOFriend: jest.fn(),
     sendVoucherAsAnSMS: jest.fn(),
-  } as unknown as SmsService;
+  } as unknown as SmsGatewayService;
 
   // Mock entities
   const mockUser: User = {
@@ -153,7 +154,7 @@ describe('PayerService', () => {
       transactionRepository,
       voucherRepository,
       mockMailService as MailService,
-      mockSmsService as SmsService,
+      mockSmsService as SmsGatewayService,
     );
   });
 

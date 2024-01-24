@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { MessageBird, initClient } from 'messagebird';
-import { AppConfigService } from '../../config/app-config.service';
+import { MessageBirdService } from './messagebird.service';
 
 @Injectable()
 export class SmsService {
-  messageBird: MessageBird;
-  constructor(private readonly appConfigService: AppConfigService) {
-    this.messageBird = initClient(this.appConfigService.smsApiKey);
-  }
+  //swap messageBirdService with SmsSwapService - platform independence
+  constructor(public smsSender: MessageBirdService) {}
 
   /**
    * This method sends an SMS Invite to friends during registration
@@ -27,7 +24,7 @@ export class SmsService {
       body: `Vous avez été invité par ${names} pour rejoindre WiiQare. Merci de vous inscrire avec le lien suivant https://app.wiiqare.com/register?referralCode=${referralCode}`,
     };
 
-    this.messageBird.messages.create(params, function (err, response) {
+    this.smsSender.sendMessage(params, function (err, response) {
       if (err) {
         return console.log(err);
       }
@@ -60,7 +57,7 @@ export class SmsService {
       `,
     };
 
-    this.messageBird.messages.create(params, function (err, response) {
+    this.smsSender.sendMessage(params, function (err, response) {
       if (err) {
         return console.log(err);
       }
@@ -87,7 +84,7 @@ export class SmsService {
       body: `Votre code the verification de pass santé WiiQare est ${token}.`,
     };
 
-    this.messageBird.messages.create(params, function (err, response) {
+    this.smsSender.sendMessage(params, function (err, response) {
       if (err) {
         return console.log(err);
       }
