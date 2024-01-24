@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StripeModule } from 'nestjs-stripe';
 import { Transaction } from './entities/transaction.entity';
 import { PaymentController } from './payment.controller';
 import { SmartContractController } from './smart-contract.controller';
@@ -11,18 +10,21 @@ import { Voucher } from './entities/voucher.entity';
 import { OperationSaving } from '../operation-saving/entities/operation.entity';
 import { Saving } from '../saving/entities/saving.entity';
 import { operationService } from '../operation-saving/operation.service';
+import { PaymentService } from '../payment-svc/payment-svc.service';
+import { GenericPaymentService } from '../payment-svc/payment-svc.module';
 
 @Module({
   imports: [
-    StripeModule.forRoot({
-      // NOTICE: no keys we are using so far only webhooks!
-      apiKey: 'my_secret_key',
-      apiVersion: '2022-11-15',
-    }),
     TypeOrmModule.forFeature([Transaction, Voucher, OperationSaving, Saving]),
   ],
   controllers: [SmartContractController, PaymentController],
-  providers: [SmartContractService, TransactionService, nodeProvider],
+  providers: [
+    PaymentService,
+    SmartContractService,
+    TransactionService,
+    nodeProvider,
+    GenericPaymentService,
+  ],
   exports: [SmartContractService],
 })
 export class SmartContractModule {}
