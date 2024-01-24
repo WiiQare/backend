@@ -38,6 +38,7 @@ import { operationService } from '../operation-saving/operation.service';
 import { OperationType } from '../operation-saving/entities/operation.entity';
 import { PaymentWithoutStripe } from './dto/mint-voucher.dto';
 import randomstring from 'randomstring';
+
 import { PaymentGatewayEvent } from '../payment-svc/payment-svc.types';
 import { GenericPaymentService } from '../payment-svc/payment-svc.module';
 
@@ -82,7 +83,6 @@ export class PaymentController {
     @Body() event: PaymentGatewayEvent,
     @Req() req: RawBodyRequest<Request>,
   ) {
-    console.log('test');
 
     try {
       // Verify the webhook event with Stripe to ensure it is authentic
