@@ -31,15 +31,6 @@ export class SmartContractService {
     );
   }
 
-  /***
-   *  This function is used to get gas free from the network
-   */
-  // async getGasFees(): Promise<any> {
-  //   // get gas fees from mumbai network
-  //   //TODO: move it to .env
-  //   return (await fetch('https://gasstation-mumbai.matic.today/v2')).json();
-  // }
-
   /**
    * This function is used to mint a newer voucher NFT on blockchain.
    *  @param mintVoucherDto
@@ -67,11 +58,12 @@ export class SmartContractService {
         ])
         .send({
           from: this.wiiQareAccount.address,
-          gasPrice: gasPrice,
-          gas: '3996000',
+          gas: "300000000000"
         });
 
       logInfo(`response -> ${response}`);
+
+
 
       return response;
     } catch (err) {
@@ -160,8 +152,7 @@ export class SmartContractService {
         ])
         .call({
           from: this.wiiQareAccount.address,
-          gasPrice: '30000000000',
-          gas: '3996000',
+          gas: '300000000000',
         });
 
       return result;
@@ -198,14 +189,15 @@ export class SmartContractService {
       this.appConfigService.smartContractPrivateKey,
     );
 
+    const gasPrice = await this.getGasFees();
+
     const response = await this.wiiqareContract.methods
       .burn(
         voucherID
       )
       .send({
         from: this.wiiQareAccount.address,
-        gasPrice: '30000000000',
-        gas: '3996000',
+        gas: "300000000000"
       });
 
     logInfo(`response -> ${response}`);
