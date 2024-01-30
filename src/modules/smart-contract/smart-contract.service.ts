@@ -55,7 +55,6 @@ export class SmartContractService {
         ])
         .send({
           from: this.wiiQareAccount.address,
-          gas: "300000000000"
         });
 
       logInfo(`response -> ${response}`);
@@ -149,7 +148,6 @@ export class SmartContractService {
         ])
         .call({
           from: this.wiiQareAccount.address,
-          gas: '300000000000',
         });
 
       return result;
@@ -192,7 +190,6 @@ export class SmartContractService {
       )
       .send({
         from: this.wiiQareAccount.address,
-        gas: "300000000000"
       });
 
     logInfo(`response -> ${response}`);
