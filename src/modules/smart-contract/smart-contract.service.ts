@@ -8,7 +8,6 @@ import { AbiItem } from 'web3-utils';
 import { VoucherStatus } from '../../common/constants/enums';
 import abi from './abi/abi.json';
 import { MintVoucherDto } from './dto/mint-voucher.dto';
-import { ethers } from 'ethers';
 
 @Injectable()
 export class SmartContractService {
@@ -37,7 +36,6 @@ export class SmartContractService {
    */
   async mintVoucher(mintVoucherDto: MintVoucherDto) {
     try {
-      // const gasParams = await this.getGasFees();
       //NOTICE: starting we will be using the wiiQare account to mint the vouchers!
 
       const { ownerId, amount, currency, patientId } = mintVoucherDto;
@@ -45,7 +43,6 @@ export class SmartContractService {
       const rr = this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
-      const gasPrice = await this.getGasFees()
 
       const response = await this.wiiqareContract.methods
         .mintVoucher([
@@ -189,8 +186,6 @@ export class SmartContractService {
       this.appConfigService.smartContractPrivateKey,
     );
 
-    const gasPrice = await this.getGasFees();
-
     const response = await this.wiiqareContract.methods
       .burn(
         voucherID
@@ -203,12 +198,5 @@ export class SmartContractService {
     logInfo(`response -> ${response}`);
 
     return response;
-  }
-
-  private async getGasFees(): Promise<string> {
-    const rpcURL = "https://polygon.llamarpc.com";
-    const provider = new ethers.JsonRpcProvider(rpcURL);
-    const hexGasEstimate = (await provider.getFeeData()).gasPrice;
-    return BigInt(hexGasEstimate).toString();
   }
 }
