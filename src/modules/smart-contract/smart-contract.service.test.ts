@@ -8,8 +8,8 @@ describe('SmartContractService', () => {
   // Mock services
   const mockAppConfigService = {
     smartContractPrivateKey:
-      '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
-    smartContractAddress: '0xabcdef0123456789abcdef0123456789abcdef01234567',
+      'ace605d1f393b26d8e8102e8afdb7effeb62f1fd06511f0cfd87de0eb63a14cf',
+    smartContractAddress: '0xf458ea479a44ab833bc2c5750d7e2cd647ca9f24',
   } as unknown as AppConfigService;
 
   const mockWeb3 = {
@@ -17,17 +17,17 @@ describe('SmartContractService', () => {
       getGasPrice: jest.fn(),
       getAccounts: jest
         .fn()
-        .mockResolvedValue(['0x1234567890abcdef1234567890abcdef12345678']),
+        .mockResolvedValue(['0x6e7070007a71217974c13DD2e575E693a9962B21']),
       Contract: jest.fn().mockReturnValue({
         methods: {},
       }),
       accounts: {
         privateKeyToAccount: jest.fn().mockReturnValue({
-          address: '0x1234567890abcdef1234567890abcdef12345678',
+          address: '0x6e7070007a71217974c13DD2e575E693a9962B21',
         }),
         wallet: {
           add: jest.fn().mockReturnValue({
-            address: '0x1234567890abcdef1234567890abcdef12345678',
+            address: '0x6e7070007a71217974c13DD2e575E693a9962B21',
           }),
         },
       },
@@ -111,7 +111,7 @@ describe('SmartContractService', () => {
 
     // This is to silence the console.error output from the logError helper
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    jest.spyOn(helpers, 'logError').mockImplementation(() => {});
+    jest.spyOn(helpers, 'logError').mockImplementation(() => { });
   });
 
   describe('getGasFees', () => {
@@ -139,7 +139,7 @@ describe('SmartContractService', () => {
       // Silence the console output from the logInfo helper
       const logInfoSpy = jest.spyOn(helpers, 'logInfo');
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      logInfoSpy.mockImplementation(() => {});
+      logInfoSpy.mockImplementation(() => { });
 
       // smartContractService.getGasFees = jest.fn().mockResolvedValue(gasFees);
 
