@@ -44,6 +44,8 @@ export class SmartContractService {
         this.appConfigService.smartContractPrivateKey,
       );
 
+      const gasPrice = await this.web3.eth.getGasPrice();
+
       const response = await this.wiiqareContract.methods
         .mintVoucher([
           amount,
@@ -55,7 +57,8 @@ export class SmartContractService {
         ])
         .send({
           from: this.wiiQareAccount.address,
-          gasPrice: "200000000000"
+          gasPrice: gasPrice,
+          gas: 500000
         });
 
       logInfo(`response -> ${response}`);
@@ -137,6 +140,7 @@ export class SmartContractService {
       const rr: AddedAccount = this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
+      const gasPrice = await this.web3.eth.getGasPrice();
 
       const result = await this.wiiqareContract.methods
         .alterVoucher(voucherId, [
@@ -149,7 +153,8 @@ export class SmartContractService {
         ])
         .call({
           from: this.wiiQareAccount.address,
-          gasPrice: "200000000000"
+          gasPrice: gasPrice,
+          gas: 500000
         });
 
       return result;
@@ -185,6 +190,7 @@ export class SmartContractService {
     const rr = this.web3.eth.accounts.wallet.add(
       this.appConfigService.smartContractPrivateKey,
     );
+    const gasPrice = await this.web3.eth.getGasPrice();
 
     const response = await this.wiiqareContract.methods
       .burn(
@@ -192,7 +198,8 @@ export class SmartContractService {
       )
       .send({
         from: this.wiiQareAccount.address,
-        gasPrice: "200000000000"
+        gasPrice: gasPrice,
+        gas: 500000
       });
 
     logInfo(`response -> ${response}`);
