@@ -8,7 +8,6 @@ import { AbiItem } from 'web3-utils';
 import { VoucherStatus } from '../../common/constants/enums';
 import abi from './abi/abi.json';
 import { MintVoucherDto } from './dto/mint-voucher.dto';
-import { ethers } from 'ethers';
 
 @Injectable()
 export class SmartContractService {
@@ -31,22 +30,12 @@ export class SmartContractService {
     );
   }
 
-  /***
-   *  This function is used to get gas free from the network
-   */
-  // async getGasFees(): Promise<any> {
-  //   // get gas fees from mumbai network
-  //   //TODO: move it to .env
-  //   return (await fetch('https://gasstation-mumbai.matic.today/v2')).json();
-  // }
-
   /**
    * This function is used to mint a newer voucher NFT on blockchain.
    *  @param mintVoucherDto
    */
   async mintVoucher(mintVoucherDto: MintVoucherDto) {
     try {
-      // const gasParams = await this.getGasFees();
       //NOTICE: starting we will be using the wiiQare account to mint the vouchers!
 
       const { ownerId, amount, currency, patientId } = mintVoucherDto;
@@ -54,7 +43,8 @@ export class SmartContractService {
       const rr = this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
-      const gasPrice = await this.getGasFees()
+
+      const gasPrice = await this.web3.eth.getGasPrice();
 
       const response = await this.wiiqareContract.methods
         .mintVoucher([
@@ -68,10 +58,12 @@ export class SmartContractService {
         .send({
           from: this.wiiQareAccount.address,
           gasPrice: gasPrice,
-          gas: '3996000',
+          gas: 500000
         });
 
       logInfo(`response -> ${response}`);
+
+
 
       return response;
     } catch (err) {
@@ -148,6 +140,7 @@ export class SmartContractService {
       const rr: AddedAccount = this.web3.eth.accounts.wallet.add(
         this.appConfigService.smartContractPrivateKey,
       );
+      const gasPrice = await this.web3.eth.getGasPrice();
 
       const result = await this.wiiqareContract.methods
         .alterVoucher(voucherId, [
@@ -160,8 +153,8 @@ export class SmartContractService {
         ])
         .call({
           from: this.wiiQareAccount.address,
-          gasPrice: '30000000000',
-          gas: '3996000',
+          gasPrice: gasPrice,
+          gas: 500000
         });
 
       return result;
@@ -197,6 +190,7 @@ export class SmartContractService {
     const rr = this.web3.eth.accounts.wallet.add(
       this.appConfigService.smartContractPrivateKey,
     );
+    const gasPrice = await this.web3.eth.getGasPrice();
 
     const response = await this.wiiqareContract.methods
       .burn(
@@ -204,19 +198,12 @@ export class SmartContractService {
       )
       .send({
         from: this.wiiQareAccount.address,
-        gasPrice: '30000000000',
-        gas: '3996000',
+        gasPrice: gasPrice,
+        gas: 500000
       });
 
     logInfo(`response -> ${response}`);
 
     return response;
-  }
-
-  private async getGasFees(): Promise<string> {
-    const rpcURL = "https://polygon.llamarpc.com";
-    const provider = new ethers.JsonRpcProvider(rpcURL);
-    const hexGasEstimate = (await provider.getFeeData()).gasPrice;
-    return BigInt(hexGasEstimate).toString();
   }
 }
