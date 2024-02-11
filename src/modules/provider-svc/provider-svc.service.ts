@@ -268,12 +268,12 @@ export class ProviderService {
       where: { shortenHash },
       relations: ['transaction'],
     });
-    const [transaction, provider, services ] = await Promise.all([
+    const [transaction, provider, services] = await Promise.all([
       this.transactionRepository.findOne({
         where: { id: voucher.transaction.id, ownerType: ReceiverType.PATIENT },
       }),
       this.providerRepository.findOne({ where: { id: providerId } }),
-      this.servicesRepository.find({ where: { id: In( serviceIds )}} )
+      this.servicesRepository.find({ where: { id: In(serviceIds) } })
     ]);
 
     if (!transaction)
@@ -288,27 +288,27 @@ export class ProviderService {
       throw new ForbiddenException(
         _403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE,
       );
-    
+
     //compute total price of services ( hospital currency )
-    const serviceTotal = services.reduce( ( acc, el ) => { acc += parseInt( el.price.toString() ); return acc; }, 0 );
+    const serviceTotal = services.reduce((acc, el) => { acc += parseInt(el.price.toString()); return acc; }, 0);
 
-    console.log('computed.total', serviceTotal );
+    console.log('computed.total', serviceTotal);
 
-    if( transaction.currency !== 'CDF'){
+    if (transaction.currency !== 'XOF') {
       throw new ForbiddenException(
         _403.WRONG_VOUCHER_CURRENCY
       );
     }
 
-    const voucherValueInCDF = Math.round( voucher.value );
+    const voucherValueInCDF = Math.round(voucher.value);
 
-    console.log('computed.voucher.value.cdf', serviceTotal );
+    console.log('computed.voucher.value.cdf', serviceTotal);
 
     //if services value is smaller than voucher
     const threshold = 0.1;
-    
-    if( (voucherValueInCDF - serviceTotal) > voucherValueInCDF*threshold ){
-      
+
+    if ((voucherValueInCDF - serviceTotal) > voucherValueInCDF * threshold) {
+
       // uint256 value;
       // string currencySymbol;
       // string ownerID;
@@ -317,20 +317,20 @@ export class ProviderService {
       // string status;
 
       const firstVoucher = {
-        amount: Math.round( serviceTotal ),
+        amount: Math.round(serviceTotal),
         ownerId: transaction.senderId,
-        currency: 'CDF',
+        currency: 'XOF',
         patientId: transaction.ownerId
       }
 
       const secondVoucher = {
         amount: (voucherValueInCDF - Math.round(serviceTotal)),
         ownerId: transaction.senderId,
-        currency: 'CDF',
+        currency: 'XOF',
         patientId: transaction.ownerId
       }
 
-      console.log('computed.vouchers', firstVoucher[0], secondVoucher[0] );
+      console.log('computed.vouchers', firstVoucher[0], secondVoucher[0]);
 
       //split voucher -- update this when contract bug is fixed
       // const voucherData = await this.contractService.splitVoucher(
@@ -341,13 +341,13 @@ export class ProviderService {
 
       console.log('attempting.to.burn.voucher');
       //burn voucher
-      const burnedData = await this.contractService.burnVoucher( voucher.vid );
+      const burnedData = await this.contractService.burnVoucher(voucher.vid);
 
       console.log('post.burn.voucher');
 
       //mint new vouchers
-      const firstSplitVoucher = await this.contractService.mintVoucher( firstVoucher );
-      const secondSplitVoucher = await this.contractService.mintVoucher( secondVoucher );
+      const firstSplitVoucher = await this.contractService.mintVoucher(firstVoucher);
+      const secondSplitVoucher = await this.contractService.mintVoucher(secondVoucher);
 
       console.log('minted.vouchers')
 
@@ -416,7 +416,7 @@ export class ProviderService {
         'events.mintVoucherEvent.transactionHash',
       );
       const secondShortenHash = secondTransactionHash.slice(0, 8);
-      
+
       console.log('pre.transaction.save');
 
       const updatedTransaction = await this.transactionRepository.save({
@@ -438,9 +438,9 @@ export class ProviderService {
       //save first transaction split
       const transactionToSave1 = this.transactionRepository.create({
         senderAmount: firstVoucher.amount,
-        senderCurrency: 'CDF',
+        senderCurrency: 'XOF',
         amount: firstVoucher.amount,
-        currency: 'CDF',
+        currency: 'XOF',
         conversionRate: 0,
         senderId: transaction.senderId,
         ownerId: transaction.ownerId,
@@ -451,7 +451,7 @@ export class ProviderService {
         hospitalId: providerId,
       });
 
-      console.log('pre.transaction1.save', transactionToSave1 );
+      console.log('pre.transaction1.save', transactionToSave1);
 
       const firstSavedTransaction = await this.transactionRepository.save(
         transactionToSave1,
@@ -468,14 +468,14 @@ export class ProviderService {
         status: VoucherStatus.UNCLAIMED,
         transaction: transactionToSave1,
       });
-      await this.voucherRepository.save( voucherToSave1 );
+      await this.voucherRepository.save(voucherToSave1);
 
       //save second transaction split
       const transactionToSave2 = this.transactionRepository.create({
         senderAmount: secondVoucher.amount,
-        senderCurrency: 'CDF',
+        senderCurrency: 'XOF',
         amount: secondVoucher.amount,
-        currency: 'CDF',
+        currency: 'XOF',
         conversionRate: 0,
         senderId: transaction.senderId,
         ownerId: transaction.ownerId,
@@ -487,7 +487,7 @@ export class ProviderService {
         transactionToSave2,
       );
 
-      console.log('pre.transaction2.save', transactionToSave1 );
+      console.log('pre.transaction2.save', transactionToSave1);
 
       const voucherToSave2 = this.voucherRepository.create({
         vid: firstVoucherJSON.id,
@@ -501,19 +501,19 @@ export class ProviderService {
         status: VoucherStatus.UNCLAIMED,
         transaction: transactionToSave2,
       });
-      await this.voucherRepository.save( voucherToSave2 );
+      await this.voucherRepository.save(voucherToSave2);
 
       return {
         code: 200,
         message: 'Voucher transfer authorized successfully',
       };
-      
+
     } else {
       // transfer voucher from patient to provider
       //Update the voucher on block-chain
 
       console.log('nonsplit.pre.transaction.update');
-      
+
       // Update the transaction in the database
       const updatedTransaction = await this.transactionRepository.save({
         ...transaction,
