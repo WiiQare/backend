@@ -294,7 +294,7 @@ export class ProviderService {
 
     console.log('computed.total', serviceTotal);
 
-    if (transaction.currency !== 'XOF') {
+    if (transaction.currency !== 'CDF') {
       throw new ForbiddenException(
         _403.WRONG_VOUCHER_CURRENCY
       );
