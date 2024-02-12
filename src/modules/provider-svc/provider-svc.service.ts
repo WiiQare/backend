@@ -294,7 +294,7 @@ export class ProviderService {
 
     console.log('computed.total', serviceTotal);
 
-    if (transaction.currency !== 'XOF') {
+    if (transaction.currency !== 'CDF') {
       throw new ForbiddenException(
         _403.WRONG_VOUCHER_CURRENCY
       );
@@ -319,14 +319,14 @@ export class ProviderService {
       const firstVoucher = {
         amount: Math.round(serviceTotal),
         ownerId: transaction.senderId,
-        currency: 'XOF',
+        currency: 'CDF',
         patientId: transaction.ownerId
       }
 
       const secondVoucher = {
         amount: (voucherValueInCDF - Math.round(serviceTotal)),
         ownerId: transaction.senderId,
-        currency: 'XOF',
+        currency: 'CDF',
         patientId: transaction.ownerId
       }
 
@@ -438,9 +438,9 @@ export class ProviderService {
       //save first transaction split
       const transactionToSave1 = this.transactionRepository.create({
         senderAmount: firstVoucher.amount,
-        senderCurrency: 'XOF',
+        senderCurrency: 'CDF',
         amount: firstVoucher.amount,
-        currency: 'XOF',
+        currency: 'CDF',
         conversionRate: 0,
         senderId: transaction.senderId,
         ownerId: transaction.ownerId,
@@ -473,9 +473,9 @@ export class ProviderService {
       //save second transaction split
       const transactionToSave2 = this.transactionRepository.create({
         senderAmount: secondVoucher.amount,
-        senderCurrency: 'XOF',
+        senderCurrency: 'CDF',
         amount: secondVoucher.amount,
-        currency: 'XOF',
+        currency: 'CDF',
         conversionRate: 0,
         senderId: transaction.senderId,
         ownerId: transaction.ownerId,
