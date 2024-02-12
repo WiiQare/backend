@@ -491,7 +491,9 @@ describe('ProviderService', () => {
       );
     });
 
-    it('should throw an error if the voucher currency is not XOF', async () => {
+
+    it('should throw an error if the voucher currency is not CDF', async () => {
+
       transactionRepository.findOne = jest.fn().mockResolvedValue({ ...mockTransaction, currency: 'USD' });
 
       await expect(
