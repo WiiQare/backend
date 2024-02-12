@@ -57,8 +57,8 @@ describe('ProviderService', () => {
   } as unknown as SmsGatewayService;
 
   const mockSmartContractService = {
-    burnVoucher: () => {},
-    mintVoucher: () => {}
+    burnVoucher: () => { },
+    mintVoucher: () => { }
   } as unknown as SmartContractService;
 
   // Mock entities
@@ -118,7 +118,7 @@ describe('ProviderService', () => {
     senderCurrency: 'senderCurrency',
     amount: 1000,
     conversionRate: 1,
-    currency: 'CDF',
+    currency: 'XOF',
     senderId: 'senderId',
     ownerId: 'ownerId',
     hospitalId: null,
@@ -485,36 +485,36 @@ describe('ProviderService', () => {
       mockCachingService.get = jest.fn().mockResolvedValue('savedSecurityCode');
 
       await expect(
-        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000 ),
+        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000),
       ).rejects.toThrow(
         new ForbiddenException(_403.INVALID_VOUCHER_TRANSFER_VERIFICATION_CODE),
       );
     });
 
-    it('should throw an error if the voucher currency is not CDF', async () => {
-      transactionRepository.findOne = jest.fn().mockResolvedValue( {...mockTransaction, currency: 'USD'} );
+    it('should throw an error if the voucher currency is not XOF', async () => {
+      transactionRepository.findOne = jest.fn().mockResolvedValue({ ...mockTransaction, currency: 'USD' });
 
       await expect(
-        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000 ),
+        service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000),
       ).rejects.toThrow(
         new ForbiddenException(_403.WRONG_VOUCHER_CURRENCY),
       );
     });
 
     it('should split into 2 vouchers with values summing the first voucher', async () => {
-      mockCachingService.get = jest.fn().mockResolvedValue( securityCode );
+      mockCachingService.get = jest.fn().mockResolvedValue(securityCode);
       const voucher1 = { value: 100 };
       const voucher2 = { value: 900 };
       transactionRepository.create = jest.fn().
-        mockImplementationOnce( ( obj ) => { return {value: obj.amount} } ).
-        mockImplementationOnce( ( obj ) => { return {value: obj.amount} } );
-      
-      voucherRepository.findOne = jest.fn().mockResolvedValue( mockVoucher );
-      voucherRepository.create = jest.fn().mockResolvedValue( 
+        mockImplementationOnce((obj) => { return { value: obj.amount } }).
+        mockImplementationOnce((obj) => { return { value: obj.amount } });
+
+      voucherRepository.findOne = jest.fn().mockResolvedValue(mockVoucher);
+      voucherRepository.create = jest.fn().mockResolvedValue(
         {}
-       );
-      providerRepository.findOne = jest.fn().mockResolvedValue( mockProvider );
-      serviceRepository.find = jest.fn().mockResolvedValue( [ mockService ] );
+      );
+      providerRepository.findOne = jest.fn().mockResolvedValue(mockProvider);
+      serviceRepository.find = jest.fn().mockResolvedValue([mockService]);
 
       const mockMintedVoucher = {
         events: {
@@ -522,16 +522,16 @@ describe('ProviderService', () => {
             transactionHash: 'hash1',
             returnValues: {
               '0': 1,
-              '1': [100, 'CDF', 'ownerId', 'hospitalId', 'patientId', 'UNCLAIMED']
+              '1': [100, 'XOF', 'ownerId', 'hospitalId', 'patientId', 'UNCLAIMED']
             }
           }
         }
       }
-      mockSmartContractService.mintVoucher = jest.fn().mockResolvedValue( mockMintedVoucher );
+      mockSmartContractService.mintVoucher = jest.fn().mockResolvedValue(mockMintedVoucher);
 
-        const result = await service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000 );
-        expect( transactionRepository.create ).toHaveNthReturnedWith( 1, voucher1 );
-        expect( transactionRepository.create ).toHaveNthReturnedWith( 2, voucher2 );
+      const result = await service.authorizeVoucherTransfer(shortenHash, providerId, securityCode, services, 1000);
+      expect(transactionRepository.create).toHaveNthReturnedWith(1, voucher1);
+      expect(transactionRepository.create).toHaveNthReturnedWith(2, voucher2);
     });
   });
 
