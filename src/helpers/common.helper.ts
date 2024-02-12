@@ -58,3 +58,9 @@ export async function convertCurrency(from: string, amount: number, to: string )
     return error;
   }
 }
+
+export function allowedCurrency(name: string) {
+  const allowedSymbols = ['XAF', 'XOF', 'FCFA','CDF'];
+
+  return allowedSymbols.includes(name);
+}
