@@ -28,7 +28,7 @@ export class PaymentSwapService {
             senderId: randomUUID(),
             patientId: randomUUID(),
             currencyPatientAmount: 100,
-            currencyPatient: 'CDF',
+            currencyPatient: 'XOF',
             currencyRate: 1.0,
           },
         },
