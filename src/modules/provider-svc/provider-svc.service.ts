@@ -319,14 +319,14 @@ export class ProviderService {
       const firstVoucher = {
         amount: Math.round(serviceTotal),
         ownerId: transaction.senderId,
-        currency: 'CDF',
+        currency: 'XOF',
         patientId: transaction.ownerId
       }
 
       const secondVoucher = {
         amount: (voucherValueInCDF - Math.round(serviceTotal)),
         ownerId: transaction.senderId,
-        currency: 'CDF',
+        currency: 'XOF',
         patientId: transaction.ownerId
       }
 
@@ -438,9 +438,9 @@ export class ProviderService {
       //save first transaction split
       const transactionToSave1 = this.transactionRepository.create({
         senderAmount: firstVoucher.amount,
-        senderCurrency: 'CDF',
+        senderCurrency: 'XOF',
         amount: firstVoucher.amount,
-        currency: 'CDF',
+        currency: 'XOF',
         conversionRate: 0,
         senderId: transaction.senderId,
         ownerId: transaction.ownerId,
@@ -473,9 +473,9 @@ export class ProviderService {
       //save second transaction split
       const transactionToSave2 = this.transactionRepository.create({
         senderAmount: secondVoucher.amount,
-        senderCurrency: 'CDF',
+        senderCurrency: 'XOF',
         amount: secondVoucher.amount,
-        currency: 'CDF',
+        currency: 'XOF',
         conversionRate: 0,
         senderId: transaction.senderId,
         ownerId: transaction.ownerId,
