@@ -18,7 +18,7 @@ import {
   VoucherStatus,
 } from '../../common/constants/enums';
 import { _403, _404 } from '../../common/constants/errors';
-import { convertCurrency, generateToken, randomSixDigit } from '../../helpers/common.helper';
+import { allowedCurrency, convertCurrency, generateToken, randomSixDigit } from '../../helpers/common.helper';
 import { In, Repository } from 'typeorm';
 import { CachingService } from '../caching/caching.service';
 import { MailService } from '../mail/mail.service';
@@ -290,11 +290,14 @@ export class ProviderService {
       );
 
     //compute total price of services ( hospital currency )
-    const serviceTotal = services.reduce((acc, el) => { acc += parseInt(el.price.toString()); return acc; }, 0);
+    const serviceTotal = services.reduce((acc, el) => {
+      acc += parseInt(el.price.toString());
+      return acc;
+    }, 0);
 
     console.log('computed.total', serviceTotal);
 
-    if (transaction.currency !== 'CDF' && transaction.currency !== 'XOF') {
+    if (!allowedCurrency(transaction.currency)) {
       throw new ForbiddenException(_403.WRONG_VOUCHER_CURRENCY);
     }
 
@@ -317,14 +320,14 @@ export class ProviderService {
       const firstVoucher = {
         amount: Math.round(serviceTotal),
         ownerId: transaction.senderId,
-        currency: transaction.currency == 'CDF' ? 'CDF' : 'XOF',
+        currency: transaction.currency,
         patientId: transaction.ownerId,
       }
 
       const secondVoucher = {
         amount: (voucherValueInCDF - Math.round(serviceTotal)),
         ownerId: transaction.senderId,
-        currency: transaction.currency == 'CDF' ? 'CDF' : 'XOF',
+        currency: transaction.currency,
         patientId: transaction.ownerId
       }
 
