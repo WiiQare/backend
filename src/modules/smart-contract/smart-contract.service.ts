@@ -58,12 +58,10 @@ export class SmartContractService {
         .send({
           from: this.wiiQareAccount.address,
           gasPrice: gasPrice,
-          gas: 500000
+          gas: 500000,
         });
 
       logInfo(`response -> ${response}`);
-
-
 
       return response;
     } catch (err) {
@@ -154,7 +152,7 @@ export class SmartContractService {
         .call({
           from: this.wiiQareAccount.address,
           gasPrice: gasPrice,
-          gas: 500000
+          gas: 500000,
         });
 
       return result;
@@ -162,7 +160,6 @@ export class SmartContractService {
       logError(`Error in getVoucher: ${err}`);
     }
   }
-
 
   /**
    * This function is used to make a voucher split
@@ -174,12 +171,14 @@ export class SmartContractService {
    */
   async splitVoucher(voucherID: string, firstVoucher: any, secondVoucher: any) {
     try {
-      const accounts = await this.web3.eth.getAccounts();
-
+      const gasPrice = await this.web3.eth.getGasPrice();
       const result = await this.wiiqareContract.methods
         .splitVoucher(voucherID, firstVoucher, secondVoucher)
-        .call({ from: accounts[0] });
-
+        .send({
+          from: this.wiiQareAccount.address,
+          gasPrice: gasPrice,
+          gas: 500000,
+        });
       return result;
     } catch (err) {
       logError(`Error in getVoucher: ${err}`);
@@ -192,15 +191,11 @@ export class SmartContractService {
     );
     const gasPrice = await this.web3.eth.getGasPrice();
 
-    const response = await this.wiiqareContract.methods
-      .burn(
-        voucherID
-      )
-      .send({
-        from: this.wiiQareAccount.address,
-        gasPrice: gasPrice,
-        gas: 500000
-      });
+    const response = await this.wiiqareContract.methods.burn(voucherID).send({
+      from: this.wiiQareAccount.address,
+      gasPrice: gasPrice,
+      gas: 500000,
+    });
 
     logInfo(`response -> ${response}`);
 
