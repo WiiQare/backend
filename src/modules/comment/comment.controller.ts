@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { _403, _404, _409 } from '../../common/constants/errors';
-import { Public } from 'src/common/decorators/public.decorator';
 import { CreateCommentDto } from './dto/comment.dto';
 import { CommentService } from './comment.service';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Comments')
 @Controller('comments')

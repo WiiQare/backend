@@ -1,4 +1,4 @@
-import { Comment } from 'src/modules/comment/entities/comment.entity';
+import { Comment } from '../../comment/entities/comment.entity';
 import { BaseEntity } from '../../../db/base-entity';
 import { Entity, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 

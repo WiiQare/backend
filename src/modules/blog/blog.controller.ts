@@ -7,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { _403, _404, _409 } from '../../common/constants/errors';
-import { Public } from 'src/common/decorators/public.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { CreateBlogDto } from './dto/blog.dto';
 import { BlogService } from './blog.service';
-import slugify from 'slugify';
 
 @ApiTags('Blogs')
 @Controller('blogs')

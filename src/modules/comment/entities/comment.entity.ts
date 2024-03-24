@@ -1,4 +1,4 @@
-import { Blog } from 'src/modules/blog/entities/blog.entity';
+import { Blog } from '../../blog/entities/blog.entity';
 import { BaseEntity } from '../../../db/base-entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 

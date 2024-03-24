@@ -11,30 +11,28 @@ export class BlogService {
   constructor(
     @InjectRepository(Blog)
     private blogRepository: Repository<Blog>,
-
   ) { }
 
   async add(blog: CreateBlogDto): Promise<Blog> {
-
     const newBlog = this.blogRepository.create({
       title: blog.title,
       slug: slugify(blog.title, { lower: true }),
       content: blog.content,
       quote: blog.quote,
       tags: blog.tags,
-      cover: blog.cover
+      cover: blog.cover,
     });
 
     return this.blogRepository.save(newBlog);
-
   }
 
   async getAll(): Promise<Blog[]> {
-    return await this.blogRepository.find()
+    return await this.blogRepository.find();
   }
 
   async getBlogDetailsWithComments(slug: string): Promise<any> {
-    const blog = await this.blogRepository.createQueryBuilder('blog')
+    const blog = await this.blogRepository
+      .createQueryBuilder('blog')
       .leftJoinAndSelect('blog.comments', 'comments')
       .where('blog.slug = :slug', { slug })
       .orderBy('comments.createdAt', 'DESC')
@@ -48,6 +46,6 @@ export class BlogService {
       },
     });
 
-    return { blog, last }
+    return { blog, last };
   }
 }
